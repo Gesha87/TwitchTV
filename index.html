@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+	<title>Приложение для сервиса Twitch</title>
+	<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/style.css" />
+	<script src="js/jquery-2.1.0.min.js"></script>
+	<script src="js/jquery.mCustomScrollbar.js"></script>
+	<script src="js/main.js"></script>
+	<script src="language.js"></script>
+</head>
+<body>
+	<div id="header">
+		<div id="logo">
+			<img src="images/TwitchApp.png" />
+		</div>
+		<div id="controls">
+			<div id="sections">
+				<div class="active button">
+					<i class="fa fa-video-camera"></i>Активные каналы
+				</div><div class="button">
+					<i class="fa fa-youtube-play"></i>Видеоматериалы
+				</div>
+			</div>
+			<div id="stream-filters">
+				<div class="filter">
+					<i class="fa fa-gamepad"></i>Игра
+				</div>
+				<div class="filter">
+					<i class="fa fa-user"></i>Каналы
+				</div>
+				<div class="filter">
+					<i class="fa fa-globe"></i>Язык
+				</div>
+				<div class="filter">
+					<i class="fa fa-filter"></i>Тип
+				</div>
+				<div class="filter">
+					<i class="fa fa-search"></i>Поиск
+				</div>
+			</div>
+		</div>
+		<div id="hints">
+			<div class="hint-refresh hint">
+				<span class="badge badge-A">A</span> <span class="text">Обновить</span>
+			</div>
+			<div class="hint-change-active hint">
+				<span class="badge badge-B">B</span> <span class="text">Видеоматериалы</span>
+			</div>
+			<div class="hint-game hint">
+				<span class="badge badge-C">C</span> <span class="text">Игра</span>
+			</div>
+			<div class="hint-search hint">
+				<span class="badge badge-D">D</span> <span class="text">Поиск</span>
+			</div>
+		</div>
+		<div class="clear"></div>
+	</div>
+	<div id="divider">
+		<hr id="line" />
+		<hr id="line-selected" class="animated"/>
+	</div>
+	<div id="channels">
+	</div>
+	<div id="loading-wrapper">
+		<div id="loading">
+			<div class="spinner-three-bounce">
+			    <div class="bounce1"></div>
+			    <div class="bounce2"></div>
+			    <div class="bounce3"></div>
+			</div>
+			<div id="loading-text">Загрузка</div>
+		</div>
+	</div>
+    <object id="av-player" type="application/avplayer"></object>
+    <div id="select-box">
+    	<div class="stream-viewers"></div>
+		<div class="stream-info">
+			<div class="game-name ellipsed"></div>
+			<div class="channel-status ellipsed"></div>
+		</div>
+    </div>
+</body>
+</html>
