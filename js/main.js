@@ -43,7 +43,7 @@ var init = function () {
     	}
     	var $selectBox = $('#select-box');
     	$('.stream-channel-name', $selectBox).html(element.data('channel-name'));
-    	$('.stream-viewers', $selectBox).html('<i class="fa fa-eye"></i>' + element.data('viewers'));
+    	$('.stream-viewers', $selectBox).html('<i class="fa fa-eye"></i>' + element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '));
     	$('.game-name', $selectBox).html(element.data('game'));
     	$('.channel-status', $selectBox).html(element.data('status'));
     	$selectBox.width(element.width());
@@ -216,7 +216,7 @@ var init = function () {
     });
     
     var xmlHttp = new XMLHttpRequest();
-	var theUrl = 'https://api.twitch.tv/kraken/streams?stream_type=live&limit=51&offset=0';	
+	var theUrl = 'https://api.twitch.tv/kraken/streams?language=es,ru&stream_type=live&limit=51&offset=0';	
 	xmlHttp.onreadystatechange = function()
 	{
 		if (xmlHttp.readyState === 4)
@@ -285,6 +285,7 @@ var init = function () {
 		}
 	};
     xmlHttp.open("GET", theUrl, true);
+	xmlHttp.setRequestHeader('Accept', 'application/vnd.twitchtv.v5+json');
 	xmlHttp.setRequestHeader('Client-ID', 'q5ix3v5d0ot12koqr7paerntdo5gz9');
     xmlHttp.send(null);
 };

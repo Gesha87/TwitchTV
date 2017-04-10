@@ -47,8 +47,8 @@ i:after {
 	/* color: #cbc8d0; */
 }
 
-.cell.selected {
-	color: #ffffff;
+.cell.selected .stream-channel-name {
+	display: none;
 }
 
 .cell:last-child {
@@ -96,7 +96,7 @@ i:after {
 	background-color: rgba(0, 0, 0, 0.7);
 	padding: 1.0vh;
 }
-.cell.selected .stream-channel-name {
+#select-box .stream-channel-name {
 	color: #ffffff;
 }
 
@@ -166,7 +166,7 @@ i:after {
 
 .filter {
 	display: inline-block;
-	padding: 0.9vh 1.4vh 1.0vh;
+	padding: 1.0vh 1.4vh 0.9vh;
 	margin-right: 1.0vh;
 	box-shadow: #392e5c 0 0 0 2px inset;
 	color: #9993a5;
@@ -213,7 +213,7 @@ i:after {
 
 .button {
 	position: relative;
-	padding: 1.2vh 2.0vh 1.3vh;
+	padding: 1.3vh 2.0vh 1.2vh;
 	background-color: #433f4a;
 	color: #9993a5;
 }
