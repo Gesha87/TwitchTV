@@ -1,18 +1,19 @@
 var startTime;
 var checkTime;
 
+var app = {
+		
+}
+
 //Initialize function
 var init = function () {
-    // TODO:: Do your initialization job
-    console.log("init() called");
-    
-    function underscore() {
+    function setUnderscore() {
     	var activeMenu = document.querySelector('.button.active', $('#sections'));
         var lineSelected = document.getElementById('line-selected');
         lineSelected.style.width = activeMenu.offsetWidth + 'px';
         lineSelected.style['margin-left'] = activeMenu.offsetLeft + 'px';
     }
-    underscore();
+    setUnderscore();
     
     document.addEventListener('visibilitychange', function() {
         if(document.hidden){
@@ -31,8 +32,8 @@ var init = function () {
     	var left = -scrollLeft;
     	if (element.position().left - 2 * vh + scrollLeft < 0) {
     		left = element.position().left - 2 * vh;
-    	} else if (element.position().left + scrollLeft + 47.867 * vh - $(window).width() > 0) {
-    		left = element.position().left - $(window).width() + 47.867 * vh;
+    	} else if (element.position().left + scrollLeft + 47.866667 * vh - $(window).width() > 0) {
+    		left = element.position().left - $(window).width() + 47.866667 * vh;
     	}
     	//left = element.position().left - ($(window).width() - 45.867 * vh) / 2;
     	left = Math.max(0, left);
@@ -260,6 +261,9 @@ var init = function () {
 						axis: "x",
 						autoHideScrollbar: false,
 						updateOnContentResize: true,
+						keyboard: {enable: false},
+						contentTouchScroll: false,
+						documentTouchScroll: false,
 						callbacks: {
 							onScroll: function() {
 								

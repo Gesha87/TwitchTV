@@ -98,6 +98,7 @@ i:after {
 }
 #select-box .stream-channel-name {
 	color: #ffffff;
+	max-width: 26vh;
 }
 
 .stream-info {
