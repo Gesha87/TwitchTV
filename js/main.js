@@ -1,19 +1,31 @@
-var startTime;
-var checkTime;
-
 var app = {
-		
+	translateLayout: function() {
+		$('#section-live-channels').find('.text').text(messages.SECTION_LIVE_CHANNELS);
+		$('#section-videos').find('.text').text(messages.SECTION_VIDEOS);
+		$('#filter-game').find('.text').text(messages.FILTER_GAME);
+		$('#filter-channels').find('.text').text(messages.FILTER_CHANNELS);
+		$('#filter-language').find('.text').text(messages.FILTER_LANGUAGE);
+		$('#filter-stream-type').find('.text').text(messages.FILTER_STREAM_TYPE);
+		$('#filter-presets').find('.text').text(messages.FILTER_PRESETS);
+		$('#filter-search').find('.text').text(messages.FILTER_SEARCH);
+		$('#hint-refresh').find('.text').text(messages.HINT_REFRESH);
+		$('#hint-change-section').find('.text').text(messages.HINT_VIDEOS);
+		$('#hint-presets').find('.text').text(messages.HINT_PRESETS);
+		$('#hint-search').find('.text').text(messages.HINT_SEARCH);
+		$('#loading-text').text(messages.LOADING);
+		$('body').addClass('init');
+	},
+	setUnderscore: function() {
+		var $activeMenu = $('#sections').find('.active');
+        var $lineSelected = $('#line-selected');
+        $lineSelected.css('width', $activeMenu[0].offsetWidth);
+        $lineSelected.css('margin-left', $activeMenu[0].offsetLeft + 'px');
+	}
 }
 
-//Initialize function
 var init = function () {
-    function setUnderscore() {
-    	var activeMenu = document.querySelector('.button.active', $('#sections'));
-        var lineSelected = document.getElementById('line-selected');
-        lineSelected.style.width = activeMenu.offsetWidth + 'px';
-        lineSelected.style['margin-left'] = activeMenu.offsetLeft + 'px';
-    }
-    setUnderscore();
+	app.translateLayout();
+    app.setUnderscore();
     
     document.addEventListener('visibilitychange', function() {
         if(document.hidden){
@@ -44,7 +56,7 @@ var init = function () {
     	}
     	var $selectBox = $('#select-box');
     	$('.stream-channel-name', $selectBox).html(element.data('channel-name'));
-    	$('.stream-viewers', $selectBox).html('<i class="fa fa-eye"></i>' + element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '));
+    	$('.stream-viewers', $selectBox).html('<i class="fa fa-eye"></i> ' + element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '));
     	$('.game-name', $selectBox).html(element.data('game'));
     	$('.channel-status', $selectBox).html(element.data('status'));
     	$selectBox.width(element.width());

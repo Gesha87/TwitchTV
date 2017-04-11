@@ -5,6 +5,7 @@
 }
 
 body {
+	opacity: 0;
 	background-color: #201c2b;
 	overflow: hidden;
 	font-family: Helvetica Neue, Helvetica, sans-serif;
@@ -12,13 +13,16 @@ body {
 	color: #ffffff;
 	line-height: 1em;
 }
+body.init {
+	opacity: 1;
+}
 
 .danger {
 	color: #fc3636;
 }
 
 i:after {
-	content: '\00a0\00a0';
+	/*content: '\00a0\00a0';*/
 }
 
 .clear {
