@@ -111,10 +111,6 @@ App.init = function() {
             clearTimeout(timeoutSelect);
         }
         element.addClass('selected');
-        /*
-         * timeoutSelect = setTimeout(function() { element.addClass('selected'); },
-         * 100);
-         */
     }
     
     // add eventListener for keydown
@@ -268,7 +264,7 @@ App.init = function() {
     });
     
     var xmlHttp = new XMLHttpRequest();
-    var theUrl = 'https://api.twitch.tv/kraken/streams?language=ru&stream_type=live&limit=50&offset=0';
+    var theUrl = 'https://api.twitch.tv/kraken/streams?language=ru&stream_type=live&limit=5&offset=0';
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState === 4) {
             if (xmlHttp.status === 200) {
