@@ -1,7 +1,7 @@
 console.log("English (en) loaded");
 var messages = {
-	SECTION_LIVE_CHANNELS: "Live channels",
-	SECTION_VIDEOS: "Videos",
+	PAGE_LIVE_CHANNELS: "Live channels",
+	PAGE_VIDEOS: "Videos",
 	
 	FILTER_GAME: "Game",
 	FILTER_CHANNELS: "Channels",

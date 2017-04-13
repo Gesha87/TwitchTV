@@ -102,7 +102,7 @@ i:after {
 }
 #select-box .stream-channel-name {
 	color: #ffffff;
-	max-width: 26vh;
+	max-width: 28vh;
 }
 
 .stream-info {
@@ -185,7 +185,7 @@ i:after {
 	color: #ffffff;
 }
 
-#sections {
+#pages {
 	font-size: 3.4vh;
 	white-space: nowrap;
 	list-style: none;
@@ -193,12 +193,12 @@ i:after {
 	padding: 0;
 }
 
-#sections .button {
+#pages .button {
 	display: inline-block;
 	margin-right: 2.0vh;
 }
 
-#sections .button:last-child {
+#pages .button:last-child {
 	margin-right: 0;
 }
 
@@ -289,7 +289,7 @@ i:after {
 	left: -50vh;
 	width: 45.867vh;
 	height: 25.8vh;
-	/* transition: 0.2s ease-out; */
+	/* transition: 0.1s ease-out; */
 	z-index: 5;
 }
 
