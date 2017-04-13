@@ -1,44 +1,59 @@
 var Constants = {
-    STATE_BROWSE: 1,
-    STATE_WATCH: 2,
+    STATE_BROWSE: 'browse',
+    STATE_WATCH: 'watch',
+    STATE_SELECT: 'select',
     
-    PAGE_ACTIVE_CHANNELS: 1,
-    PAGE_VIDEOS: 2,
+    PAGE_ACTIVE_CHANNELS: 'active-channels',
+    PAGE_VIDEOS: 'videos',
     
-    AREA_PAGES: 1,
-    AREA_FILTERS: 2,
-    AREA_RESULTS: 3,
-};
-var AREA = 1;
-var App = {
-    state: Constants.STATE_BROWSE,
-    activeArea: Constants.AREA_RESULTS,
-    areaItems: [],
-    translateLayout: function() {
-        $('#page-live-channels').find('.text').text(messages.PAGE_LIVE_CHANNELS);
-        $('#page-videos').find('.text').text(messages.PAGE_VIDEOS);
-        $('#filter-game').find('.text').text(messages.FILTER_GAME);
-        $('#filter-channels').find('.text').text(messages.FILTER_CHANNELS);
-        $('#filter-language').find('.text').text(messages.FILTER_LANGUAGE);
-        $('#filter-stream-type').find('.text').text(messages.FILTER_STREAM_TYPE);
-        $('#filter-presets').find('.text').text(messages.FILTER_PRESETS);
-        $('#filter-search').find('.text').text(messages.FILTER_SEARCH);
-        $('#hint-refresh').find('.text').text(messages.HINT_REFRESH);
-        $('#hint-change-section').find('.text').text(messages.HINT_VIDEOS);
-        $('#hint-presets').find('.text').text(messages.HINT_PRESETS);
-        $('#hint-search').find('.text').text(messages.HINT_SEARCH);
-        $('#loading').find('.text').text(messages.LOADING);
-        $('body').addClass('init');
-    },
-    setUnderscore: function() {
-        var $activeMenu = $('#sections').find('.active');
-        var $lineSelected = $('#line-selected');
-        $lineSelected.css('width', $activeMenu[0].offsetWidth);
-        $lineSelected.css('margin-left', $activeMenu[0].offsetLeft + 'px');
-    }
+    AREA_PAGES: 'pages',
+    AREA_FILTERS: 'filter',
+    AREA_RESULTS: 'results',
 };
 
-var init = function() {
+var App = {}
+App.page = Constants.PAGE_ACTIVE_CHANNELS;
+App.state = Constants.STATE_BROWSE;
+App.activeArea = Constants.AREA_RESULTS;
+App.areas = {};
+App.areas[Constants.AREA_RESULTS] = {
+    columns: 0,
+    rows: 3,
+    x: 0,
+    y: 0
+};
+App.areas[Constants.AREA_FILTERS] = {
+    columns: 6,
+    x: 0
+};
+App.areas[Constants.AREA_PAGES] = {
+    columns: 2,
+    x: 0
+};
+App.translateLayout = function() {
+    $('#page-live-channels').find('.text').text(messages.PAGE_LIVE_CHANNELS);
+    $('#page-videos').find('.text').text(messages.PAGE_VIDEOS);
+    $('#filter-game').find('.text').text(messages.FILTER_GAME);
+    $('#filter-channels').find('.text').text(messages.FILTER_CHANNELS);
+    $('#filter-language').find('.text').text(messages.FILTER_LANGUAGE);
+    $('#filter-stream-type').find('.text').text(messages.FILTER_STREAM_TYPE);
+    $('#filter-presets').find('.text').text(messages.FILTER_PRESETS);
+    $('#filter-search').find('.text').text(messages.FILTER_SEARCH);
+    $('#hint-refresh').find('.text').text(messages.HINT_REFRESH);
+    $('#hint-change-section').find('.text').text(messages.HINT_VIDEOS);
+    $('#hint-presets').find('.text').text(messages.HINT_PRESETS);
+    $('#hint-search').find('.text').text(messages.HINT_SEARCH);
+    $('#loading').find('.text').text(messages.LOADING);
+    $('body').addClass('init');
+};
+App.setUnderscore = function() {
+    var $activeMenu = $('#pages').find('.active');
+    var $lineSelected = $('#line-selected');
+    $lineSelected.css('width', $activeMenu[0].offsetWidth + 'px');
+    $lineSelected.css('margin-left', $activeMenu[0].offsetLeft + 'px');
+};
+
+App.init = function() {
     App.translateLayout();
     App.setUnderscore();
     
@@ -65,8 +80,7 @@ var init = function() {
         } else if (element.position().left + scrollLeft + 47.866667 * vh - $(window).width() > 0) {
             left = Math.round(element.position().left - $(window).width() + 47.866667 * vh);
         }
-        // left = element.position().left - ($(window).width() - 45.867 * vh) /
-        // 2;
+        //left = element.position().left - ($(window).width() - 45.867 * vh) / 2;
         left = Math.max(0, left);
         var change = Math.abs(left + scrollLeft);
         var selectPosition = $('#select-box').offset();
@@ -254,7 +268,7 @@ var init = function() {
     });
     
     var xmlHttp = new XMLHttpRequest();
-    var theUrl = 'https://api.twitch.tv/kraken/streams?language=es,ru&stream_type=live&limit=51&offset=0';
+    var theUrl = 'https://api.twitch.tv/kraken/streams?language=ru&stream_type=live&limit=50&offset=0';
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState === 4) {
             if (xmlHttp.status === 200) {
@@ -365,7 +379,6 @@ function imageFailed(img) {
 
 function extractStreamDeclarations(input) {
     var result = [];
-    
     var myRegexp = /#EXT-X-MEDIA:(.)*\n#EXT-X-STREAM-INF:(.)*\n(.)*/g;
     var match;
     while (match = myRegexp.exec(input)) {
@@ -377,7 +390,6 @@ function extractStreamDeclarations(input) {
 function extractQualityFromStream(input) {
     var myRegexp = /#EXT-X-MEDIA:.*NAME=\"(\w+)\".*/g;
     var match = myRegexp.exec(input);
-    
     var quality;
     if (match !== null) {
         quality = match[1];
@@ -400,7 +412,6 @@ function extractUrlFromStream(input) {
 }
 function extractQualities(input) {
     var result = [];
-    
     var streams = extractStreamDeclarations(input);
     for (var i = 0; i < streams.length; i++) {
         result.push({
@@ -412,4 +423,4 @@ function extractQualities(input) {
     return result;
 }
 
-window.onload = init;
+window.onload = App.init;

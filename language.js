@@ -2,7 +2,7 @@ console.log("English (en) loaded");
 var messages = {
 	PAGE_LIVE_CHANNELS: "Live channels",
 	PAGE_VIDEOS: "Videos",
-	
+
 	FILTER_GAME: "Game",
 	FILTER_CHANNELS: "Channels",
 	FILTER_LANGUAGE: "Language",
@@ -17,6 +17,8 @@ var messages = {
 	HINT_SEARCH: "Search",
 	
 	LOADING: "Loading",
+
+    EMPTY_RESULTS: "Nothing found",
 	
 	OPEN: "Open",
 	REFRESH: "Refresh",
