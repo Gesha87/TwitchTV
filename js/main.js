@@ -67,6 +67,7 @@ App.init = function() {
     App.translateLayout();
     App.setUnderscore();
     App.$items.mCustomScrollbar({
+        scrollInertia: 0,
         axis: "x",
         autoHideScrollbar: false,
         advanced: {
@@ -82,9 +83,10 @@ App.init = function() {
         contentTouchScroll: false,
         documentTouchScroll: false,
         callbacks: {
-            onScroll: function() {
-                
-            }
+            onTotalScroll: function() {
+                App.loadMore();
+            },
+            onTotalScrollOffset: $(window).height() * 0.5
         }
     });
     App.$itemsContainer = App.$items.find('.mCSB_container');
@@ -100,125 +102,62 @@ App.init = function() {
         }
     });*/
     
-    var timeoutAutoHide;
-    var timeoutSelect;
-    function scrollTo($element) {
-        var vh = $(window).height() / 100;
-        var scrollLeft = App.$itemsContainer.position().left;
-        var left = -scrollLeft;
-        if ($element.position().left - 2 * vh + scrollLeft < 0) {
-            left = Math.round($element.position().left - 2 * vh);
-        } else if ($element.position().left + scrollLeft + $element.width() - $(window).width() > 0) {
-            left = Math.round($element.position().left - $(window).width() + $element.width());
-        }
-        left = Math.max(0, left);
-        var change = Math.abs(left + scrollLeft);
-        var selectPosition = $('#select-box').offset();
-        if (change > 0) {
-            App.$items.mCustomScrollbar('scrollTo', left, {
-                scrollInertia: 0,
-                timeout: 0
-            });
-        }
-        App.$selectBox.find('.stream-channel-name').html($element.data('channel-name'));
-        App.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + 
-                $element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, App.thousandsSeparator));
-        App.$selectBox.find('.game-name').html($element.data('game'));
-        App.$selectBox.find('.channel-status').html($element.data('status'));
-        App.$selectBox.width($element.width());
-        App.$selectBox.height($element.height());
-        var newOffset = $element.offset();
-        newOffset.left -= left + scrollLeft;
-        App.$selectBox.offset(newOffset);
-        if (timeoutAutoHide) {
-            clearTimeout(timeoutAutoHide);
-        }
-        App.$items.removeClass('mCS-autoHide');
-        timeoutAutoHide = setTimeout(function() {
-            App.$items.addClass('mCS-autoHide');
-        }, 2000);
-        if (timeoutSelect) {
-            clearTimeout(timeoutSelect);
-        }
-        $element.addClass('selected');
-    }
-    
     // add eventListener for keydown
     document.addEventListener('keydown', function(e) {
         switch (e.keyCode) {
             case 37: // LEFT arrow
-                var allColumns = $('.column');
-                var container = $('#channels');
-                var activeCell = $('.cell.active', container);
-                if (activeCell) {
-                    var activeColumn = activeCell.parent();
-                    var x = allColumns.index(activeColumn);
-                    var allCells = $('.cell', activeColumn);
-                    var y = allCells.index(activeCell);
-                    if (x > 0) {
-                        x--;
-                        var prevColumn = allColumns[x];
-                        if (prevColumn) {
-                            var prevCells = $('.cell', prevColumn);
-                            var prevCell = $(prevCells[y]);
-                            activeCell.removeClass('active selected');
-                            prevCell.addClass('active');
-                            scrollTo(prevCell);
+                if (App.activeArea == Constants.AREA_RESULTS) {
+                    var $newActiveCell, $activeCell = $('#item-' + App.areas[Constants.AREA_RESULTS].x + '-' + App.areas[Constants.AREA_RESULTS].y);
+                    if ($activeCell.length > 0 && App.areas[Constants.AREA_RESULTS].x > 0) {
+                        $newActiveCell = $('#item-' + (App.areas[Constants.AREA_RESULTS].x - 1) + '-' + App.areas[Constants.AREA_RESULTS].y);
+                        if ($newActiveCell.length > 0) {
+                            App.areas[Constants.AREA_RESULTS].x--;
+                            $activeCell.removeClass('active selected');
+                            $newActiveCell.addClass('active');
+                            App.scrollTo($newActiveCell);
                         }
                     }
                 }
                 break;
             case 38: // UP arrow
-                var container = $('#channels');
-                var activeCell = $('.cell.active', container);
-                if (activeCell) {
-                    var activeColumn = activeCell.parent();
-                    var allCells = $('.cell', activeColumn);
-                    var y = allCells.index(activeCell);
-                    if (y > 0) {
-                        y--;
-                        var prevCell = $(allCells[y]);
-                        activeCell.removeClass('active selected');
-                        prevCell.addClass('active');
-                        scrollTo(prevCell);
+                if (App.activeArea == Constants.AREA_RESULTS) {
+                    var $newActiveCell, $activeCell = $('#item-' + App.areas[Constants.AREA_RESULTS].x + '-' + App.areas[Constants.AREA_RESULTS].y);
+                    if ($activeCell.length > 0 && App.areas[Constants.AREA_RESULTS].y > 0) {
+                        $newActiveCell = $('#item-' + App.areas[Constants.AREA_RESULTS].x + '-' + (App.areas[Constants.AREA_RESULTS].y - 1));
+                        if ($newActiveCell.length > 0) {
+                            App.areas[Constants.AREA_RESULTS].y--;
+                            $activeCell.removeClass('active selected');
+                            $newActiveCell.addClass('active');
+                            App.scrollTo($newActiveCell);
+                        }
                     }
                 }
                 break;
             case 39: // RIGHT arrow
-                var allColumns = $('.column');
-                var container = $('#channels');
-                var activeCell = $('.cell.active', container);
-                if (activeCell) {
-                    var activeColumn = activeCell.parent();
-                    var x = allColumns.index(activeColumn);
-                    var allCells = $('.cell', activeColumn);
-                    var y = allCells.index(activeCell);
-                    if (x < allColumns.length - 1) {
-                        x++;
-                        var nextColumn = allColumns[x];
-                        if (nextColumn) {
-                            var nextCells = $('.cell', nextColumn);
-                            var nextCell = $(nextCells[y]);
-                            activeCell.removeClass('active selected');
-                            nextCell.addClass('active');
-                            scrollTo(nextCell);
+                if (App.activeArea == Constants.AREA_RESULTS) {
+                    var $newActiveCell, $activeCell = $('#item-' + App.areas[Constants.AREA_RESULTS].x + '-' + App.areas[Constants.AREA_RESULTS].y);
+                    if ($activeCell.length > 0 && App.areas[Constants.AREA_RESULTS].x < App.areas[Constants.AREA_RESULTS].columns - 1) {
+                        $newActiveCell = $('#item-' + (App.areas[Constants.AREA_RESULTS].x + 1) + '-' + App.areas[Constants.AREA_RESULTS].y);
+                        if ($newActiveCell.length > 0) {
+                            App.areas[Constants.AREA_RESULTS].x++;
+                            $activeCell.removeClass('active selected');
+                            $newActiveCell.addClass('active');
+                            App.scrollTo($newActiveCell);
                         }
                     }
                 }
                 break;
             case 40: // DOWN arrow
-                var container = $('#channels');
-                var activeCell = $('.cell.active', container);
-                if (activeCell) {
-                    var activeColumn = activeCell.parent();
-                    var allCells = $('.cell', activeColumn);
-                    var y = allCells.index(activeCell);
-                    if (y < 2) {
-                        y++;
-                        var nextCell = $(allCells[y]);
-                        activeCell.removeClass('active selected');
-                        nextCell.addClass('active');
-                        scrollTo(nextCell);
+                if (App.activeArea == Constants.AREA_RESULTS) {
+                    var $newActiveCell, $activeCell = $('#item-' + App.areas[Constants.AREA_RESULTS].x + '-' + App.areas[Constants.AREA_RESULTS].y);
+                    if ($activeCell.length > 0 && App.areas[Constants.AREA_RESULTS].y < App.areas[Constants.AREA_RESULTS].rows - 1) {
+                        $newActiveCell = $('#item-' + App.areas[Constants.AREA_RESULTS].x + '-' + (App.areas[Constants.AREA_RESULTS].y + 1));
+                        if ($newActiveCell.length > 0) {
+                            App.areas[Constants.AREA_RESULTS].y++;
+                            $activeCell.removeClass('active selected');
+                            $newActiveCell.addClass('active');
+                            App.scrollTo($newActiveCell);
+                        }
                     }
                 }
                 break;
@@ -284,9 +223,11 @@ App.init = function() {
                 break;
             case 27:
             case 10009: //RETURN button
-                webapis.avplay.stop();
+                //webapis.avplay.stop();
                 App.$player.hide();
                 break;
+            case 49:
+                App.refresh();
             default:
                 console.log("Key code : " + e.keyCode);
                 break;
@@ -298,21 +239,55 @@ App.init = function() {
             xhr.setRequestHeader('Client-ID', 'q5ix3v5d0ot12koqr7paerntdo5gz9');
         }
     });
-    $.get('https://api.twitch.tv/kraken/streams?language=ru&stream_type=live&limit=50&offset=0', function(response) {
-        console.log(response);
+    App.refresh();
+};
+App.hasMoreResults = true;
+App.loadingMoreResults = null;
+App.loadMore = function() {
+    if (App.hasMoreResults && !App.loadingMoreResults) {
+        App.loadingMoreResults = App.getActiveChannels(66, App.areas[Constants.AREA_RESULTS].count, function() {
+            App.loadingMoreResults = null;
+        });
+    }
+}
+App.refreshing = null;
+App.refresh = function() {
+    if (!App.refreshing) {
+        if (App.loadingMoreResults) {
+            App.loadingMoreResults.abort();
+            App.loadingMoreResults = null;
+        }
+        App.$selectBox.hide();
+        App.$loading.show();
         App.$itemsContainer.empty();
-        var $firstCell = null;
+        App.$itemsContainer.css('width', 0);
+        App.$items.mCustomScrollbar('update');
+        App.areas[Constants.AREA_RESULTS].count = 0;
+        App.areas[Constants.AREA_RESULTS].columns = 0;
+        App.areas[Constants.AREA_RESULTS].x = 0;
+        App.areas[Constants.AREA_RESULTS].y = 0;
+        App.refreshing = App.getActiveChannels(33, 0, function() {
+            App.refreshing = null;
+        });
+    }
+};
+App.getActiveChannels = function(limit, offset, callback) {
+    return $.get('https://api.twitch.tv/kraken/streams?language=ru&stream_type=live&limit=' + limit + '&offset=' + offset, function(response) {
+        console.log(response);
+        var i, ii, x, y, stream, $newCell;
         var countResults = App.areas[Constants.AREA_RESULTS].count;
         var countRows = App.areas[Constants.AREA_RESULTS].rows;
         var $newColumn = App.$itemsContainer.find('.column:last-child');
-        for (var i = countResults; i < countResults + response.streams.length; i++) {
-            if (i % countRows == 0) {
+        for (i = 0; i < response.streams.length; i++) {
+            ii = i + countResults;
+            if ((y = ii % countRows) == 0) {
                 $newColumn = $('<div class="column"/>');
                 App.$itemsContainer.append($newColumn);
                 App.areas[Constants.AREA_RESULTS].columns++;
             }
-            var stream = response.streams[i];
-            var $newCell = $('<div class="cell">\
+            x = (ii - y) / countRows;
+            stream = response.streams[i];
+            $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
                 <i class="fa fa-fw fa-twitch"></i>\
                 <img src="' + stream.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
                 <div class="stream-channel-name">' + stream.channel.display_name + '</div>\
@@ -323,19 +298,67 @@ App.init = function() {
             $newCell.data('game', stream.game);
             $newCell.data('status', stream.channel.status);
             $newColumn.append($newCell);
-            if (!$firstCell) {
+            if (ii == 0) {
                 $newCell.addClass('active');
-                $firstCell = $newCell;
+                App.scrollTo($newCell);
             }
         }
         App.areas[Constants.AREA_RESULTS].count += response.streams.length;
         App.$loading.hide();
         App.$items.mCustomScrollbar('update');
-        scrollTo($firstCell);
-        timeoutAutoHide = setTimeout(function() {
+        App.timeoutAutoHide = setTimeout(function() {
             App.$itemsContainer.addClass('mCS-autoHide');
         }, 2000);
+        App.hasMoreResults = response.streams.length > 0;
+        if (typeof callback == 'function') {
+            callback();
+        }
     }, 'json');
+};
+App.timeoutAutoHide = null;
+App.timeoutSelect = null;
+App.scrollTo = function ($element) {
+    var vh = $(window).height() / 100;
+    var scrollLeft = App.$itemsContainer.position().left;
+    var left = -scrollLeft;
+    if ($element.position().left - 2 * vh + scrollLeft < 0) {
+        left = Math.round($element.position().left - 2 * vh);
+    } else if ($element.position().left + scrollLeft + $element.width() + 2 * vh - $(window).width() > 0) {
+        left = Math.round($element.position().left + $element.width() + 2 * vh - $(window).width());
+    }
+    left = Math.max(0, left);
+    var change = Math.abs(left + scrollLeft);
+    var selectPosition = App.$selectBox.offset();
+    if (change > 0) {
+        App.$items.mCustomScrollbar('scrollTo', left, {
+            scrollInertia: 0,
+            timeout: 0
+        });
+    }
+    App.$selectBox.find('.stream-channel-name').html($element.data('channel-name'));
+    App.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + 
+            $element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, App.thousandsSeparator));
+    App.$selectBox.find('.game-name').html($element.data('game'));
+    App.$selectBox.find('.channel-status').html($element.data('status'));
+    App.$selectBox.show();
+    App.$selectBox.width($element.width());
+    App.$selectBox.height($element.height());
+    var newOffset = $element.offset();
+    newOffset.left -= left + scrollLeft;
+    App.$selectBox.offset(newOffset);
+    if (App.timeoutAutoHide) {
+        clearTimeout(App.timeoutAutoHide);
+        App.timeoutAutoHide = null;
+    }
+    App.$items.removeClass('mCS-autoHide');
+    App.timeoutAutoHide = setTimeout(function() {
+        App.$items.addClass('mCS-autoHide');
+    }, 2000);
+    if (App.timeoutSelect) {
+        clearTimeout(App.timeoutSelect);
+        App.timeoutSelect = null;
+    }
+    $element.addClass('selected');
 };
 
 function ajaxGet(url, callback) {

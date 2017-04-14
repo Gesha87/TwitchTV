@@ -185,6 +185,15 @@ i:after {
 	color: #ffffff;
 }
 
+.filter-divider {
+    display: inline-block;
+	margin: 0 2.0vh 0 1.0vh;
+	border: 2px solid #392e5c;
+    border-left: 0;
+    line-height: 1;
+    height: 4.4vh;
+}
+
 #pages {
 	font-size: 3.4vh;
 	white-space: nowrap;
