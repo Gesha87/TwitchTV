@@ -228,6 +228,7 @@ App.init = function() {
                 break;
             case 49:
                 App.refresh();
+                break;
             default:
                 console.log("Key code : " + e.keyCode);
                 break;
