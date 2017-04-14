@@ -254,7 +254,7 @@ i:after {
 	background-color: #337ab7;
 }
 
-#channels {
+#items {
 	overflow-x: auto;
 	overflow-y: hidden;
 	white-space: nowrap;
@@ -275,7 +275,7 @@ i:after {
 	/*background-color: rgba(0, 0, 0, 0.7);*/
 }
 
-#loading-text {
+#loading-wrapper .text {
 	font-size: 3.6vh;
 	margin-top: 1.0vh;
 }

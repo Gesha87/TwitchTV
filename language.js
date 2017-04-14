@@ -1,5 +1,6 @@
-console.log("English (en) loaded");
 var messages = {
+    language: 'en',
+    
 	PAGE_LIVE_CHANNELS: "Live channels",
 	PAGE_VIDEOS: "Videos",
 
