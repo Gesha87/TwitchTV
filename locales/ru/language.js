@@ -1,29 +1,29 @@
-var language = "en";
+var language = "ru";
 var messages = {
-	PAGE_LIVE_CHANNELS: "Live channels",
-	PAGE_VIDEOS: "Videos",
+	PAGE_LIVE_CHANNELS: "Активные каналы",
+	PAGE_VIDEOS: "Видеоматериалы",
 
-	FILTER_STREAM_GAME: "Game",
-	FILTER_STREAM_CHANNELS: "Channels",
-	FILTER_STREAM_LANGUAGE: "Language",
-	FILTER_STREAM_TYPE: "Type",
-	FILTER_VIDEO_GAME: "Game",
-	FILTER_VIDEO_PERIOD: "Period",
-	FILTER_VIDEO_LANGUAGES: "Languages",
-	FILTER_VIDEO_TYPE: "Type",
-	FILTER_VIDEO_SORT: "Sort",
-	FILTER_PRESETS: "Presets",
-    FILTER_SEARCH: "Search",
+	FILTER_STREAM_GAME: "Игра",
+	FILTER_STREAM_CHANNELS: "Каналы",
+	FILTER_STREAM_LANGUAGE: "Язык",
+	FILTER_STREAM_TYPE: "Тип",
+	FILTER_VIDEO_GAME: "Игра",
+	FILTER_VIDEO_PERIOD: "За период",
+	FILTER_VIDEO_LANGUAGES: "Языки",
+	FILTER_VIDEO_TYPE: "Тип",
+	FILTER_VIDEO_SORT: "Сортировка",
+	FILTER_PRESETS: "Фильтры",
+    FILTER_SEARCH: "Поиск",
 	
-	HINT_REFRESH: "Refresh",
-	HINT_LIVE_CHANNELS: "Live",
-	HINT_VIDEOS: "Videos",
-	HINT_PRESETS: "Presets",
-	HINT_SEARCH: "Search",
+	HINT_REFRESH: "Обновить",
+	HINT_LIVE_CHANNELS: "Активные каналы",
+	HINT_VIDEOS: "Видеоматериалы",
+	HINT_PRESETS: "Фильтры",
+	HINT_SEARCH: "Поиск",
 	
-	LOADING: "Loading",
+	LOADING: "Загрузка",
 
-    EMPTY_RESULTS: "Nothing found",
+    EMPTY_RESULTS: "Ничего не найдено",
     
     
 	

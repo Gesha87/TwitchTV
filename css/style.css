@@ -29,6 +29,11 @@ i:after {
 	clear: both;
 }
 
+.selected {
+    outline: 3px solid #ffffff;
+    box-shadow: inherit !important;
+}
+
 .column {
 	display: inline-table;
 	margin: 3vh 0 0 0;
@@ -50,9 +55,8 @@ i:after {
 	/* font-size: 2.4vh; */
 	/* color: #cbc8d0; */
 }
-
-.cell.selected .stream-channel-name {
-	display: none;
+.cell.selected {
+	outline: none;
 }
 
 .cell:last-child {
@@ -100,7 +104,10 @@ i:after {
 	background-color: rgba(0, 0, 0, 0.7);
 	padding: 1.0vh;
 }
-#select-box .stream-channel-name {
+.cell.selected .stream-channel-name {
+	display: none;
+}
+.select-box .stream-channel-name {
 	color: #ffffff;
 	max-width: 28vh;
 }
@@ -129,14 +136,14 @@ i:after {
 	text-overflow: ellipsis;
 }
 
-#line {
+.line {
 	border: none;
 	background-color: #392e5c;
 	height: 0.2vh;
 	margin: 0 2.0vh;
 }
 
-#line-selected {
+.line-selected {
 	border: none;
 	background-color: #6441a4;
 	height: 2px;
@@ -144,37 +151,37 @@ i:after {
 	width: 20.185316vh;
 }
 
-#header {
+.header {
 	line-height: 0;
 	white-space: nowrap;
 }
 
-#logo {
+.logo {
 	padding: 2.0vh;
 	/* display: inline-block; */
 	float: left;
 }
 
-#logo img {
-	height: 12.2vh;
+.logo img {
+	height: 12.4vh;
 }
 
-#controls {
+.controls {
 	/* display: inline-block; */
 	float: left;
 }
 
-#stream-filters {
+.filters {
 	margin: 0 0 2.0vh 2.0vh;
 	font-size: 2.6vh;
+	color: #9993a5;
 }
 
 .filter {
 	display: inline-block;
-	padding: 1.0vh 1.4vh 0.9vh;
+	padding: 1.0vh 1.4vh;
 	margin-right: 1.0vh;
 	box-shadow: #392e5c 0 0 0 2px inset;
-	color: #9993a5;
 	max-width: 20vh;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -187,14 +194,13 @@ i:after {
 
 .filter-divider {
     display: inline-block;
-	margin: 0 2.0vh 0 1.0vh;
-	border: 2px solid #392e5c;
-    border-left: 0;
-    line-height: 1;
-    height: 4.4vh;
+    padding: 1.0vh 0;
+	margin-right: 1.0vh;
+	line-height: 1;
+    overflow: hidden;
 }
 
-#pages {
+.pages {
 	font-size: 3.4vh;
 	white-space: nowrap;
 	list-style: none;
@@ -202,16 +208,7 @@ i:after {
 	padding: 0;
 }
 
-#pages .button {
-	display: inline-block;
-	margin-right: 2.0vh;
-}
-
-#pages .button:last-child {
-	margin-right: 0;
-}
-
-#hints {
+.hints {
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -225,17 +222,22 @@ i:after {
 	margin-bottom: 0.4vh;
 }
 
-.button {
+.page {
+	display: inline-block;
+    margin-right: 2.0vh;
 	position: relative;
 	padding: 1.3vh 2.0vh 1.2vh;
 	background-color: #433f4a;
 	color: #9993a5;
 }
-.button.active {
+.page:last-child {
+    margin-right: 0;
+}
+.page.active {
 	background-color: #6441a4;
 	color: #ffffff;
 }
-.button.selected {
+.page.selected {
 	color: #ffffff;
 }
 
@@ -289,17 +291,19 @@ i:after {
 	margin-top: 1.0vh;
 }
 
-#select-box {
+.select-box {
+	display: none;
 	white-space: nowrap;
 	background-color: rgba(0, 0, 0, 0);
-	outline: 3px solid #ffffff;
 	position: absolute;
 	top: 0;
 	left: -50vh;
 	width: 45.867vh;
 	height: 25.8vh;
-	/* transition: 0.1s ease-out; */
 	z-index: 5;
+}
+.select-box.selected {
+	display: block;
 }
 
 #av-player {
@@ -360,24 +364,20 @@ i:after {
     }
 }
 
-.mCSB_container {
-	/* transition: 0.2s ease-out left; */
-}
-
 .mCSB_horizontal.mCSB_inside > .mCSB_container {
-	margin-bottom: 2.4vh;
+	margin-bottom: 3.0vh;
 }
 
 .mCSB_scrollTools.mCSB_scrollTools_horizontal {
-	height: 2.4vh;
+	height: 3.0vh;
 }
 
 .mCSB_scrollTools.mCSB_scrollTools_horizontal .mCSB_draggerRail {
 	height: 0.4vh;
-	margin: 1.0vh 0;
+	margin: 1.3vh 0;
 }
 
 .mCSB_scrollTools.mCSB_scrollTools_horizontal .mCSB_dragger .mCSB_dragger_bar {
 	height: 0.6vh;
-	margin: 0.9vh auto;
+	margin: 1.2vh auto;
 }
