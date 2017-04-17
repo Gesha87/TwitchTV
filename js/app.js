@@ -1,31 +1,14 @@
 var app = {}
 app.page = constants.PAGE_LIVE_CHANNELS;
+app.returnStack = [];
 app.state = constants.STATE_BROWSE;
 app.activeArea = constants.AREA_RESULTS;
 app.areas = {};
-app.areas[constants.AREA_RESULTS] = {
-    count: 0,
-    columns: 0,
-    rows: 3,
-    x: 0,
-    y: 0
-};
-app.areas[constants.AREA_FILTERS] = {
-    columns: 0,
-    x: 0
-};
-app.areas[constants.AREA_STREAM_FILTERS] = {
-    columns: 0,
-    x: 0
-};
-app.areas[constants.AREA_VIDEO_FILTERS] = {
-    columns: 0,
-    x: 0
-};
-app.areas[constants.AREA_PAGES] = {
-    columns: 0,
-    x: 0
-};
+app.areas[constants.AREA_RESULTS] = { count: 0, columns: 0, rows: 3, x: 0, y: 0 };
+app.areas[constants.AREA_FILTERS] = { columns: 0, x: 0 };
+app.areas[constants.AREA_STREAM_FILTERS] = { columns: 0, x: 0 };
+app.areas[constants.AREA_VIDEO_FILTERS] = { columns: 0, x: 0 };
+app.areas[constants.AREA_PAGES] = { columns: 0, x: 0 };
 app.translateLayout = function() {
     // pages
     $('#page-live-channels').find('.text').text(messages.PAGE_LIVE_CHANNELS);
@@ -74,6 +57,7 @@ app.$videosPage = null;
 app.$hintChangePageText = null;
 app.init = function() {
     app.$loading = $('#loading-wrapper');
+    app.$loadingText = app.$loading.find('.text');
     app.$selectBox = $('#select-box');
     app.$player = $('#av-player');
     app.$items = $('#items');
@@ -116,13 +100,11 @@ app.init = function() {
     });
     app.$itemsContainer = app.$items.find('.mCSB_container');
     /*document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            webapis.avplay.suspend();
-        } else {
-            if (app.state == constants.STATE_WATCH) {
-                webapis.avplay.restore();
+        if (app.state == constants.STATE_WATCH) {
+            if (document.hidden) {
+                webapis.avplay.suspend();
             } else {
-                app.refresh();
+                webapis.avplay.restore();
             }
         }
     });*/
@@ -135,7 +117,7 @@ app.init = function() {
                         $newActiveCell = $('#item-' + (app.areas[constants.AREA_RESULTS].x - 1) + '-' + app.areas[constants.AREA_RESULTS].y);
                         if ($newActiveCell.length > 0) {
                             app.areas[constants.AREA_RESULTS].x--;
-                            app.scrollTo($newActiveCell);
+                            app.showItem($newActiveCell);
                         }
                     }
                 } else if (app.activeArea == constants.AREA_FILTERS) {
@@ -157,7 +139,7 @@ app.init = function() {
                         $newActiveCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + (app.areas[constants.AREA_RESULTS].y - 1));
                         if ($newActiveCell.length > 0) {
                             app.areas[constants.AREA_RESULTS].y--;
-                            app.scrollTo($newActiveCell);
+                            app.showItem($newActiveCell);
                         }
                     } else if (app.areas[constants.AREA_RESULTS].y == 0) {
                         if (app.areas[constants.AREA_FILTERS].columns > 0) {
@@ -177,7 +159,7 @@ app.init = function() {
                         $newActiveCell = $('#item-' + (app.areas[constants.AREA_RESULTS].x + 1) + '-' + app.areas[constants.AREA_RESULTS].y);
                         if ($newActiveCell.length > 0) {
                             app.areas[constants.AREA_RESULTS].x++;
-                            app.scrollTo($newActiveCell);
+                            app.showItem($newActiveCell);
                         }
                     }
                 } else if (app.activeArea == constants.AREA_FILTERS) {
@@ -199,7 +181,7 @@ app.init = function() {
                         $newActiveCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + (app.areas[constants.AREA_RESULTS].y + 1));
                         if ($newActiveCell.length > 0) {
                             app.areas[constants.AREA_RESULTS].y++;
-                            app.scrollTo($newActiveCell);
+                            app.showItem($newActiveCell);
                         }
                     }
                 } else if (app.activeArea == constants.AREA_FILTERS) {
@@ -214,72 +196,8 @@ app.init = function() {
                 break;
             case keys.KEY_ENTER:
                 if (app.activeArea == constants.AREA_RESULTS) {
-                    var selectedChannel = $('.cell.selected').data('channel');
-                    app.$player.show();
-                    app.$loading.show();
-                    $.get('http://api.twitch.tv/api/channels/' + selectedChannel + '/access_token', function(data) {
-                        console.log(data.token);
-                        $.get('http://usher.twitch.tv/api/channel/hls/' + selectedChannel + '.m3u8?player=twitchweb&&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_audi_only=true&p=' + Math.round(Math.random() * 1e7), function(data) {
-                            app.$loading.hide();
-                            var qualities = extractQualities(data);
-                            webapis.avplay.stop();
-                            webapis.avplay.open(qualities[0].url);
-                            webapis.avplay.setListener({
-                                onbufferingstart: function() {
-                                    console.log("Buffering start.");
-                                    // SceneSceneChannel.onBufferingStart();
-                                },
-                                onbufferingprogress: function(percent) {
-                                    console.log("Buffering progress data : " + percent);
-                                    // SceneSceneChannel.onBufferingProgress(percent);
-                                },
-                                onbufferingcomplete: function() {
-                                    console.log("Buffering complete.");
-                                    // SceneSceneChannel.onBufferingComplete();
-                                },
-                                oncurrentplaytime: function(currentTime) {
-                                    console.log("Current Playtime : " + currentTime);
-                                    // updateCurrentTime(currentTime);
-                                },
-                                onevent: function(eventType, eventData) {
-                                    console.log("event type error : " + eventType + ", data: " + eventData);
-                                    if (eventType == 'PLAYER_MSG_RESOLUTION_CHANGED') {
-                                        console.log("Mudou de Qualidade");
-                                    }
-                                },
-                                onerror: function(eventType) {
-                                    console.log("event type error : " + eventType);
-                                    if (eventType == 'PLAYER_ERROR_CONNECTION_FAILED') {
-                                        console.log("Closing stream from eventType == 'PLAYER_ERROR_CONNECTION_FAILED'");
-                                        // SceneSceneBrowser.errorNetwork
-                                        // =
-                                        // true;
-                                        // SceneSceneChannel.shutdownStream();
-                                    }
-                                },
-                                onsubtitlechange: function(duration, text, data3, data4) {
-                                    console.log("Subtitle Changed.");
-                                },
-                                ondrmevent: function(drmEvent, drmData) {
-                                    console.log("DRM callback: " + drmEvent + ", data: " + drmData);
-                                },
-                                onstreamcompleted: function() {
-                                    console.log("Stream Completed");
-                                    // SceneSceneChannel.onRenderingComplete();
-                                }
-                            });
-                            webapis.avplay.setDisplayRect(0, 0, $(window).width(), $(window).height());
-                            webapis.avplay.prepare();
-                            webapis.avplay.play();
-                        }).error(function(error) {
-                            app.$loading.hide();
-                            for (i in error)
-                                console.log(error[i]);
-                        });
-                    }, 'json').error(function(error) {
-                        app.$loading.hide();
-                        console.log(error);
-                    });
+                    var selectedChannel = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y).data('channel');
+                    app.playStream(selectedChannel);
                 } else if (app.activeArea == constants.AREA_PAGES) {
                     app.refresh();
                 }
@@ -312,17 +230,85 @@ app.init = function() {
     });
     $.ajaxSetup({
         beforeSend: function(xhr) {
-            //xhr.setRequestHeader('Accept', 'application/vnd.twitchtv.v5+json');
             xhr.setRequestHeader('Client-ID', 'q5ix3v5d0ot12koqr7paerntdo5gz9');
         }
     });
     app.refresh();
 };
+app.playStream = function(channelName) {
+    app.$player.show();
+    app.showLoading(constants.LOADING);
+    $.get('https://api.twitch.tv/api/channels/' + channelName + '/access_token', function(data) {
+        $.get('https://usher.twitch.tv/api/channel/hls/' + channelName + '.m3u8?player=twitchweb&&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_audio_only=true&p=' + Math.round(Math.random() * 1e7), function(data) {
+            app.$loading.hide();
+            var qualities = extractQualities(data);
+            app.play(qualities[0].url);
+        }).error(function(error) {
+            app.$loading.hide();
+        });
+    }, 'json').error(function(error) {
+        app.$loading.hide();
+    });
+};
+app.playVideo = function(id) {
+    app.$player.show();
+    app.showLoading(constants.LOADING);
+    $.get('https://api.twitch.tv/api/vods/' + id + '/access_token', function(data) {
+        console.log(data.token);
+        $.get('https://usher.ttvnw.net/vod/' + id + '.m3u8?player_backend=html5&nauthsig=' + data.sig + '&nauth=' + escape(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7), function(data) {
+            app.$loading.hide();
+            var qualities = extractQualities(data);
+            app.play(qualities[0].url);
+        }).error(function(error) {
+            app.$loading.hide();
+        });
+    }, 'json').error(function(error) {
+        app.$loading.hide();
+    });
+};
+app.play = function(url) {
+    webapis.avplay.stop();
+    webapis.avplay.open(url);
+    webapis.avplay.setListener({
+        onbufferingstart: function() {
+            app.showLoading(constants.BUFFERING);
+        },
+        onbufferingprogress: function(percent) {},
+        onbufferingcomplete: function() {
+            app.$loading.hide();
+        },
+        oncurrentplaytime: function(currentTime) {},
+        onevent: function(eventType, eventData) {
+            console.log("event type error : " + eventType + ", data: " + eventData);
+            if (eventType == 'PLAYER_MSG_RESOLUTION_CHANGED') {
+                console.log("Mudou de Qualidade");
+            }
+        },
+        onerror: function(eventType) {
+            console.log("event type error : " + eventType);
+            if (eventType == 'PLAYER_ERROR_CONNECTION_FAILED') {
+                console.log("Closing stream from eventType == 'PLAYER_ERROR_CONNECTION_FAILED'");
+                // SceneSceneBrowser.errorNetwork = true;
+                // SceneSceneChannel.shutdownStream();
+            }
+        },
+        onsubtitlechange: function(duration, text, data3, data4) {},
+        ondrmevent: function(drmEvent, drmData) {},
+        onstreamcompleted: function() {}
+    });
+    webapis.avplay.setDisplayRect(0, 0, $(window).width(), $(window).height());
+    webapis.avplay.prepare();
+    webapis.avplay.play();
+};
+app.showLoading = function(text) {
+    app.$loadingText.text(text);
+    app.$loading.show();
+};
 app.hasMoreResults = true;
 app.loadingMoreResults = null;
 app.loadMore = function() {
     if (app.hasMoreResults && !app.loadingMoreResults) {
-        app.loadingMoreResults = app.getActiveChannels(66, app.areas[constants.AREA_RESULTS].count, function() {
+        app.loadingMoreResults = app.getLiveChannels(66, app.areas[constants.AREA_RESULTS].count, function() {
             app.loadingMoreResults = null;
         });
     }
@@ -339,63 +325,127 @@ app.refresh = function(force) {
             app.loadingMoreResults = null;
         }
         app.$selectBox.removeClass('selected');
-        app.$loading.show();
+        app.showLoading(constants.LOADING);
         app.clearItems();
         app.areas[constants.AREA_RESULTS].count = 0;
         app.areas[constants.AREA_RESULTS].columns = 0;
         app.areas[constants.AREA_RESULTS].x = 0;
         app.areas[constants.AREA_RESULTS].y = 0;
-        app.refreshing = app.getActiveChannels(33, 0, function() {
-            app.refreshing = null;
-        });
+        if (app.page == constants.PAGE_LIVE_CHANNELS) {
+            app.refreshing = app.getLiveChannels(33, 0, function() {
+                app.refreshing = null;
+            });
+        } else if (app.page == constants.PAGE_VIDEOS) {
+            app.refreshing = app.getVideos(33, 0, function() {
+                app.refreshing = null;
+            });
+        }
     }
 };
-app.getActiveChannels = function(limit, offset, callback) {
-    return $.get('https://api.twitch.tv/kraken/streams?language=ua&stream_type=live&limit=' + limit + '&offset=' + offset, function(response) {
-        console.log(response);
-        var i, ii, x, y, stream, $newCell;
-        var countResults = app.areas[constants.AREA_RESULTS].count;
-        var countRows = app.areas[constants.AREA_RESULTS].rows;
-        var $newColumn = app.$itemsContainer.find('.column:last-child');
-        for (i = 0; i < response.streams.length; i++) {
-            ii = i + countResults;
-            if ((y = ii % countRows) == 0) {
-                $newColumn = $('<div class="column"/>');
-                app.$itemsContainer.append($newColumn);
-                app.areas[constants.AREA_RESULTS].columns++;
+app.twitchApiOptions = {
+    method: 'GET',
+    dataType: 'json',
+    accepts: {
+        json: 'application/vnd.twitchtv.v5+json'
+    },
+    
+};
+app.getLiveChannels = function(limit, offset, callback) {
+    return $.ajax($.extend({}, app.twitchApiOptions, {
+        url: 'https://api.twitch.tv/kraken/streams?limit=' + limit + '&offset=' + offset, 
+        success: function(response) {
+            console.log(response);
+            var i, ii, x, y, stream, $newCell;
+            var countResults = app.areas[constants.AREA_RESULTS].count;
+            var countRows = app.areas[constants.AREA_RESULTS].rows;
+            var $newColumn = app.$itemsContainer.find('.column:last-child');
+            for (i = 0; i < response.streams.length; i++) {
+                ii = i + countResults;
+                if ((y = ii % countRows) == 0) {
+                    $newColumn = $('<div class="column"/>');
+                    app.$itemsContainer.append($newColumn);
+                    app.areas[constants.AREA_RESULTS].columns++;
+                }
+                x = (ii - y) / countRows;
+                stream = response.streams[i];
+                $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
+                    <i class="fa fa-fw fa-twitch"></i>\
+                    <img src="' + stream.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+                    <div class="stream-channel-name">' + stream.channel.display_name + '</div>\
+                </div>');
+                $newCell.data('channel', stream.channel.name);
+                $newCell.data('channel-name', stream.channel.display_name);
+                $newCell.data('viewers', stream.viewers);
+                $newCell.data('game', stream.game);
+                $newCell.data('status', stream.channel.status);
+                $newColumn.append($newCell);
+                if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
+                    app.showItem($newCell);
+                }
             }
-            x = (ii - y) / countRows;
-            stream = response.streams[i];
-            $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
-                <i class="fa fa-fw fa-twitch"></i>\
-                <img src="' + stream.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
-                <div class="stream-channel-name">' + stream.channel.display_name + '</div>\
-            </div>');
-            $newCell.data('channel', stream.channel.name);
-            $newCell.data('channel-name', stream.channel.display_name);
-            $newCell.data('viewers', stream.viewers);
-            $newCell.data('game', stream.game);
-            $newCell.data('status', stream.channel.status);
-            $newColumn.append($newCell);
-            if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
-                app.scrollTo($newCell);
+            app.areas[constants.AREA_RESULTS].count += response.streams.length;
+            app.$loading.hide();
+            app.$items.mCustomScrollbar('update');
+            app.timeoutAutoHide = setTimeout(function() {
+                app.$itemsContainer.addClass('mCS-autoHide');
+            }, 2000);
+            app.hasMoreResults = response.streams.length > 0;
+            if (typeof callback == 'function') {
+                callback();
             }
         }
-        app.areas[constants.AREA_RESULTS].count += response.streams.length;
-        app.$loading.hide();
-        app.$items.mCustomScrollbar('update');
-        app.timeoutAutoHide = setTimeout(function() {
-            app.$itemsContainer.addClass('mCS-autoHide');
-        }, 2000);
-        app.hasMoreResults = response.streams.length > 0;
-        if (typeof callback == 'function') {
-            callback();
+    }));
+};
+app.getVideos = function(limit, offset, callback) {
+    return $.ajax($.extend({}, app.twitchApiOptions, {
+        url: 'https://api.twitch.tv/kraken/videos/top?limit=' + limit + '&offset=' + offset, 
+        success: function(response) {
+            console.log(response);
+            var i, ii, x, y, vod, $newCell;
+            var countResults = app.areas[constants.AREA_RESULTS].count;
+            var countRows = app.areas[constants.AREA_RESULTS].rows;
+            var $newColumn = app.$itemsContainer.find('.column:last-child');
+            for (i = 0; i < response.vods.length; i++) {
+                ii = i + countResults;
+                if ((y = ii % countRows) == 0) {
+                    $newColumn = $('<div class="column"/>');
+                    app.$itemsContainer.append($newColumn);
+                    app.areas[constants.AREA_RESULTS].columns++;
+                }
+                x = (ii - y) / countRows;
+                vod = response.vods[i];
+                $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
+                    <i class="fa fa-fw fa-twitch"></i>\
+                    <img src="' + vod.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+                    <div class="stream-channel-name">' + vod.channel.display_name + '</div>\
+                </div>');
+                $newCell.data('channel', vod.channel.name);
+                $newCell.data('channel-name', vod.channel.display_name);
+                $newCell.data('viewers', vod.views);
+                $newCell.data('game', vod.game);
+                $newCell.data('status', vod.title);
+                $newCell.data('vod-id', vod._id.toString().replace(/[^0-9]/g, ''));
+                $newColumn.append($newCell);
+                if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
+                    app.showItem($newCell);
+                }
+            }
+            app.areas[constants.AREA_RESULTS].count += response.vods.length;
+            app.$loading.hide();
+            app.$items.mCustomScrollbar('update');
+            app.timeoutAutoHide = setTimeout(function() {
+                app.$itemsContainer.addClass('mCS-autoHide');
+            }, 2000);
+            app.hasMoreResults = response.vods.length > 0;
+            if (typeof callback == 'function') {
+                callback();
+            }
         }
-    }, 'json');
+    }));
 };
 app.timeoutAutoHide = null;
 app.timeoutSelect = null;
-app.scrollTo = function ($element) {
+app.showItem = function ($element) {
     var vh = $(window).height() / 100;
     var scrollLeft = app.$itemsContainer.position().left;
     var left = -scrollLeft;
@@ -521,7 +571,7 @@ app.activateItemsArea = function() {
     app.activeArea = constants.AREA_RESULTS;
     app.clearSelection();
     var $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
-    app.scrollTo($activeCell);
+    app.showItem($activeCell);
 };
 app.clearSelection = function() {
     $('.selected').removeClass('selected');
@@ -549,10 +599,6 @@ function ajaxGet(url, callback) {
     xmlHttp.open("GET", url, true);
     xmlHttp.setRequestHeader('Client-ID', 'q5ix3v5d0ot12koqr7paerntdo5gz9');
     xmlHttp.send(null);
-}
-
-function twitchApiGet(url, callback) {
-    
 }
 
 function imageLoaded(img) {

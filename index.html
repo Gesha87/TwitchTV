@@ -1,50 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-	<title>Приложение для сервиса Twitch</title>
-	<link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
-	<link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.min.css" />
-	<link rel="stylesheet" type="text/css" href="css/style.css" />
-	<script src="js/jquery-2.1.0.min.js"></script>
-	<script src="js/jquery.mCustomScrollbar.min.js"></script>
-	<script src="language.js"></script>
-	<script src="js/constants.js"></script>
-	<script src="js/keys.js"></script>
-	<script src="js/app.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Приложение для сервиса Twitch</title>
+    <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <script src="js/jquery-2.1.0.min.js"></script>
+    <script src="js/jquery.mCustomScrollbar.min.js"></script>
+    <script src="language.js"></script>
+    <script src="js/constants.js"></script>
+    <script src="js/keys.js"></script>
+    <script src="js/app.js"></script>
 </head>
 <body>
-	<div class="header">
-		<div class="logo">
-			<img src="images/TwitchApp.png" />
-		</div>
-		<div class="controls">
-			<div id="pages" class="pages">
-				<div class="active page" id="page-live-channels" data-page="live-channels">
-					<i class="fa fa-video-camera"></i> <span class="text">Активные каналы</span>
-				</div><div class="page" id="page-videos" data-page="videos">
-					<i class="fa fa-youtube-play"></i> <span class="text">Видеоматериалы</span>
-				</div>
-			</div>
-			<div id="stream-filters" class="filters">
-				<div class="filter" id="stream-filter-game">
-					<i class="fa fa-gamepad"></i> <span class="text">Игра</span>
-				</div><div class="filter" id="stream-filter-channels">
-					<i class="fa fa-user"></i> <span class="text">Каналы</span>
-				</div><div class="filter" id="stream-filter-language">
-					<i class="fa fa-globe"></i> <span class="text">Язык</span>
-				</div><div class="filter" id="stream-filter-type">
-					<i class="fa fa-play"></i> <span class="text">Тип</span>
-				</div><div class="filter-divider">
-				    <i class="fa fa-arrows-h"></i>
-				</div><div class="filter" id="stream-filter-presets">
-					<i class="fa fa-filter"></i> <span class="text">Фильтры</span>
-				</div><div class="filter" id="stream-filter-search">
-					<i class="fa fa-search"></i> <span class="text">Поиск</span>
-				</div>
-			</div>
-			<div id="video-filters" style="display:none;" class="filters">
+    <div class="header">
+        <div class="logo">
+            <img src="images/TwitchApp.png" />
+        </div>
+        <div class="controls">
+            <div id="pages" class="pages">
+                <div class="active page" id="page-live-channels" data-page="live-channels">
+                    <i class="fa fa-video-camera"></i> <span class="text">Активные каналы</span>
+                </div><div class="page" id="page-videos" data-page="videos">
+                    <i class="fa fa-youtube-play"></i> <span class="text">Видеоматериалы</span>
+                </div>
+            </div>
+            <div id="stream-filters" class="filters">
+                <div class="filter" id="stream-filter-game">
+                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
+                </div><div class="filter" id="stream-filter-channels">
+                    <i class="fa fa-user"></i> <span class="text">Каналы</span>
+                </div><div class="filter" id="stream-filter-language">
+                    <i class="fa fa-globe"></i> <span class="text">Язык</span>
+                </div><div class="filter" id="stream-filter-type">
+                    <i class="fa fa-play"></i> <span class="text">Тип</span>
+                </div><div class="filter-divider">
+                    <i class="fa fa-arrows-h"></i>
+                </div><div class="filter" id="stream-filter-presets">
+                    <i class="fa fa-filter"></i> <span class="text">Фильтры</span>
+                </div><div class="filter" id="stream-filter-search">
+                    <i class="fa fa-search"></i> <span class="text">Поиск</span>
+                </div>
+            </div>
+            <div id="video-filters" style="display:none;" class="filters">
                 <div class="filter" id="video-filter-game">
                     <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
                 </div><div class="filter" id="video-filter-period">
@@ -63,46 +63,63 @@
                     <i class="fa fa-search"></i> <span class="text">Поиск</span>
                 </div>
             </div>
-		</div>
-		<div class="hints">
-			<div class="hint" id="hint-refresh">
-				<span class="badge badge-A">A</span> <span class="text">Обновить</span>
-			</div>
-			<div class="hint" id="hint-change-page">
-				<span class="badge badge-B">B</span> <span class="text">Видеоматериалы</span>
-			</div>
-			<div class="hint" id="hint-presets">
-				<span class="badge badge-C">C</span> <span class="text">Фильтры</span>
-			</div>
-			<div class="hint" id="hint-search">
-				<span class="badge badge-D">D</span> <span class="text">Поиск</span>
-			</div>
-		</div>
-		<div class="clear"></div>
-	</div>
-	<div id="divider">
-		<hr class="line" />
-		<hr class="line-selected animated"/>
-	</div>
- 	<div id="items"></div>
-	<div id="loading-wrapper">
-		<div id="loading">
-			<div class="spinner-three-bounce">
-			    <div class="bounce1"></div>
-			    <div class="bounce2"></div>
-			    <div class="bounce3"></div>
-			</div>
-			<div class="text">Загрузка</div>
-		</div>
-	</div>
+        </div>
+        <div class="hints">
+            <div class="hint" id="hint-refresh">
+                <span class="badge badge-A">A</span> <span class="text">Обновить</span>
+            </div>
+            <div class="hint" id="hint-change-page">
+                <span class="badge badge-B">B</span> <span class="text">Видеоматериалы</span>
+            </div>
+            <div class="hint" id="hint-presets">
+                <span class="badge badge-C">C</span> <span class="text">Фильтры</span>
+            </div>
+            <div class="hint" id="hint-search">
+                <span class="badge badge-D">D</span> <span class="text">Поиск</span>
+            </div>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <div id="divider">
+        <hr class="line" />
+        <hr class="line-selected"/>
+    </div>
+    <div id="items" class="items"></div>
+    <div id="loading-wrapper" class="loading-wrapper">
+        <div id="loading" class="loading">
+            <div class="spinner-three-bounce">
+                <div class="bounce1"></div>
+                <div class="bounce2"></div>
+                <div class="bounce3"></div>
+            </div>
+            <div class="text">Загрузка</div>
+        </div>
+    </div>
     <object id="av-player" type="application/avplayer"></object>
-    <div id="select-box" class="select-box selected">
-		<div class="stream-channel-name ellipsed"></div>
-    	<div class="stream-viewers"></div>
-		<div class="stream-info">
-			<div class="game-name ellipsed"></div>
-			<div class="channel-status ellipsed"></div>
-		</div>
+    <div id="select-box" class="select-box">
+        <div class="stream-channel-name ellipsed"></div>
+        <div class="stream-viewers"></div>
+        <div class="stream-info">
+            <div class="game-name ellipsed"></div>
+            <div class="channel-status ellipsed"></div>
+        </div>
+    </div>
+    <div id="error-dialog" class="dialog-wrapper">
+        <div class="dialog">
+            <div class="text">Загрузка</div>
+            <div class="dialog-buttons">
+                <div class="text">ОК</div>
+            </div>
+        </div>
+    </div>
+    <div id="exit-dialog" class="dialog-wrapper">
+        <div class="dialog">
+            <div class="text">Вы действительно хотите выйти из приложения?</div>
+            <div class="dialog-buttons">
+                <div class="dialog-button">Выйти</div>
+                <div class="dialog-button">Отмена</div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

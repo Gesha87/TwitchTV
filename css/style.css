@@ -265,30 +265,44 @@ i:after {
 	background-color: #337ab7;
 }
 
-#items {
+.items {
 	overflow-x: auto;
 	overflow-y: hidden;
 	white-space: nowrap;
 }
 
-#loading-wrapper {
+.loading-wrapper {
 	position: absolute;
 	top: 50vh;
 	width: 100vw;
 	margin-top: -1.4vh;
 	text-align: center;
-	z-index: 1000;
+	z-index: 100;
 }
 
-#loading {
+.loading {
 	display: inline-block;
 	padding: 2vh;
 	/*background-color: rgba(0, 0, 0, 0.7);*/
 }
 
-#loading-wrapper .text {
+.loading-wrapper .text {
 	font-size: 3.6vh;
 	margin-top: 1.0vh;
+}
+
+.dialog-wrapper {
+    position: absolute;
+	top: 0;
+    left: 0;
+	width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+}
+
+.dialog {
+    
 }
 
 .select-box {

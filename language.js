@@ -22,6 +22,7 @@ var messages = {
 	HINT_SEARCH: "Search",
 	
 	LOADING: "Loading",
+    BUFFERING: "Buffering",
 
     EMPTY_RESULTS: "Nothing found",
     
