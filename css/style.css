@@ -21,17 +21,12 @@ body.init {
 	color: #fc3636;
 }
 
-i:after {
-	/*content: '\00a0\00a0';*/
-}
-
 .clear {
 	clear: both;
 }
 
 .selected {
     outline: 3px solid #ffffff;
-    box-shadow: inherit !important;
 }
 
 .column {
@@ -275,7 +270,7 @@ i:after {
 	position: absolute;
 	top: 50vh;
 	width: 100vw;
-	margin-top: -1.4vh;
+	margin-top: -6.2vh;
 	text-align: center;
 	z-index: 100;
 }
@@ -283,26 +278,53 @@ i:after {
 .loading {
 	display: inline-block;
 	padding: 2vh;
-	/*background-color: rgba(0, 0, 0, 0.7);*/
 }
 
 .loading-wrapper .text {
 	font-size: 3.6vh;
-	margin-top: 1.0vh;
+	margin-top: 2.0vh;
 }
 
 .dialog-wrapper {
+	display: none;
+	font-size: 3.0vh;
+	line-height: 1.2;
     position: absolute;
-	top: 0;
+    top: 0;
     left: 0;
-	width: 100vw;
+    width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.8);
     z-index: 1000;
 }
 
 .dialog {
-    
+    position: absolute;
+    top: 50vh;
+    width: 100vw;
+    margin-top: -7.0vh;
+    text-align: center;
+    background-color: #392e5c;
+    padding: 2vh 20vh;
+}
+
+.dialog-buttons {
+	margin-top: 2.0vh;
+}
+
+.dialog-button {
+	display: inline-block;
+    margin-right: 2.0vh;
+    position: relative;
+    padding: 0.3vh 1.5vh;
+    background-color: #6441a4;
+    color: #b9b3c5;
+}
+.dialog-button.selected {
+	color: #ffffff;
+}
+.dialog-button:last-child {
+	margin-right: 0;
 }
 
 .select-box {
@@ -311,7 +333,7 @@ i:after {
 	background-color: rgba(0, 0, 0, 0);
 	position: absolute;
 	top: 0;
-	left: -50vh;
+	left: 0;
 	width: 45.867vh;
 	height: 25.8vh;
 	z-index: 5;

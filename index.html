@@ -106,9 +106,9 @@
     </div>
     <div id="error-dialog" class="dialog-wrapper">
         <div class="dialog">
-            <div class="text">Загрузка</div>
+            <div class="text" id="error-dialog-text">Ошибка</div>
             <div class="dialog-buttons">
-                <div class="text">ОК</div>
+                <div class="dialog-button selected" id="button-close">Закрыть</div>
             </div>
         </div>
     </div>
@@ -116,8 +116,8 @@
         <div class="dialog">
             <div class="text">Вы действительно хотите выйти из приложения?</div>
             <div class="dialog-buttons">
-                <div class="dialog-button">Выйти</div>
-                <div class="dialog-button">Отмена</div>
+                <div class="dialog-button" id="button-exit">Выйти</div>
+                <div class="dialog-button selected" id="button-cancel">Отмена</div>
             </div>
         </div>
     </div>

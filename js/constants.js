@@ -2,6 +2,8 @@ var constants = {
     STATE_BROWSE: 'browse',
     STATE_WATCH: 'watch',
     STATE_SELECT: 'select',
+    STATE_ERROR: 'error',
+    STATE_EXIT: 'exit',
     
     PAGE_LIVE_CHANNELS: 'live-channels',
     PAGE_VIDEOS: 'videos',

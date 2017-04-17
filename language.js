@@ -23,6 +23,10 @@ var messages = {
 	
 	LOADING: "Loading",
     BUFFERING: "Buffering",
+    
+    BUTTON_CLOSE: "Close",
+    BUTTON_EXIT: "Exit",
+    BUTTON_CANCEL: "Cancel",
 
     EMPTY_RESULTS: "Nothing found",
     

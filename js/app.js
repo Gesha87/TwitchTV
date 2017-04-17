@@ -33,6 +33,10 @@ app.translateLayout = function() {
     $('#hint-change-page').find('.text').text(messages.HINT_VIDEOS);
     $('#hint-presets').find('.text').text(messages.HINT_PRESETS);
     $('#hint-search').find('.text').text(messages.HINT_SEARCH);
+    // buttons
+    $('#button-exit').text(messages.BUTTON_EXIT);
+    $('#button-cancel').text(messages.BUTTON_CANCEL);
+    $('#button-close').text(messages.BUTTON_CLOSE);
     // others
     $('#loading').find('.text').text(messages.LOADING);
 };
@@ -42,8 +46,11 @@ app.setUnderscore = function() {
     $lineSelected.css('width', $activePage[0].offsetWidth + 'px');
     $lineSelected.css('margin-left', $activePage[0].offsetLeft + 'px');
 };
-app.thousandsSeparator = messages.language == 'ru' ? ' ' : ',';
+app.thousandsSeparator = messages.language === 'ru' ? ' ' : ',';
 app.$loading = null;
+app.$error = null;
+app.$errorText = null;
+app.$exitDialog = null;
 app.$selectBox = null;
 app.$player = null;
 app.$items = null;
@@ -57,6 +64,9 @@ app.$videosPage = null;
 app.$hintChangePageText = null;
 app.init = function() {
     app.$loading = $('#loading-wrapper');
+    app.$error = $('#error-dialog');
+    app.$errorText = $('#error-dialog-text');
+    app.$exitDialog = $('#exit-dialog');
     app.$loadingText = app.$loading.find('.text');
     app.$selectBox = $('#select-box');
     app.$player = $('#av-player');
@@ -111,101 +121,127 @@ app.init = function() {
     document.addEventListener('keydown', function(e) {
         switch (e.keyCode) {
             case keys.KEY_LEFT:
-                if (app.activeArea == constants.AREA_RESULTS) {
-                    var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
-                    if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].x > 0) {
-                        $newActiveCell = $('#item-' + (app.areas[constants.AREA_RESULTS].x - 1) + '-' + app.areas[constants.AREA_RESULTS].y);
-                        if ($newActiveCell.length > 0) {
-                            app.areas[constants.AREA_RESULTS].x--;
-                            app.showItem($newActiveCell);
+                if (app.state === constants.STATE_BROWSE) {
+                    if (app.activeArea === constants.AREA_RESULTS) {
+                        var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
+                        if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].x > 0) {
+                            $newActiveCell = $('#item-' + (app.areas[constants.AREA_RESULTS].x - 1) + '-' + app.areas[constants.AREA_RESULTS].y);
+                            if ($newActiveCell.length > 0) {
+                                app.areas[constants.AREA_RESULTS].x--;
+                                app.showItem($newActiveCell);
+                            }
                         }
-                    }
-                } else if (app.activeArea == constants.AREA_FILTERS) {
-                    if (app.areas[constants.AREA_FILTERS].x > 0) {
-                        app.areas[constants.AREA_FILTERS].x--;
-                        app.showCurrentFilter();
-                    }
-                } else if (app.activeArea == constants.AREA_PAGES) {
-                    if (app.areas[constants.AREA_PAGES].x > 0) {
-                        app.areas[constants.AREA_PAGES].x--;
-                        app.showCurrentPage(true);
+                    } else if (app.activeArea == constants.AREA_FILTERS) {
+                        if (app.areas[constants.AREA_FILTERS].x > 0) {
+                            app.areas[constants.AREA_FILTERS].x--;
+                            app.showCurrentFilter();
+                        }
+                    } else if (app.activeArea == constants.AREA_PAGES) {
+                        if (app.areas[constants.AREA_PAGES].x > 0) {
+                            app.areas[constants.AREA_PAGES].x--;
+                            app.showCurrentPage(true);
+                        }
                     }
                 }
                 break;
             case keys.KEY_UP:
-                if (app.activeArea == constants.AREA_RESULTS) {
-                    var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
-                    if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].y > 0) {
-                        $newActiveCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + (app.areas[constants.AREA_RESULTS].y - 1));
-                        if ($newActiveCell.length > 0) {
-                            app.areas[constants.AREA_RESULTS].y--;
-                            app.showItem($newActiveCell);
+                if (app.state === constants.STATE_BROWSE) {
+                    if (app.activeArea == constants.AREA_RESULTS) {
+                        var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
+                        if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].y > 0) {
+                            $newActiveCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + (app.areas[constants.AREA_RESULTS].y - 1));
+                            if ($newActiveCell.length > 0) {
+                                app.areas[constants.AREA_RESULTS].y--;
+                                app.showItem($newActiveCell);
+                            }
+                        } else if (app.areas[constants.AREA_RESULTS].y == 0) {
+                            if (app.areas[constants.AREA_FILTERS].columns > 0) {
+                                app.activateFiltersArea();
+                            } else {
+                                app.activatePagesArea();
+                            }
                         }
-                    } else if (app.areas[constants.AREA_RESULTS].y == 0) {
-                        if (app.areas[constants.AREA_FILTERS].columns > 0) {
-                            app.activateFiltersArea();
-                        } else {
-                            app.activatePagesArea();
-                        }
+                    } else if (app.activeArea == constants.AREA_FILTERS) {
+                        app.activatePagesArea();
                     }
-                } else if (app.activeArea == constants.AREA_FILTERS) {
-                    app.activatePagesArea();
                 }
                 break;
             case keys.KEY_RIGHT:
-                if (app.activeArea == constants.AREA_RESULTS) {
-                    var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
-                    if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].x < app.areas[constants.AREA_RESULTS].columns - 1) {
-                        $newActiveCell = $('#item-' + (app.areas[constants.AREA_RESULTS].x + 1) + '-' + app.areas[constants.AREA_RESULTS].y);
-                        if ($newActiveCell.length > 0) {
-                            app.areas[constants.AREA_RESULTS].x++;
-                            app.showItem($newActiveCell);
+                if (app.state === constants.STATE_BROWSE) {
+                    if (app.activeArea == constants.AREA_RESULTS) {
+                        var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
+                        if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].x < app.areas[constants.AREA_RESULTS].columns - 1) {
+                            $newActiveCell = $('#item-' + (app.areas[constants.AREA_RESULTS].x + 1) + '-' + app.areas[constants.AREA_RESULTS].y);
+                            if ($newActiveCell.length > 0) {
+                                app.areas[constants.AREA_RESULTS].x++;
+                                app.showItem($newActiveCell);
+                            }
                         }
-                    }
-                } else if (app.activeArea == constants.AREA_FILTERS) {
-                    if (app.areas[constants.AREA_FILTERS].x < app.areas[constants.AREA_FILTERS].columns - 1) {
-                        app.areas[constants.AREA_FILTERS].x++;
-                        app.showCurrentFilter();
-                    }
-                } else if (app.activeArea == constants.AREA_PAGES) {
-                    if (app.areas[constants.AREA_PAGES].x < app.areas[constants.AREA_PAGES].columns - 1) {
-                        app.areas[constants.AREA_PAGES].x++;
-                        app.showCurrentPage(true);
+                    } else if (app.activeArea == constants.AREA_FILTERS) {
+                        if (app.areas[constants.AREA_FILTERS].x < app.areas[constants.AREA_FILTERS].columns - 1) {
+                            app.areas[constants.AREA_FILTERS].x++;
+                            app.showCurrentFilter();
+                        }
+                    } else if (app.activeArea == constants.AREA_PAGES) {
+                        if (app.areas[constants.AREA_PAGES].x < app.areas[constants.AREA_PAGES].columns - 1) {
+                            app.areas[constants.AREA_PAGES].x++;
+                            app.showCurrentPage(true);
+                        }
                     }
                 }
                 break;
             case keys.KEY_DOWN:
-                if (app.activeArea == constants.AREA_RESULTS) {
-                    var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
-                    if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].y < app.areas[constants.AREA_RESULTS].rows - 1) {
-                        $newActiveCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + (app.areas[constants.AREA_RESULTS].y + 1));
-                        if ($newActiveCell.length > 0) {
-                            app.areas[constants.AREA_RESULTS].y++;
-                            app.showItem($newActiveCell);
+                if (app.state === constants.STATE_BROWSE) {
+                    if (app.activeArea == constants.AREA_RESULTS) {
+                        var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
+                        if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].y < app.areas[constants.AREA_RESULTS].rows - 1) {
+                            $newActiveCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + (app.areas[constants.AREA_RESULTS].y + 1));
+                            if ($newActiveCell.length > 0) {
+                                app.areas[constants.AREA_RESULTS].y++;
+                                app.showItem($newActiveCell);
+                            }
                         }
-                    }
-                } else if (app.activeArea == constants.AREA_FILTERS) {
-                    app.activateItemsArea();
-                } else if (app.activeArea == constants.AREA_PAGES) {
-                    if (app.areas[constants.AREA_FILTERS].columns > 0) {
-                        app.activateFiltersArea();
-                    } else {
+                    } else if (app.activeArea == constants.AREA_FILTERS) {
                         app.activateItemsArea();
+                    } else if (app.activeArea == constants.AREA_PAGES) {
+                        if (app.areas[constants.AREA_FILTERS].columns > 0) {
+                            app.activateFiltersArea();
+                        } else {
+                            app.activateItemsArea();
+                        }
                     }
                 }
                 break;
             case keys.KEY_ENTER:
-                if (app.activeArea == constants.AREA_RESULTS) {
-                    var selectedChannel = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y).data('channel');
-                    app.playStream(selectedChannel);
-                } else if (app.activeArea == constants.AREA_PAGES) {
-                    app.refresh();
+                if (app.state === constants.STATE_BROWSE) {
+                    if (app.activeArea == constants.AREA_RESULTS) {
+                        var $selectedItem = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
+                        if (app.page == constants.PAGE_LIVE_CHANNELS) {
+                            app.playStream($selectedItem.data('channel'));
+                        } else if (app.page == constants.PAGE_VIDEOS) {
+                            app.playVideo($selectedItem.data('vod-id'));
+                        }
+                    } else if (app.activeArea == constants.AREA_PAGES) {
+                        app.refresh();
+                    }
                 }
                 break;
             case 27:
             case keys.KEY_RETURN:
-                webapis.avplay.stop();
-                app.$player.hide();
+                if (app.state === constants.STATE_WATCH) {
+                    webapis.avplay.stop();
+                    app.$player.hide();
+                } else if (app.state === constants.STATE_BROWSE) {
+                    app.$exitDialog.show();
+                    app.returnStack.push(app.state);
+                    app.state = constants.STATE_EXIT;
+                } else if (app.state === constants.STATE_ERROR) {
+                    app.$error.hide();
+                    app.state = app.returnStack.pop();
+                } else if (app.state === constants.STATE_EXIT) {
+                    app.$exitDialog.hide();
+                    app.state = app.returnStack.pop();
+                }
                 break;
             case keys.KEY_1:
             case keys.KEY_RED:
@@ -238,35 +274,43 @@ app.init = function() {
 app.playStream = function(channelName) {
     app.$player.show();
     app.showLoading(constants.LOADING);
-    $.get('https://api.twitch.tv/api/channels/' + channelName + '/access_token', function(data) {
+    $.get('http://api.twitch.tv/api/channels/' + channelName + '/access_token', function(data) {
+        console.log(data.token);
         $.get('https://usher.twitch.tv/api/channel/hls/' + channelName + '.m3u8?player=twitchweb&&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_audio_only=true&p=' + Math.round(Math.random() * 1e7), function(data) {
             app.$loading.hide();
             var qualities = extractQualities(data);
             app.play(qualities[0].url);
         }).error(function(error) {
+            app.$player.hide();
             app.$loading.hide();
+            app.showError('ОШИБКА!!!!');
         });
     }, 'json').error(function(error) {
+        app.$player.hide();
         app.$loading.hide();
+        app.showError('ОШИБКА!!!!');
     });
 };
 app.playVideo = function(id) {
     app.$player.show();
     app.showLoading(constants.LOADING);
-    $.get('https://api.twitch.tv/api/vods/' + id + '/access_token', function(data) {
+    $.get('http://api.twitch.tv/api/vods/' + id + '/access_token', function(data) {
         console.log(data.token);
-        $.get('https://usher.ttvnw.net/vod/' + id + '.m3u8?player_backend=html5&nauthsig=' + data.sig + '&nauth=' + escape(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7), function(data) {
+        $.get('http://usher.ttvnw.net/vod/' + id + '.m3u8?player_backend=html5&nauthsig=' + data.sig + '&nauth=' + escape(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7), function(data) {
             app.$loading.hide();
             var qualities = extractQualities(data);
             app.play(qualities[0].url);
         }).error(function(error) {
             app.$loading.hide();
+            console.log('2');
         });
     }, 'json').error(function(error) {
         app.$loading.hide();
+        console.log('1');
     });
 };
 app.play = function(url) {
+    console.log(url);
     webapis.avplay.stop();
     webapis.avplay.open(url);
     webapis.avplay.setListener({
@@ -303,6 +347,14 @@ app.play = function(url) {
 app.showLoading = function(text) {
     app.$loadingText.text(text);
     app.$loading.show();
+};
+app.showError = function(text) {
+    if (app.state !== constants.STATE_EXIT) {
+        app.$errorText.text(text);
+        app.$error.show();
+        app.returnStack.push(app.state);
+        app.state = constants.STATE_ERROR;
+    }
 };
 app.hasMoreResults = true;
 app.loadingMoreResults = null;
