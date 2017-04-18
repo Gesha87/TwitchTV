@@ -219,10 +219,12 @@ app.init = function() {
                 if (app.state === constants.STATE_BROWSE) {
                     if (app.activeArea == constants.AREA_RESULTS) {
                         var $selectedItem = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
-                        if (app.page == constants.PAGE_LIVE_CHANNELS) {
-                            app.playStream($selectedItem.data('channel'));
-                        } else if (app.page == constants.PAGE_VIDEOS) {
-                            app.playVideo($selectedItem.data('vod-id'));
+                        if ($selectedItem.length > 0) {
+                            if (app.page == constants.PAGE_LIVE_CHANNELS) {
+                                app.playStream($selectedItem.data('channel'));
+                            } else if (app.page == constants.PAGE_VIDEOS) {
+                                app.playVideo($selectedItem.data('vod-id'));
+                            }
                         }
                     } else if (app.activeArea == constants.AREA_PAGES) {
                         app.refresh();
@@ -243,11 +245,9 @@ app.init = function() {
                 if (app.state === constants.STATE_WATCH) {
                     webapis.avplay.stop();
                     app.$player.hide();
+                    app.returnState();
                 } else if (app.state === constants.STATE_BROWSE) {
-                    app.$exitDialog.show();
-                    app.returnStack.push(app.state);
-                    app.state = constants.STATE_EXIT;
-                    app.$
+                    app.returnState();
                 } else if (app.state === constants.STATE_ERROR) {
                     app.hideError();
                 } else if (app.state === constants.STATE_EXIT) {
@@ -282,31 +282,55 @@ app.init = function() {
     });
     app.refresh();
 };
+app.setState = function(state) {
+    app.returnStack.push(app.state);
+    app.state = state;
+};
+app.returnState = function() {
+    if (app.returnStack.length > 0) {
+        app.state = app.returnStack.pop();
+    } else {
+        app.$exitDialog.show();
+        app.returnStack.push(app.state);
+        app.state = constants.STATE_EXIT;
+    }
+};
+app.loadingStream = null;
 app.playStream = function(channelName) {
+    app.setState(constants.STATE_WATCH);
+    if (app.loadingStream) {
+        app.loadingStream.abort();
+        app.loadingStream = null;
+    }
     app.$player.show();
     app.showLoading(constants.LOADING);
-    $.get('http://api.twitch.tv/api/channels/' + channelName + '/access_token', function(data) {
-        console.log(data.token);
-        $.get('https://usher.twitch.tv/api/channel/hls/' + channelName + '.m3u8?player=twitchweb&&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_audio_only=true&p=' + Math.round(Math.random() * 1e7), function(data) {
+    app.loadingStream = $.get('http://api.twitch.tv/api/channels/' + channelName + '/access_token', 'json').always(function() {
+        app.loadingStream = null;
+    }).done(function(data) {
+        app.loadingStream = $.get('http://usher.twitch.tv/api/channel/hls/' + channelName + '.m3u8?player=twitchweb&&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_audio_only=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
+            app.loadingStream = null;
+        }).done(function(data) {
             app.$loading.hide();
             var qualities = extractQualities(data);
             app.play(qualities[0].url);
-        }).error(function(error) {
+        }).fail(function(xhr) {
+            app.returnState();
             app.$player.hide();
             app.$loading.hide();
-            app.showError('ERROR!!!');
+            app.showError(xhr.responseText);
         });
-    }, 'json').error(function(error) {
+    }).fail(function(xhr) {
+        app.returnState();
         app.$player.hide();
         app.$loading.hide();
-        app.showError('ERROR!!!');
+        app.showError(xhr.responseText);
     });
 };
 app.playVideo = function(id) {
+    app.setState(constants.STATE_WATCH);
     app.$player.show();
     app.showLoading(constants.LOADING);
     $.get('http://api.twitch.tv/api/vods/' + id + '/access_token', function(data) {
-        console.log(data.token);
         $.get('http://usher.ttvnw.net/vod/' + id + '.m3u8?player_backend=html5&nauthsig=' + data.sig + '&nauth=' + escape(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7), function(data) {
             app.$loading.hide();
             var qualities = extractQualities(data);
@@ -328,22 +352,24 @@ app.play = function(url) {
     webapis.avplay.open(url);
     webapis.avplay.setListener({
         onbufferingstart: function() {
-            app.showLoading(constants.BUFFERING);
+            app.showLoading(messages.BUFFERING + ' 0%');
         },
-        onbufferingprogress: function(percent) {},
+        onbufferingprogress: function(percent) {
+            app.showLoading(messages.BUFFERING + ' ' + percent + '%');
+        },
         onbufferingcomplete: function() {
             app.$loading.hide();
         },
         oncurrentplaytime: function(currentTime) {},
         onevent: function(eventType, eventData) {
-            console.log("event type error : " + eventType + ", data: " + eventData);
+            console.log("event type: " + eventType + ", data: " + eventData);
             if (eventType == 'PLAYER_MSG_RESOLUTION_CHANGED') {
                 console.log("Mudou de Qualidade");
             }
         },
-        onerror: function(eventType) {
-            console.log("event type error : " + eventType);
-            if (eventType == 'PLAYER_ERROR_CONNECTION_FAILED') {
+        onerror: function(error) {
+            console.log("error: " + error);
+            if (error == 'PLAYER_ERROR_CONNECTION_FAILED') {
                 console.log("Closing stream from eventType == 'PLAYER_ERROR_CONNECTION_FAILED'");
                 // SceneSceneBrowser.errorNetwork = true;
                 // SceneSceneChannel.shutdownStream();
