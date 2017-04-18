@@ -108,16 +108,16 @@
         <div class="dialog">
             <div class="text" id="error-dialog-text">Ошибка</div>
             <div class="dialog-buttons">
-                <div class="dialog-button selected" id="button-close">Закрыть</div>
+                <div class="dialog-button" id="button-close" data-type="close">Закрыть</div>
             </div>
         </div>
     </div>
     <div id="exit-dialog" class="dialog-wrapper">
         <div class="dialog">
-            <div class="text">Вы действительно хотите выйти из приложения?</div>
+            <div class="text" id="confirm-exit">Вы действительно хотите выйти из приложения?</div>
             <div class="dialog-buttons">
-                <div class="dialog-button" id="button-exit">Выйти</div>
-                <div class="dialog-button selected" id="button-cancel">Отмена</div>
+                <div class="dialog-button" id="button-exit" data-type="exit">Выйти</div>
+                <div class="dialog-button" id="button-cancel" data-type="cancel">Отмена</div>
             </div>
         </div>
     </div>

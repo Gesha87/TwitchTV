@@ -28,6 +28,8 @@ var messages = {
     BUTTON_EXIT: "Exit",
     BUTTON_CANCEL: "Cancel",
 
+    CONFIRM_EXIT: "Do you really want to exit?",
+
     EMPTY_RESULTS: "Nothing found",
     
     

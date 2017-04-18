@@ -1,4 +1,4 @@
-var app = {}
+﻿var app = {}
 app.page = constants.PAGE_LIVE_CHANNELS;
 app.returnStack = [];
 app.state = constants.STATE_BROWSE;
@@ -39,6 +39,7 @@ app.translateLayout = function() {
     $('#button-close').text(messages.BUTTON_CLOSE);
     // others
     $('#loading').find('.text').text(messages.LOADING);
+    $('#confirm-exit').text(messages.CONFIRM_EXIT);
 };
 app.setUnderscore = function() {
     var $activePage = app.$pages.find('.active');
@@ -50,6 +51,7 @@ app.thousandsSeparator = messages.language === 'ru' ? ' ' : ',';
 app.$loading = null;
 app.$error = null;
 app.$errorText = null;
+app.$buttonCloseError = null;
 app.$exitDialog = null;
 app.$selectBox = null;
 app.$player = null;
@@ -66,6 +68,7 @@ app.init = function() {
     app.$loading = $('#loading-wrapper');
     app.$error = $('#error-dialog');
     app.$errorText = $('#error-dialog-text');
+    app.$buttonCloseError = $('#button-close');
     app.$exitDialog = $('#exit-dialog');
     app.$loadingText = app.$loading.find('.text');
     app.$selectBox = $('#select-box');
@@ -224,6 +227,15 @@ app.init = function() {
                     } else if (app.activeArea == constants.AREA_PAGES) {
                         app.refresh();
                     }
+                } else if (app.state === constants.STATE_ERROR) {
+                    app.hideError();
+                } else if (app.state === constants.STATE_EXIT) {
+                    var type = app.$exitDialog.find('.selected').data('type');
+                    if (type === constants.BUTTON_TYPE_EXIT) {
+                        sf.core.exit(false);
+                    } else if (type === constants.BUTTON_TYPE_CLOSE) {
+                        app.hideExit();
+                    }
                 }
                 break;
             case 27:
@@ -235,12 +247,11 @@ app.init = function() {
                     app.$exitDialog.show();
                     app.returnStack.push(app.state);
                     app.state = constants.STATE_EXIT;
+                    app.$
                 } else if (app.state === constants.STATE_ERROR) {
-                    app.$error.hide();
-                    app.state = app.returnStack.pop();
+                    app.hideError();
                 } else if (app.state === constants.STATE_EXIT) {
-                    app.$exitDialog.hide();
-                    app.state = app.returnStack.pop();
+                    app.hideExit();
                 }
                 break;
             case keys.KEY_1:
@@ -283,12 +294,12 @@ app.playStream = function(channelName) {
         }).error(function(error) {
             app.$player.hide();
             app.$loading.hide();
-            app.showError('ОШИБКА!!!!');
+            app.showError('ERROR!!!');
         });
     }, 'json').error(function(error) {
         app.$player.hide();
         app.$loading.hide();
-        app.showError('ОШИБКА!!!!');
+        app.showError('ERROR!!!');
     });
 };
 app.playVideo = function(id) {
@@ -301,12 +312,14 @@ app.playVideo = function(id) {
             var qualities = extractQualities(data);
             app.play(qualities[0].url);
         }).error(function(error) {
+            app.$player.hide();
             app.$loading.hide();
-            console.log('2');
+            app.showError('ERROR!!!');
         });
     }, 'json').error(function(error) {
+        app.$player.hide();
         app.$loading.hide();
-        console.log('1');
+        app.showError('ERROR!!!');
     });
 };
 app.play = function(url) {
@@ -354,7 +367,16 @@ app.showError = function(text) {
         app.$error.show();
         app.returnStack.push(app.state);
         app.state = constants.STATE_ERROR;
+        app.$buttonCloseError.addClass('selected');
     }
+};
+app.hideError = function() {
+    app.$error.hide();
+    app.state = app.returnStack.pop();
+};
+app.hideExit = function() {
+    app.$exitDialog.hide();
+    app.state = app.returnStack.pop();
 };
 app.hasMoreResults = true;
 app.loadingMoreResults = null;

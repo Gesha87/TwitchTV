@@ -13,4 +13,7 @@ var constants = {
     AREA_STREAM_FILTERS: 'stream-filters',
     AREA_VIDEO_FILTERS: 'video-filters',
     AREA_RESULTS: 'results',
+
+    BUTTON_TYPE_EXIT: 'exit',
+    BUTTON_TYPE_CLOSE: 'close',
 };

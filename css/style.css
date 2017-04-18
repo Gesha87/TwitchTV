@@ -304,8 +304,12 @@ body.init {
     width: 100vw;
     margin-top: -7.0vh;
     text-align: center;
-    background-color: #392e5c;
+    background-color: #201c2b;
     padding: 2vh 20vh;
+}
+
+.dialog .text {
+    padding: 2vh 0;
 }
 
 .dialog-buttons {
