@@ -50,6 +50,7 @@ app.setUnderscore = function() {
 app.thousandsSeparator = messages.language === 'ru' ? ' ' : ',';
 app.$loading = null;
 app.$error = null;
+app.$errorContent = null;
 app.$errorText = null;
 app.$buttonCloseError = null;
 app.$exitDialog = null;
@@ -67,6 +68,7 @@ app.$hintChangePageText = null;
 app.init = function() {
     app.$loading = $('#loading-wrapper');
     app.$error = $('#error-dialog');
+    app.$errorContent = $('#error-dialog').find('.content');
     app.$errorText = $('#error-dialog-text');
     app.$buttonCloseError = $('#button-close');
     app.$exitDialog = $('#exit-dialog');
@@ -243,9 +245,7 @@ app.init = function() {
             case 27:
             case keys.KEY_RETURN:
                 if (app.state === constants.STATE_WATCH) {
-                    webapis.avplay.stop();
-                    app.$player.hide();
-                    app.returnState();
+                    app.stop();
                 } else if (app.state === constants.STATE_BROWSE) {
                     app.returnState();
                 } else if (app.state === constants.STATE_ERROR) {
@@ -296,58 +296,65 @@ app.returnState = function() {
     }
 };
 app.loadingStream = null;
+app.loadingErrorHandler = function(xhr, textStatus, errorThrown) {
+    if (errorThrown !== 'abort') {
+        var message = messages.ERROR_LOADING_STREAM_FAILED;
+        if (xhr.status > 0) {
+            try {
+                var response = $.parseJSON(xhr.responseText);
+                message = message + '<br>' + response.message;
+            } catch(e) {}
+        }
+        app.showLoadingError(message);
+    }
+}
+app.showLoadingError = function(message) {
+    app.returnState();
+    app.$player.hide();
+    app.$loading.hide();
+    app.showError(message);
+};
 app.playStream = function(channelName) {
     app.setState(constants.STATE_WATCH);
-    if (app.loadingStream) {
-        app.loadingStream.abort();
-        app.loadingStream = null;
-    }
     app.$player.show();
     app.showLoading(constants.LOADING);
-    app.loadingStream = $.get('http://api.twitch.tv/api/channels/' + channelName + '/access_token', 'json').always(function() {
+    app.loadingStream = $.get('https://api.twitch.tv/kraken/streams/?channel=' + channelName + '&stream_type=all', 'json').always(function() {
         app.loadingStream = null;
     }).done(function(data) {
-        app.loadingStream = $.get('http://usher.twitch.tv/api/channel/hls/' + channelName + '.m3u8?player=twitchweb&&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_audio_only=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
-            app.loadingStream = null;
-        }).done(function(data) {
-            app.$loading.hide();
-            var qualities = extractQualities(data);
-            app.play(qualities[0].url);
-        }).fail(function(xhr) {
-            app.returnState();
-            app.$player.hide();
-            app.$loading.hide();
-            app.showError(xhr.responseText);
-        });
-    }).fail(function(xhr) {
-        app.returnState();
-        app.$player.hide();
-        app.$loading.hide();
-        app.showError(xhr.responseText);
-    });
+        if (data._total === 0) {
+            app.showLoadingError(messages.ERROR_STREAM_IS_OFFLINE);
+        } else {
+            app.loadingStream = $.get('https://api.twitch.tv/api/channels/' + channelName + '/access_token', 'json').always(function() {
+                app.loadingStream = null;
+            }).done(function(data) {
+                app.loadingStream = $.get('http://usher.twitch.tv/api/channel/hls/' + channelName + '.m3u8?player_backend=html5&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_spectre=true&allow_audio_only=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
+                    app.loadingStream = null;
+                }).done(function(data) {
+                    app.$loading.hide();
+                    var qualities = extractQualities(data);
+                    app.play(qualities[0].url);
+                }).fail(app.loadingErrorHandler);
+            }).fail(app.loadingErrorHandler);
+        }
+    }).fail(app.loadingErrorHandler);
 };
 app.playVideo = function(id) {
     app.setState(constants.STATE_WATCH);
     app.$player.show();
     app.showLoading(constants.LOADING);
-    $.get('http://api.twitch.tv/api/vods/' + id + '/access_token', function(data) {
-        $.get('http://usher.ttvnw.net/vod/' + id + '.m3u8?player_backend=html5&nauthsig=' + data.sig + '&nauth=' + escape(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7), function(data) {
+    app.loadingStream = $.get('https://api.twitch.tv/api/vods/' + id + '/access_token', 'json').always(function() {
+        app.loadingStream = null;
+    }).done(function(data) {
+        app.loadingStream = $.get('http://usher.ttvnw.net/vod/' + id + '.m3u8?player_backend=html5&nauthsig=' + data.sig + '&nauth=' + escape(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
+            app.loadingStream = null;
+        }).done(function(data) {
             app.$loading.hide();
             var qualities = extractQualities(data);
             app.play(qualities[0].url);
-        }).error(function(error) {
-            app.$player.hide();
-            app.$loading.hide();
-            app.showError('ERROR!!!');
-        });
-    }, 'json').error(function(error) {
-        app.$player.hide();
-        app.$loading.hide();
-        app.showError('ERROR!!!');
-    });
+        }).fail(app.loadingErrorHandler);
+    }).fail(app.loadingErrorHandler);
 };
 app.play = function(url) {
-    console.log(url);
     webapis.avplay.stop();
     webapis.avplay.open(url);
     webapis.avplay.setListener({
@@ -383,14 +390,26 @@ app.play = function(url) {
     webapis.avplay.prepare();
     webapis.avplay.play();
 };
+app.stop = function() {
+    webapis.avplay.stop();
+    app.returnState();
+    app.$player.hide();
+    app.$loading.hide();
+    if (app.loadingStream) {
+        app.loadingStream.abort();
+        app.loadingStream = null;
+    }
+};
 app.showLoading = function(text) {
     app.$loadingText.text(text);
     app.$loading.show();
 };
 app.showError = function(text) {
     if (app.state !== constants.STATE_EXIT) {
-        app.$errorText.text(text);
+        app.$errorText.html(text);
         app.$error.show();
+        var height = app.$errorContent.height();
+        app.$errorContent.css('margin-top', -Math.round(height / 2));
         app.returnStack.push(app.state);
         app.state = constants.STATE_ERROR;
         app.$buttonCloseError.addClass('selected');

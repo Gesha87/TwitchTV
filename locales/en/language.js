@@ -23,8 +23,17 @@ var messages = {
 	
 	LOADING: "Loading",
     BUFFERING: "Buffering",
+    
+    BUTTON_CLOSE: "Close",
+    BUTTON_EXIT: "Exit",
+    BUTTON_CANCEL: "Cancel",
+
+    CONFIRM_EXIT: "Do you really want to exit?",
 
     EMPTY_RESULTS: "Nothing found",
+    
+    ERROR_LOADING_STREAM_FAILED: 'An error occurred while loading',
+    ERROR_STREAM_IS_OFFLINE: 'Stream is offline',
     
     
 	

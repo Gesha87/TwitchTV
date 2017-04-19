@@ -298,18 +298,21 @@ body.init {
     z-index: 1000;
 }
 
-.dialog {
+.dialog-wrapper .content {
     position: absolute;
     top: 50vh;
     width: 100vw;
     margin-top: -7.0vh;
     text-align: center;
     background-color: #201c2b;
-    padding: 2vh 20vh;
+    padding: 2vh 20vw;
+    overflow: hidden;
 }
 
-.dialog .text {
+.dialog-wrapper .text {
     padding: 2vh 0;
+    line-height: 1.2;
+    word-break: break-all; 
 }
 
 .dialog-buttons {

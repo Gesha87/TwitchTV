@@ -1,5 +1,7 @@
 var constants = {
     STATE_BROWSE: 'browse',
+    STATE_LOADING_TOKEN: 'loading-token',
+    STATE_LOADING_STREAM_INFO: 'loading-stream-info',
     STATE_WATCH: 'watch',
     STATE_SELECT: 'select',
     STATE_ERROR: 'error',
