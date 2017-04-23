@@ -44,18 +44,11 @@ body.init {
 }
 
 .cell {
-	margin-bottom: 0;
 	line-height: 0;
 	position: relative;
-	/* font-size: 2.4vh; */
-	/* color: #cbc8d0; */
 }
 .cell.selected {
 	outline: none;
-}
-
-.cell:last-child {
-	margin-bottom: 0;
 }
 
 .cell i {
@@ -67,10 +60,6 @@ body.init {
 	font-size: 6vh;
 }
 
-.cell i:after {
-	content: '';
-}
-
 .cell img {
 	position: relative;
 	height: 25.8vh;
@@ -78,7 +67,7 @@ body.init {
 	opacity: 0;
 }
 
-.cell img.loaded {
+img.loaded {
 	opacity: 1;
 }
 
@@ -108,7 +97,6 @@ body.init {
 }
 
 .stream-info {
-	/* font-size: 2.4vh; */
 	position: absolute;
 	bottom: 0;
 	left: 0;
@@ -141,8 +129,8 @@ body.init {
 .line-selected {
 	border: none;
 	background-color: #6441a4;
-	height: 2px;
-	margin: -2px 2.0vh 0;
+	height: 0.2vh;
+	margin: -0.2vh 2.0vh 0;
 	width: 20.185316vh;
 }
 
@@ -181,6 +169,9 @@ body.init {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+.filter.selected {
+	box-shadow: inherit;
 }
 
 .filter.chosen {
@@ -298,6 +289,30 @@ body.init {
     z-index: 1000;
 }
 
+.select-wrapper {
+    display: none;
+    padding: 2vh;
+    font-size: 3.0vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 500;
+}
+
+.select-wrapper .caption {
+	font-size: 3.4vh;
+	margin-bottom: 2vh;
+}
+
+.select-wrapper .search-input {
+	font-size: 2.6vh;
+    padding: 1.0vh 2.0vh;
+    width: 80vw;
+}
+
 .dialog-wrapper .content {
     position: absolute;
     top: 50vh;
@@ -349,7 +364,7 @@ body.init {
 	display: block;
 }
 
-#av-player {
+.player {
 	display: none;
 	background-color: #000000;
 	position: absolute;
@@ -358,6 +373,11 @@ body.init {
 	width: 100vw;
 	height: 100vh;
 	z-index: 10;
+}
+
+.player object {
+	width: 100vw;
+    height: 100vh;
 }
 
 .spinner-three-bounce > div {

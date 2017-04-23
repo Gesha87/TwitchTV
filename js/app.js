@@ -9,6 +9,15 @@ app.areas[constants.AREA_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_STREAM_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_VIDEO_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_PAGES] = { columns: 0, x: 0 };
+app.filters = {
+    game: null,
+    channels: null,
+    languages: null,
+    streamType: null,
+    period: null,
+    videoType: null,
+    sort: null
+};
 app.translateLayout = function() {
     // pages
     $('#page-live-channels').find('.text').text(messages.PAGE_LIVE_CHANNELS);
@@ -16,7 +25,7 @@ app.translateLayout = function() {
     // stream filters
     $('#stream-filter-game').find('.text').text(messages.FILTER_STREAM_GAME);
     $('#stream-filter-channels').find('.text').text(messages.FILTER_STREAM_CHANNELS);
-    $('#stream-filter-language').find('.text').text(messages.FILTER_STREAM_LANGUAGE);
+    $('#stream-filter-languages').find('.text').text(messages.FILTER_STREAM_LANGUAGES);
     $('#stream-filter-type').find('.text').text(messages.FILTER_STREAM_TYPE);
     $('#stream-filter-presets').find('.text').text(messages.FILTER_PRESETS);
     $('#stream-filter-search').find('.text').text(messages.FILTER_SEARCH);
@@ -65,6 +74,7 @@ app.$pages = null;
 app.$liveChannelsPage = null;
 app.$videosPage = null;
 app.$hintChangePageText = null;
+app.$selectGame = null;
 app.init = function() {
     app.$loading = $('#loading-wrapper');
     app.$error = $('#error-dialog');
@@ -83,6 +93,7 @@ app.init = function() {
     app.$videoFilters = $('#video-filters');
     app.$filters = app.$streamFilters;
     app.$hintChangePageText = $('#hint-change-page').find('.text');
+    app.$selectGame = $('#select-game');
     app.translateLayout();
     app.setUnderscore();
     app.areas[constants.AREA_PAGES].columns = app.$pages.find('.page').length;
@@ -114,15 +125,15 @@ app.init = function() {
         }
     });
     app.$itemsContainer = app.$items.find('.mCSB_container');
-    /*document.addEventListener('visibilitychange', function() {
-        if (app.state == constants.STATE_WATCH) {
+    document.addEventListener('visibilitychange', function() {
+        if (window.webapis && app.state == constants.STATE_WATCH) {
             if (document.hidden) {
                 webapis.avplay.suspend();
             } else {
                 webapis.avplay.restore();
             }
         }
-    });*/
+    });
     document.addEventListener('keydown', function(e) {
         switch (e.keyCode) {
             case keys.KEY_LEFT:
@@ -230,6 +241,8 @@ app.init = function() {
                         }
                     } else if (app.activeArea == constants.AREA_PAGES) {
                         app.refresh();
+                    } else if (app.activeArea == constants.AREA_FILTERS) {
+                        app.selectCurrentFilter();
                     }
                 } else if (app.state === constants.STATE_ERROR) {
                     app.hideError();
@@ -244,15 +257,7 @@ app.init = function() {
                 break;
             case 27:
             case keys.KEY_RETURN:
-                if (app.state === constants.STATE_WATCH) {
-                    app.stop();
-                } else if (app.state === constants.STATE_BROWSE) {
-                    app.returnState();
-                } else if (app.state === constants.STATE_ERROR) {
-                    app.hideError();
-                } else if (app.state === constants.STATE_EXIT) {
-                    app.hideExit();
-                }
+                app.returnState();
                 break;
             case keys.KEY_1:
             case keys.KEY_RED:
@@ -282,17 +287,23 @@ app.init = function() {
     });
     app.refresh();
 };
-app.setState = function(state) {
-    app.returnStack.push(app.state);
+app.setState = function(state, callback) {
+    app.returnStack.push({
+        state: app.state,
+        callback: callback
+    });
     app.state = state;
 };
 app.returnState = function() {
     if (app.returnStack.length > 0) {
-        app.state = app.returnStack.pop();
+        var obj = app.returnStack.pop();
+        app.state = obj.state;
+        if (typeof obj.callback === 'function') {
+            obj.callback();
+        }
     } else {
         app.$exitDialog.show();
-        app.returnStack.push(app.state);
-        app.state = constants.STATE_EXIT;
+        app.setState(constants.STATE_EXIT, app.hideExit);
     }
 };
 app.loadingStream = null;
@@ -315,9 +326,9 @@ app.showLoadingError = function(message) {
     app.showError(message);
 };
 app.playStream = function(channelName) {
-    app.setState(constants.STATE_WATCH);
+    app.setState(constants.STATE_WATCH, app.stop);
     app.$player.show();
-    app.showLoading(constants.LOADING);
+    app.showLoading(messages.LOADING);
     app.loadingStream = $.get('https://api.twitch.tv/kraken/streams/?channel=' + channelName + '&stream_type=all', 'json').always(function() {
         app.loadingStream = null;
     }).done(function(data) {
@@ -339,13 +350,13 @@ app.playStream = function(channelName) {
     }).fail(app.loadingErrorHandler);
 };
 app.playVideo = function(id) {
-    app.setState(constants.STATE_WATCH);
+    app.setState(constants.STATE_WATCH, app.stop);
     app.$player.show();
     app.showLoading(constants.LOADING);
     app.loadingStream = $.get('https://api.twitch.tv/api/vods/' + id + '/access_token', 'json').always(function() {
         app.loadingStream = null;
     }).done(function(data) {
-        app.loadingStream = $.get('http://usher.ttvnw.net/vod/' + id + '.m3u8?player_backend=html5&nauthsig=' + data.sig + '&nauth=' + escape(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
+        app.loadingStream = $.get('http://usher.ttvnw.net/vod/' + id + '.m3u8?player_backend=html5&nauthsig=' + data.sig + '&nauth=' + encodeURIComponent(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
             app.loadingStream = null;
         }).done(function(data) {
             app.$loading.hide();
@@ -355,44 +366,49 @@ app.playVideo = function(id) {
     }).fail(app.loadingErrorHandler);
 };
 app.play = function(url) {
-    webapis.avplay.stop();
-    webapis.avplay.open(url);
-    webapis.avplay.setListener({
-        onbufferingstart: function() {
-            app.showLoading(messages.BUFFERING + ' 0%');
-        },
-        onbufferingprogress: function(percent) {
-            app.showLoading(messages.BUFFERING + ' ' + percent + '%');
-        },
-        onbufferingcomplete: function() {
-            app.$loading.hide();
-        },
-        oncurrentplaytime: function(currentTime) {},
-        onevent: function(eventType, eventData) {
-            console.log("event type: " + eventType + ", data: " + eventData);
-            if (eventType == 'PLAYER_MSG_RESOLUTION_CHANGED') {
-                console.log("Mudou de Qualidade");
+    if (window.webapis) {
+        webapis.avplay.stop();
+        webapis.avplay.open(url);
+        webapis.avplay.setListener({
+            onbufferingstart: function() {
+                app.showLoading(messages.BUFFERING + ' 0%');
+            },
+            onbufferingprogress: function(percent) {
+                app.showLoading(messages.BUFFERING + ' ' + percent + '%');
+            },
+            onbufferingcomplete: function() {
+                app.$loading.hide();
+            },
+            oncurrentplaytime: function(currentTime) {},
+            onevent: function(eventType, eventData) {
+                console.log("event type: " + eventType + ", data: " + eventData);
+                if (eventType == 'PLAYER_MSG_RESOLUTION_CHANGED') {
+                    console.log("Mudou de Qualidade");
+                }
+            },
+            onerror: function(error) {
+                var message = messages.ERROR_LOADING_STREAM_FAILED;
+                if (error === 'PLAYER_ERROR_CONNECTION_FAILED') {
+                    message = messages.ERROR_CONNECTION_FAIL;
+                }
+                app.returnState();
+                app.showError(message);
+            },
+            onsubtitlechange: function(duration, text) {},
+            ondrmevent: function(drmEvent, drmData) {},
+            onstreamcompleted: function() {
+                webapis.avplay.stop();
             }
-        },
-        onerror: function(error) {
-            console.log("error: " + error);
-            if (error == 'PLAYER_ERROR_CONNECTION_FAILED') {
-                console.log("Closing stream from eventType == 'PLAYER_ERROR_CONNECTION_FAILED'");
-                // SceneSceneBrowser.errorNetwork = true;
-                // SceneSceneChannel.shutdownStream();
-            }
-        },
-        onsubtitlechange: function(duration, text, data3, data4) {},
-        ondrmevent: function(drmEvent, drmData) {},
-        onstreamcompleted: function() {}
-    });
-    webapis.avplay.setDisplayRect(0, 0, $(window).width(), $(window).height());
-    webapis.avplay.prepare();
-    webapis.avplay.play();
+        });
+        webapis.avplay.setDisplayRect(0, 0, $(window).width(), $(window).height());
+        webapis.avplay.prepare();
+        webapis.avplay.play();
+    }
 };
 app.stop = function() {
-    webapis.avplay.stop();
-    app.returnState();
+    if (window.webapis) {
+        webapis.avplay.stop();
+    }
     app.$player.hide();
     app.$loading.hide();
     if (app.loadingStream) {
@@ -410,18 +426,15 @@ app.showError = function(text) {
         app.$error.show();
         var height = app.$errorContent.height();
         app.$errorContent.css('margin-top', -Math.round(height / 2));
-        app.returnStack.push(app.state);
-        app.state = constants.STATE_ERROR;
+        app.setState(constants.STATE_ERROR, app.hideError);
         app.$buttonCloseError.addClass('selected');
     }
 };
 app.hideError = function() {
     app.$error.hide();
-    app.state = app.returnStack.pop();
 };
 app.hideExit = function() {
     app.$exitDialog.hide();
-    app.state = app.returnStack.pop();
 };
 app.hasMoreResults = true;
 app.loadingMoreResults = null;
@@ -470,8 +483,21 @@ app.twitchApiOptions = {
     
 };
 app.getLiveChannels = function(limit, offset, callback) {
+    var url = 'https://api.twitch.tv/kraken/streams?limit=' + limit + '&offset=' + offset;
+    if (app.filters.game) {
+        url += '&game=' + encodeURIComponent(app.filters.game);
+    }
+    if (app.filters.channels) {
+        url += '&channels=' + encodeURIComponent(app.filters.channels);
+    }
+    if (app.filters.languages) {
+        url += '&language=' + encodeURIComponent(app.filters.languages);
+    }
+    if (app.filters.streamType) {
+        url += '&type=' + encodeURIComponent(app.filters.streamType);
+    }
     return $.ajax($.extend({}, app.twitchApiOptions, {
-        url: 'https://api.twitch.tv/kraken/streams?limit=' + limit + '&offset=' + offset, 
+        url: url, 
         success: function(response) {
             console.log(response);
             var i, ii, x, y, stream, $newCell;
@@ -516,8 +542,24 @@ app.getLiveChannels = function(limit, offset, callback) {
     }));
 };
 app.getVideos = function(limit, offset, callback) {
+    var url = 'https://api.twitch.tv/kraken/videos/top?limit=' + limit + '&offset=' + offset;
+    if (app.filters.game) {
+        url += '&game=' + encodeURIComponent(app.filters.game);
+    }
+    if (app.filters.period) {
+        url += '&period=' + encodeURIComponent(app.filters.period);
+    }
+    if (app.filters.languages) {
+        url += '&language=' + encodeURIComponent(app.filters.languages);
+    }
+    if (app.filters.videoType) {
+        url += '&type=' + encodeURIComponent(app.filters.videoType);
+    }
+    if (app.filters.sort) {
+        url += '&sort=' + encodeURIComponent(app.filters.sort);
+    }
     return $.ajax($.extend({}, app.twitchApiOptions, {
-        url: 'https://api.twitch.tv/kraken/videos/top?limit=' + limit + '&offset=' + offset, 
+        url: url, 
         success: function(response) {
             console.log(response);
             var i, ii, x, y, vod, $newCell;
@@ -559,6 +601,15 @@ app.getVideos = function(limit, offset, callback) {
             if (typeof callback == 'function') {
                 callback();
             }
+        }
+    }));
+};
+app.getGames = function() {
+    return $.ajax($.extend({}, app.twitchApiOptions, {
+        url: 'https://api.twitch.tv/kraken/games/top?limit=100', 
+        success: function(response) {
+            console.log(response);
+            
         }
     }));
 };
@@ -686,6 +737,24 @@ app.showCurrentFilter = function() {
     var x = app.areas[constants.AREA_FILTERS].x;
     app.$filters.find('.filter').get(x).classList.add('selected');
 }
+app.selectCurrentFilter = function() {
+    var x = app.areas[constants.AREA_FILTERS].x,
+        type = app.$filters.find('.filter.selected').data('type'),
+        callback;
+    switch (type) {
+        case 'game':
+            app.$selectGame.show();
+            if (!app.$selectGame.hasClass('init')) {
+                app.$selectGame.addClass('init');
+                app.getGames();
+            }
+            callback = function() {
+                app.$selectGame.hide();
+            };
+            break;
+    }
+    app.setState(constants.STATE_SELECT, callback);
+};
 app.activateItemsArea = function() {
     app.activeArea = constants.AREA_RESULTS;
     app.clearSelection();
@@ -695,30 +764,6 @@ app.activateItemsArea = function() {
 app.clearSelection = function() {
     $('.selected').removeClass('selected');
 };
-
-function ajaxGet(url, callback) {
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() {
-        if (xmlHttp.readyState === 4) {
-            if (xmlHttp.status === 200) {
-                try {
-                    var responseText = xmlHttp.responseText;
-                    //var response = JSON.parse(responseText);
-                    callback(responseText);
-                } catch (err) {
-                    console.log(err);
-                    //SceneSceneBrowser.showDialog("loadDataSuccess() exception: " + err.name + ' ' + err.message);
-                }
-                
-            } else {
-                //SceneSceneBrowser.loadDataError("HTTP Status " + xmlHttp.status+" Message: "+xmlHttp.statusText,xmlHttp.responseText);
-            }
-        }
-    };
-    xmlHttp.open("GET", url, true);
-    xmlHttp.setRequestHeader('Client-ID', 'q5ix3v5d0ot12koqr7paerntdo5gz9');
-    xmlHttp.send(null);
-}
 
 function imageLoaded(img) {
     img.classList.add('loaded');
@@ -774,14 +819,16 @@ function extractQualities(input) {
     return result;
 }
 
-/*tizen.tvinputdevice.registerKey("Tools");
-tizen.tvinputdevice.registerKey("MediaPlayPause");
-tizen.tvinputdevice.registerKey("MediaPlay");
-tizen.tvinputdevice.registerKey("MediaPause");
-tizen.tvinputdevice.registerKey("MediaStop");
-tizen.tvinputdevice.registerKey("ColorF0Red");
-tizen.tvinputdevice.registerKey("ColorF1Green");
-tizen.tvinputdevice.registerKey("ColorF2Yellow");
-tizen.tvinputdevice.registerKey("ColorF3Blue");*/
+if (window.tizen) {
+    tizen.tvinputdevice.registerKey("Tools");
+    tizen.tvinputdevice.registerKey("MediaPlayPause");
+    tizen.tvinputdevice.registerKey("MediaPlay");
+    tizen.tvinputdevice.registerKey("MediaPause");
+    tizen.tvinputdevice.registerKey("MediaStop");
+    tizen.tvinputdevice.registerKey("ColorF0Red");
+    tizen.tvinputdevice.registerKey("ColorF1Green");
+    tizen.tvinputdevice.registerKey("ColorF2Yellow");
+    tizen.tvinputdevice.registerKey("ColorF3Blue");
+}
 
 window.onload = app.init;

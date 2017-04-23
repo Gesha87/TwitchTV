@@ -28,40 +28,40 @@
                 </div>
             </div>
             <div id="stream-filters" class="filters">
-                <div class="filter" id="stream-filter-game">
+                <div class="filter" id="stream-filter-game" data-type="game">
                     <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
-                </div><div class="filter" id="stream-filter-channels">
+                </div><div class="filter" id="stream-filter-channels" data-type="channels">
                     <i class="fa fa-user"></i> <span class="text">Каналы</span>
-                </div><div class="filter" id="stream-filter-language">
-                    <i class="fa fa-globe"></i> <span class="text">Язык</span>
-                </div><div class="filter" id="stream-filter-type">
+                </div><div class="filter" id="stream-filter-languages" data-type="languages">
+                    <i class="fa fa-globe"></i> <span class="text">Языки</span>
+                </div><div class="filter" id="stream-filter-type" data-type="stream-type">
                     <i class="fa fa-play"></i> <span class="text">Тип</span>
-                </div><div class="filter-divider">
+                </div><!-- <div class="filter-divider">
                     <i class="fa fa-arrows-h"></i>
                 </div><div class="filter" id="stream-filter-presets">
                     <i class="fa fa-filter"></i> <span class="text">Фильтры</span>
                 </div><div class="filter" id="stream-filter-search">
                     <i class="fa fa-search"></i> <span class="text">Поиск</span>
-                </div>
+                </div> -->
             </div>
             <div id="video-filters" style="display:none;" class="filters">
-                <div class="filter" id="video-filter-game">
+                <div class="filter" id="video-filter-game" data-type="game">
                     <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
-                </div><div class="filter" id="video-filter-period">
+                </div><div class="filter" id="video-filter-period" data-type="period">
                     <i class="fa fa-calendar"></i> <span class="text">Период</span>
-                </div><div class="filter" id="video-filter-languages">
+                </div><div class="filter" id="video-filter-languages" data-type="languages">
                     <i class="fa fa-globe"></i> <span class="text">Языки</span>
-                </div><div class="filter" id="video-filter-type">
+                </div><div class="filter" id="video-filter-type" data-type="video-type">
                     <i class="fa fa-play"></i> <span class="text">Тип</span>
-                </div><div class="filter" id="video-filter-sort">
+                </div><div class="filter" id="video-filter-sort" data-type="sort">
                     <i class="fa fa-sort"></i> <span class="text">Сортировка</span>
-                </div><div class="filter-divider">
+                </div><!-- <div class="filter-divider">
                     <i class="fa fa-arrows-h"></i>
                 </div><div class="filter" id="video-filter-presets">
                     <i class="fa fa-filter"></i> <span class="text">Фильтры</span>
                 </div><div class="filter" id="video-filter-search">
                     <i class="fa fa-search"></i> <span class="text">Поиск</span>
-                </div>
+                </div> -->
             </div>
         </div>
         <div class="hints">
@@ -71,12 +71,12 @@
             <div class="hint" id="hint-change-page">
                 <span class="badge badge-B">B</span> <span class="text">Видеоматериалы</span>
             </div>
-            <div class="hint" id="hint-presets">
+            <!-- <div class="hint" id="hint-presets">
                 <span class="badge badge-C">C</span> <span class="text">Фильтры</span>
             </div>
             <div class="hint" id="hint-search">
                 <span class="badge badge-D">D</span> <span class="text">Поиск</span>
-            </div>
+            </div> -->
         </div>
         <div class="clear"></div>
     </div>
@@ -95,7 +95,9 @@
             <div class="text">Загрузка</div>
         </div>
     </div>
-    <object id="av-player" type="application/avplayer"></object>
+    <div id="av-player" class="player">
+        <object type="application/avplayer"></object>
+    </div>
     <div id="select-box" class="select-box">
         <div class="stream-channel-name ellipsed"></div>
         <div class="stream-viewers"></div>
@@ -103,6 +105,11 @@
             <div class="game-name ellipsed"></div>
             <div class="channel-status ellipsed"></div>
         </div>
+    </div>
+    <div id="select-game" class="select-wrapper">
+        <div class="caption">Выбор игры</div>
+        <input class="search-input" placeholder="Поиск игры">
+        <div id="game-items" class="items"></div>
     </div>
     <div id="error-dialog" class="dialog-wrapper">
         <div class="content">

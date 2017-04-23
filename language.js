@@ -5,7 +5,7 @@ var messages = {
 
 	FILTER_STREAM_GAME: "Game",
 	FILTER_STREAM_CHANNELS: "Channels",
-	FILTER_STREAM_LANGUAGE: "Language",
+	FILTER_STREAM_LANGUAGES: "Languages",
 	FILTER_STREAM_TYPE: "Type",
 	FILTER_VIDEO_GAME: "Game",
 	FILTER_VIDEO_PERIOD: "Period",
@@ -21,8 +21,8 @@ var messages = {
 	HINT_PRESETS: "Presets",
 	HINT_SEARCH: "Search",
 	
-	LOADING: "Loading",
-    BUFFERING: "Buffering",
+	LOADING: "Loading...",
+    BUFFERING: "Buffering...",
     
     BUTTON_CLOSE: "Close",
     BUTTON_EXIT: "Exit",
@@ -34,7 +34,7 @@ var messages = {
     
     ERROR_LOADING_STREAM_FAILED: 'An error occurred while loading',
     ERROR_STREAM_IS_OFFLINE: 'Stream is offline',
-    
+    ERROR_CONNECTION_FAILED: 'Connection failed',
     
 	
 	OPEN: "Open",
@@ -46,8 +46,6 @@ var messages = {
 	
 	RETRYING: "Retrying",
 	VIEWER: "Viewers",
-	BUFFERING: "Buffering",
-	
 	
 	ERROR_RENDER_SOURCE: "Format not supported :(",
 	ERROR_RENDER_FIXED: "Sorry but it seems like stream\nqualities High/Medium/Low are not supported\non your TV. Try Source quality on various streams.",
