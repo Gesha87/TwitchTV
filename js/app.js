@@ -9,6 +9,7 @@ app.areas[constants.AREA_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_STREAM_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_VIDEO_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_PAGES] = { columns: 0, x: 0 };
+app.areas[constants.AREA_GAME_RESULTS] = { columns: 0, rows: 3, x: 0, y: 0 };
 app.filters = {
     game: null,
     channels: null,
@@ -17,6 +18,23 @@ app.filters = {
     period: null,
     videoType: null,
     sort: null
+};
+app.customScrollbarOptions = {
+    scrollInertia: 0,
+    axis: "x",
+    autoHideScrollbar: false,
+    advanced: {
+        updateOnContentResize: false,
+        updateOnImageLoad: false
+    },
+    keyboard: {
+        enable: false
+    },
+    mouseWheel: {
+        enable: false
+    },
+    contentTouchScroll: false,
+    documentTouchScroll: false
 };
 app.translateLayout = function() {
     // pages
@@ -75,6 +93,8 @@ app.$liveChannelsPage = null;
 app.$videosPage = null;
 app.$hintChangePageText = null;
 app.$selectGame = null;
+app.$gameItems = null;
+app.$gameItemsContainer = null;
 app.init = function() {
     app.$loading = $('#loading-wrapper');
     app.$error = $('#error-dialog');
@@ -94,6 +114,7 @@ app.init = function() {
     app.$filters = app.$streamFilters;
     app.$hintChangePageText = $('#hint-change-page').find('.text');
     app.$selectGame = $('#select-game');
+    app.$gameItems = $('#game-items');
     app.translateLayout();
     app.setUnderscore();
     app.areas[constants.AREA_PAGES].columns = app.$pages.find('.page').length;
@@ -101,29 +122,12 @@ app.init = function() {
     app.areas[constants.AREA_VIDEO_FILTERS].columns = app.$videoFilters.find('.filter').length;
     app.areas[constants.AREA_FILTERS] = app.areas[constants.AREA_STREAM_FILTERS];
     $('body').addClass('init');
-    app.$items.mCustomScrollbar({
-        scrollInertia: 0,
-        axis: "x",
-        autoHideScrollbar: false,
-        advanced: {
-            updateOnContentResize: false,
-            updateOnImageLoad: false
-        },
-        keyboard: {
-            enable: false
-        },
-        mouseWheel: {
-            enable: false
-        },
-        contentTouchScroll: false,
-        documentTouchScroll: false,
+    app.$items.mCustomScrollbar($.extend({}, app.customScrollbarOptions, {
         callbacks: {
-            onTotalScroll: function() {
-                app.loadMore();
-            },
-            onTotalScrollOffset: $(window).height() * 0.5
+            onTotalScroll: app.loadMore,
+            onTotalScrollOffset: $(window).width() * 0.5
         }
-    });
+    }));
     app.$itemsContainer = app.$items.find('.mCSB_container');
     document.addEventListener('visibilitychange', function() {
         if (window.webapis && app.state == constants.STATE_WATCH) {
@@ -458,7 +462,7 @@ app.refresh = function(force) {
         }
         app.$selectBox.removeClass('selected');
         app.showLoading(constants.LOADING);
-        app.clearItems();
+        app.clearItems(app.$items, app.$itemsContainer);
         app.areas[constants.AREA_RESULTS].count = 0;
         app.areas[constants.AREA_RESULTS].columns = 0;
         app.areas[constants.AREA_RESULTS].x = 0;
@@ -604,12 +608,46 @@ app.getVideos = function(limit, offset, callback) {
         }
     }));
 };
-app.getGames = function() {
+app.getGames = function(callback) {
     return $.ajax($.extend({}, app.twitchApiOptions, {
-        url: 'https://api.twitch.tv/kraken/games/top?limit=100', 
+        url: 'https://api.twitch.tv/kraken/games/top?limit=99', 
         success: function(response) {
             console.log(response);
-            
+            var i, x, y, game, $newCell, $newColumn;
+            app.clearItems(app.$gameItems, app.$gameItemsContainer);
+            app.areas[constants.AREA_GAME_RESULTS].columns = 0;
+            app.areas[constants.AREA_GAME_RESULTS].columns = 0;
+            app.areas[constants.AREA_GAME_RESULTS].columns = 0;
+            var countRows = app.areas[constants.AREA_GAME_RESULTS].rows;
+            for (i = 0; i < response.top.length; i++) {
+                i = i;
+                if ((y = i % countRows) == 0) {
+                    $newColumn = $('<div class="column"/>');
+                    app.$gameItemsContainer.append($newColumn);
+                    app.areas[constants.AREA_GAME_RESULTS].columns++;
+                }
+                x = (i - y) / countRows;
+                game = response.top[i];
+                $newCell = $('<div class="game-cell" id="game-item-' + x + '-' + y + '">\
+                    <i class="fa fa-fw fa-twitch"></i>\
+                    <img src="' + game.game.box.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+                    <div class="game-name">' + game.game.name + '</div>\
+                </div>');
+                $newCell.data('viewers', game.viewers);
+                $newCell.data('name', game.game.name);
+                $newColumn.append($newCell);
+                if (i == 0 && app.activeArea == constants.AREA_RESULTS) {
+                    app.showItem($newCell);
+                }
+            }
+            app.$loading.hide();
+            app.$gameItems.mCustomScrollbar('update');
+            app.timeoutAutoHide = setTimeout(function() {
+                app.$gameItemsContainer.addClass('mCS-autoHide');
+            }, 2000);
+            if (typeof callback == 'function') {
+                callback();
+            }
         }
     }));
 };
@@ -659,14 +697,14 @@ app.showItem = function ($element) {
     $('.selected').filter('.cell').removeClass('selected');
     $element.addClass('selected');
 };
-app.clearItems = function() {
-    app.$itemsContainer.empty();
-    app.$itemsContainer.css('width', 0);
-    app.$items.mCustomScrollbar('update');
+app.clearItems = function($items, $container) {
+    $container.empty();
+    $container.css('width', 0);
+    $items.mCustomScrollbar('update');
 };
 app.selectPage = function(page) {
     app.page = page;
-    app.clearItems();
+    app.clearItems(app.$items, app.$itemsContainer);
     $('.filters').hide();
     app.areas[constants.AREA_FILTERS] = {
         x: 0,
@@ -737,6 +775,7 @@ app.showCurrentFilter = function() {
     var x = app.areas[constants.AREA_FILTERS].x;
     app.$filters.find('.filter').get(x).classList.add('selected');
 }
+app.loadingGames = null;
 app.selectCurrentFilter = function() {
     var x = app.areas[constants.AREA_FILTERS].x,
         type = app.$filters.find('.filter.selected').data('type'),
@@ -746,10 +785,24 @@ app.selectCurrentFilter = function() {
             app.$selectGame.show();
             if (!app.$selectGame.hasClass('init')) {
                 app.$selectGame.addClass('init');
-                app.getGames();
+                app.$gameItems.mCustomScrollbar(app.customScrollbarOptions);
+                app.$gameItemsContainer = app.$gameItems.find('.mCSB_container');
             }
+            app.showLoading(messages.LOADING);
+            if (app.loadingGames) {
+                app.loadingGames.abort();
+                app.loadingGames = null;
+            }
+            app.loadingGames = app.getGames(function() {
+                app.loadingGames = null;
+            });
             callback = function() {
+                if (app.loadingGames) {
+                    app.loadingGames.abort();
+                    app.loadingGames = null;
+                }
                 app.$selectGame.hide();
+                app.$loading.hide();
             };
             break;
     }

@@ -263,7 +263,7 @@ img.loaded {
 	width: 100vw;
 	margin-top: -6.2vh;
 	text-align: center;
-	z-index: 100;
+	z-index: 10000;
 }
 
 .loading {
