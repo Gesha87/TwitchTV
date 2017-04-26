@@ -9,7 +9,7 @@ app.areas[constants.AREA_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_STREAM_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_VIDEO_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_PAGES] = { columns: 0, x: 0 };
-app.areas[constants.AREA_GAME_RESULTS] = { columns: 0, rows: 3, x: 0, y: 0 };
+app.areas[constants.AREA_GAME_RESULTS] = { columns: 0, rows: 2, x: 0, y: 0 };
 app.filters = {
     game: null,
     channels: null,
@@ -95,6 +95,7 @@ app.$hintChangePageText = null;
 app.$selectGame = null;
 app.$gameItems = null;
 app.$gameItemsContainer = null;
+app.$selectGameBox = null;
 app.init = function() {
     app.$loading = $('#loading-wrapper');
     app.$error = $('#error-dialog');
@@ -115,6 +116,7 @@ app.init = function() {
     app.$hintChangePageText = $('#hint-change-page').find('.text');
     app.$selectGame = $('#select-game');
     app.$gameItems = $('#game-items');
+    app.$selectGameBox = $('#select-game-box');
     app.translateLayout();
     app.setUnderscore();
     app.areas[constants.AREA_PAGES].columns = app.$pages.find('.page').length;
@@ -620,7 +622,6 @@ app.getGames = function(callback) {
             app.areas[constants.AREA_GAME_RESULTS].columns = 0;
             var countRows = app.areas[constants.AREA_GAME_RESULTS].rows;
             for (i = 0; i < response.top.length; i++) {
-                i = i;
                 if ((y = i % countRows) == 0) {
                     $newColumn = $('<div class="column"/>');
                     app.$gameItemsContainer.append($newColumn);
@@ -628,16 +629,16 @@ app.getGames = function(callback) {
                 }
                 x = (i - y) / countRows;
                 game = response.top[i];
-                $newCell = $('<div class="game-cell" id="game-item-' + x + '-' + y + '">\
+                $newCell = $('<div class="cell game-cell" id="game-item-' + x + '-' + y + '">\
                     <i class="fa fa-fw fa-twitch"></i>\
                     <img src="' + game.game.box.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
-                    <div class="game-name">' + game.game.name + '</div>\
+                    <div class="game-name ellipsed">' + game.game.name + '</div>\
                 </div>');
                 $newCell.data('viewers', game.viewers);
                 $newCell.data('name', game.game.name);
                 $newColumn.append($newCell);
-                if (i == 0 && app.activeArea == constants.AREA_RESULTS) {
-                    app.showItem($newCell);
+                if (i == 0 && app.activeArea == constants.AREA_GAME_RESULTS) {
+                    app.showGameItem($newCell);
                 }
             }
             app.$loading.hide();
@@ -654,6 +655,50 @@ app.getGames = function(callback) {
 app.timeoutAutoHide = null;
 app.timeoutSelect = null;
 app.showItem = function ($element) {
+    var vh = $(window).height() / 100;
+    var scrollLeft = app.$itemsContainer.position().left;
+    var left = -scrollLeft;
+    if ($element.position().left - 2 * vh + scrollLeft < 0) {
+        left = Math.round($element.position().left - 2 * vh);
+    } else if ($element.position().left + scrollLeft + $element.width() + 2 * vh - $(window).width() > 0) {
+        left = Math.round($element.position().left + $element.width() + 2 * vh - $(window).width());
+    }
+    left = Math.max(0, left);
+    var change = Math.abs(left + scrollLeft);
+    var selectPosition = app.$selectBox.offset();
+    if (change > 0) {
+        app.$items.mCustomScrollbar('scrollTo', left, {
+            scrollInertia: 0,
+            timeout: 0
+        });
+    }
+    app.$selectBox.find('.stream-channel-name').html($element.data('channel-name'));
+    app.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + 
+            $element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+    app.$selectBox.find('.game-name').html($element.data('game'));
+    app.$selectBox.find('.channel-status').html($element.data('status'));
+    app.$selectBox.addClass('selected');
+    app.$selectBox.width($element.width());
+    app.$selectBox.height($element.height());
+    var newOffset = $element.offset();
+    newOffset.left -= left + scrollLeft;
+    app.$selectBox.offset(newOffset);
+    if (app.timeoutAutoHide) {
+        clearTimeout(app.timeoutAutoHide);
+        app.timeoutAutoHide = null;
+    }
+    app.$items.removeClass('mCS-autoHide');
+    app.timeoutAutoHide = setTimeout(function() {
+        app.$items.addClass('mCS-autoHide');
+    }, 2000);
+    if (app.timeoutSelect) {
+        clearTimeout(app.timeoutSelect);
+        app.timeoutSelect = null;
+    }
+    $('.selected').filter('.cell').removeClass('selected');
+    $element.addClass('selected');
+};
+app.showGameItem = function ($element) {
     var vh = $(window).height() / 100;
     var scrollLeft = app.$itemsContainer.position().left;
     var left = -scrollLeft;
@@ -783,6 +828,8 @@ app.selectCurrentFilter = function() {
     switch (type) {
         case 'game':
             app.$selectGame.show();
+            var oldActiveArea = app.activeArea;
+            app.activeArea = constants.AREA_GAME_RESULTS;
             if (!app.$selectGame.hasClass('init')) {
                 app.$selectGame.addClass('init');
                 app.$gameItems.mCustomScrollbar(app.customScrollbarOptions);
@@ -803,6 +850,7 @@ app.selectCurrentFilter = function() {
                 }
                 app.$selectGame.hide();
                 app.$loading.hide();
+                app.activeArea = oldActiveArea;
             };
             break;
     }

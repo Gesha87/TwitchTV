@@ -44,11 +44,7 @@ body.init {
 }
 
 .cell {
-	line-height: 0;
 	position: relative;
-}
-.cell.selected {
-	outline: none;
 }
 
 .cell i {
@@ -67,6 +63,22 @@ body.init {
 	opacity: 0;
 }
 
+.game-cell img {
+	height: 41vh;
+	width: 29.347368vh;
+}
+
+.game-cell .game-name {
+    padding: 1.0vh;
+    background-color: rgba(0, 0, 0, 0.7);
+	position: absolute;
+    top: 0;
+    left: 0;
+    max-width: 29.347368vh;
+    line-height: 1.3em;
+    white-space: normal;
+}
+
 img.loaded {
 	opacity: 1;
 }
@@ -81,14 +93,17 @@ img.loaded {
 
 .stream-channel-name {
 	color: #bbb8c0;
-	line-height: 1em;
 	position: absolute;
 	top: 0;
 	left: 0;
 	background-color: rgba(0, 0, 0, 0.7);
+    line-height: 1em;
 	padding: 1.0vh;
 }
 .cell.selected .stream-channel-name {
+	display: none;
+}
+.cell.selected .game-name {
 	display: none;
 }
 .select-box .stream-channel-name {
@@ -108,6 +123,16 @@ img.loaded {
 
 .game-name {
 	color: #bbb8c0;
+}
+
+.game-info {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	background-color: rgba(0, 0, 0, 0.7);
+	padding: 1.0vh;
+	line-height: 1.3em;
 }
 
 .channel-status {
@@ -291,7 +316,6 @@ img.loaded {
 
 .select-wrapper {
     display: none;
-    padding: 2vh;
     font-size: 3.0vh;
     position: absolute;
     top: 0;
@@ -304,13 +328,18 @@ img.loaded {
 
 .select-wrapper .caption {
 	font-size: 3.4vh;
-	margin-bottom: 2vh;
+	padding: 2vh;
 }
 
 .select-wrapper .search-input {
+    border: none;
+    background-color: #201c2b;
+    box-shadow: #392e5c 0 0 0 2px inset;
 	font-size: 2.6vh;
     padding: 1.0vh 2.0vh;
+    margin-left: 2.0vh;
     width: 80vw;
+    color: #ffffff;
 }
 
 .dialog-wrapper .content {
