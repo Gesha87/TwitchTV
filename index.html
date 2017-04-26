@@ -15,76 +15,86 @@
     <script src="js/app.js"></script>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">
-            <img src="images/TwitchApp.png" />
-        </div>
-        <div class="controls">
-            <div id="pages" class="pages">
-                <div class="active page" id="page-live-channels" data-page="live-channels">
-                    <i class="fa fa-video-camera"></i> <span class="text">Активные каналы</span>
-                </div><div class="page" id="page-videos" data-page="videos">
-                    <i class="fa fa-youtube-play"></i> <span class="text">Видеоматериалы</span>
-                </div>
-            </div>
-            <div id="stream-filters" class="filters">
-                <div class="filter" id="stream-filter-game" data-type="game">
-                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
-                </div><div class="filter" id="stream-filter-channels" data-type="channels">
-                    <i class="fa fa-user"></i> <span class="text">Каналы</span>
-                </div><div class="filter" id="stream-filter-languages" data-type="languages">
-                    <i class="fa fa-globe"></i> <span class="text">Языки</span>
-                </div><div class="filter" id="stream-filter-type" data-type="stream-type">
-                    <i class="fa fa-play"></i> <span class="text">Тип</span>
-                </div><!-- <div class="filter-divider">
-                    <i class="fa fa-arrows-h"></i>
-                </div><div class="filter" id="stream-filter-presets">
-                    <i class="fa fa-filter"></i> <span class="text">Фильтры</span>
-                </div><div class="filter" id="stream-filter-search">
-                    <i class="fa fa-search"></i> <span class="text">Поиск</span>
-                </div> -->
-            </div>
-            <div id="video-filters" style="display:none;" class="filters">
-                <div class="filter" id="video-filter-game" data-type="game">
-                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
-                </div><div class="filter" id="video-filter-period" data-type="period">
-                    <i class="fa fa-calendar"></i> <span class="text">Период</span>
-                </div><div class="filter" id="video-filter-languages" data-type="languages">
-                    <i class="fa fa-globe"></i> <span class="text">Языки</span>
-                </div><div class="filter" id="video-filter-type" data-type="video-type">
-                    <i class="fa fa-play"></i> <span class="text">Тип</span>
-                </div><div class="filter" id="video-filter-sort" data-type="sort">
-                    <i class="fa fa-sort"></i> <span class="text">Сортировка</span>
-                </div><!-- <div class="filter-divider">
-                    <i class="fa fa-arrows-h"></i>
-                </div><div class="filter" id="video-filter-presets">
-                    <i class="fa fa-filter"></i> <span class="text">Фильтры</span>
-                </div><div class="filter" id="video-filter-search">
-                    <i class="fa fa-search"></i> <span class="text">Поиск</span>
-                </div> -->
-            </div>
-        </div>
-        <div class="hints">
-            <div class="hint" id="hint-refresh">
-                <span class="badge badge-A">A</span> <span class="text">Обновить</span>
-            </div>
-            <div class="hint" id="hint-change-page">
-                <span class="badge badge-B">B</span> <span class="text">Видеоматериалы</span>
-            </div>
-            <!-- <div class="hint" id="hint-presets">
-                <span class="badge badge-C">C</span> <span class="text">Фильтры</span>
-            </div>
-            <div class="hint" id="hint-search">
-                <span class="badge badge-D">D</span> <span class="text">Поиск</span>
-            </div> -->
-        </div>
-        <div class="clear"></div>
+    <div id="main">
+	    <div class="header">
+	        <div class="logo">
+	            <img src="images/TwitchApp.png" />
+	        </div>
+	        <div class="controls">
+	            <div id="pages" class="pages">
+	                <div class="active page" id="page-live-channels" data-page="live-channels">
+	                    <i class="fa fa-video-camera"></i> <span class="text">Активные каналы</span>
+	                </div><div class="page" id="page-videos" data-page="videos">
+	                    <i class="fa fa-youtube-play"></i> <span class="text">Видеоматериалы</span>
+	                </div>
+	            </div>
+	            <div id="stream-filters" class="filters">
+	                <div class="filter selected" id="stream-filter-game" data-type="game">
+	                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
+	                </div><div class="filter" id="stream-filter-channels" data-type="channels">
+	                    <i class="fa fa-user"></i> <span class="text">Каналы</span>
+	                </div><div class="filter" id="stream-filter-languages" data-type="languages">
+	                    <i class="fa fa-globe"></i> <span class="text">Языки</span>
+	                </div><div class="filter" id="stream-filter-type" data-type="stream-type">
+	                    <i class="fa fa-play"></i> <span class="text">Тип</span>
+	                </div><!-- <div class="filter-divider">
+	                    <i class="fa fa-arrows-h"></i>
+	                </div><div class="filter" id="stream-filter-presets">
+	                    <i class="fa fa-filter"></i> <span class="text">Фильтры</span>
+	                </div><div class="filter" id="stream-filter-search">
+	                    <i class="fa fa-search"></i> <span class="text">Поиск</span>
+	                </div> -->
+	            </div>
+	            <div id="video-filters" style="display:none;" class="filters">
+	                <div class="filter" id="video-filter-game" data-type="game">
+	                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
+	                </div><div class="filter" id="video-filter-period" data-type="period">
+	                    <i class="fa fa-calendar"></i> <span class="text">Период</span>
+	                </div><div class="filter" id="video-filter-languages" data-type="languages">
+	                    <i class="fa fa-globe"></i> <span class="text">Языки</span>
+	                </div><div class="filter" id="video-filter-type" data-type="video-type">
+	                    <i class="fa fa-play"></i> <span class="text">Тип</span>
+	                </div><div class="filter" id="video-filter-sort" data-type="sort">
+	                    <i class="fa fa-sort"></i> <span class="text">Сортировка</span>
+	                </div><!-- <div class="filter-divider">
+	                    <i class="fa fa-arrows-h"></i>
+	                </div><div class="filter" id="video-filter-presets">
+	                    <i class="fa fa-filter"></i> <span class="text">Фильтры</span>
+	                </div><div class="filter" id="video-filter-search">
+	                    <i class="fa fa-search"></i> <span class="text">Поиск</span>
+	                </div> -->
+	            </div>
+	        </div>
+	        <div class="hints">
+	            <div class="hint" id="hint-refresh">
+	                <span class="badge badge-A">A</span> <span class="text">Обновить</span>
+	            </div>
+	            <div class="hint" id="hint-change-page">
+	                <span class="badge badge-B">B</span> <span class="text">Видеоматериалы</span>
+	            </div>
+	            <!-- <div class="hint" id="hint-presets">
+	                <span class="badge badge-C">C</span> <span class="text">Фильтры</span>
+	            </div>
+	            <div class="hint" id="hint-search">
+	                <span class="badge badge-D">D</span> <span class="text">Поиск</span>
+	            </div> -->
+	        </div>
+	        <div class="clear"></div>
+	    </div>
+	    <div id="divider">
+	        <hr class="line" />
+	        <hr class="line-selected"/>
+	    </div>
+	    <div id="items" class="items"></div>
+	    <div id="select-box" class="select-box">
+	        <div class="stream-channel-name ellipsed"></div>
+	        <div class="stream-viewers"></div>
+	        <div class="stream-info">
+	            <div class="game-name ellipsed"></div>
+	            <div class="channel-status ellipsed"></div>
+	        </div>
+	    </div>
     </div>
-    <div id="divider">
-        <hr class="line" />
-        <hr class="line-selected"/>
-    </div>
-    <div id="items" class="items"></div>
     <div id="loading-wrapper" class="loading-wrapper">
         <div id="loading" class="loading">
             <div class="spinner-three-bounce">
@@ -98,17 +108,9 @@
     <div id="av-player" class="player">
         <object type="application/avplayer"></object>
     </div>
-    <div id="select-box" class="select-box">
-        <div class="stream-channel-name ellipsed"></div>
-        <div class="stream-viewers"></div>
-        <div class="stream-info">
-            <div class="game-name ellipsed"></div>
-            <div class="channel-status ellipsed"></div>
-        </div>
-    </div>
     <div id="select-game" class="select-wrapper">
         <div class="caption">Выбор игры</div>
-        <input class="search-input" placeholder="Поиск игры">
+        <input class="search-input selected" placeholder="Поиск игры">
         <div id="game-items" class="items"></div>
         <div id="select-game-box" class="select-box">
             <div class="game-info">
@@ -129,7 +131,7 @@
         <div class="content">
             <div class="text" id="confirm-exit">Вы действительно хотите выйти из приложения?</div>
             <div class="dialog-buttons">
-                <div class="dialog-button" id="button-exit" data-type="exit">Выйти</div>
+                <div class="dialog-button selected" id="button-exit" data-type="exit">Выйти</div>
                 <div class="dialog-button" id="button-cancel" data-type="cancel">Отмена</div>
             </div>
         </div>

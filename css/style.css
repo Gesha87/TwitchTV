@@ -75,8 +75,7 @@ body.init {
     top: 0;
     left: 0;
     max-width: 29.347368vh;
-    line-height: 1.3em;
-    white-space: normal;
+    line-height: 1.0em;
 }
 
 img.loaded {
@@ -340,6 +339,9 @@ img.loaded {
     margin-left: 2.0vh;
     width: 80vw;
     color: #ffffff;
+}
+.select-wrapper .search-input.selected {
+    box-shadow: inherit;
 }
 
 .dialog-wrapper .content {

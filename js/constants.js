@@ -3,7 +3,7 @@ var constants = {
     STATE_LOADING_TOKEN: 'loading-token',
     STATE_LOADING_STREAM_INFO: 'loading-stream-info',
     STATE_WATCH: 'watch',
-    STATE_SELECT: 'select',
+    STATE_SELECT_GAME: 'select-game',
     STATE_ERROR: 'error',
     STATE_EXIT: 'exit',
     
@@ -16,6 +16,8 @@ var constants = {
     AREA_VIDEO_FILTERS: 'video-filters',
     AREA_RESULTS: 'results',
     AREA_GAME_RESULTS: 'game-results',
+    AREA_GAME_SEARCH: 'game-search',
+    AREA_GAME_CLEAR: 'game-clear',
 
     BUTTON_TYPE_EXIT: 'exit',
     BUTTON_TYPE_CLOSE: 'close',
