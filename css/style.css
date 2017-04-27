@@ -17,6 +17,10 @@ body.init {
 	opacity: 1;
 }
 
+.clear {
+	clear: both;
+}
+
 .danger {
 	color: #fc3636;
 }
@@ -332,7 +336,19 @@ img.loaded {
 
 .select-wrapper .caption {
 	font-size: 3.4vh;
-	padding: 2vh;
+	padding: 1vh;
+}
+.select-wrapper .selected-game {
+    display: inline-block;
+    padding: 1vh;
+    color: #9993a5;
+}
+.select-wrapper .selected-game.selected {
+	color: #ffffff;
+}
+
+.select-wrapper .caption > .text {
+    padding: 1vh;
 }
 
 .select-wrapper .search-input {

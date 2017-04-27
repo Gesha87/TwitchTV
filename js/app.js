@@ -2,7 +2,7 @@
 app.page = constants.PAGE_LIVE_CHANNELS;
 app.returnStack = [];
 app.state = constants.STATE_BROWSE;
-app.activeArea = constants.AREA_FILTERS;
+app.activeArea = constants.AREA_PAGES;
 app.areas = {};
 app.areas[constants.AREA_RESULTS] = { count: 0, columns: 0, rows: 3, x: 0, y: 0 };
 app.areas[constants.AREA_FILTERS] = { columns: 0, x: 0 };
@@ -288,7 +288,9 @@ app.init = function() {
                             }
                         }
                     } else if (app.activeArea == constants.AREA_GAME_SEARCH) {
-                        app.activateGameItemsArea();
+                        if (app.areas[constants.AREA_GAME_RESULTS].columns > 0) {
+                            app.activateGameItemsArea();
+                        }
                     } else if (app.activeArea == constants.AREA_GAME_CLEAR) {
                         app.activateGameSearchArea();
                     }
@@ -319,10 +321,14 @@ app.init = function() {
                     } else if (app.activeArea == constants.AREA_GAME_RESULTS) {
                         var $selectedItem = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
                         if ($selectedItem.length > 0) {
-                            app.filters.game = $selectedItem.data('name');
+                            app.selectGame($selectedItem.data('name'));
                             app.returnState();
                             app.refresh();
                         }
+                    } else if (app.activeArea == constants.AREA_GAME_CLEAR) {
+                        app.clearGame();
+                        app.returnState();
+                        app.refresh();
                     }
                 } else if (app.state === constants.STATE_ERROR) {
                     app.hideError();
@@ -868,7 +874,7 @@ app.selectCurrentFilter = function() {
                 app.$selectGame.hide();
                 app.$loading.hide();
             });
-            app.activeArea = constants.AREA_GAME_SEARCH;
+            app.activateGameSearchArea();
             if (!app.$selectGame.hasClass('init')) {
                 app.$selectGame.addClass('init');
                 app.$gameItems.mCustomScrollbar(app.customScrollbarOptions);
@@ -881,13 +887,23 @@ app.selectCurrentFilter = function() {
             }
             app.clearItems(app.$gameItems, app.$gameItemsContainer);
             app.areas[constants.AREA_GAME_RESULTS].columns = 0;
-            app.areas[constants.AREA_GAME_RESULTS].columns = 0;
-            app.areas[constants.AREA_GAME_RESULTS].columns = 0;
+            app.areas[constants.AREA_GAME_RESULTS].x = 0;
+            app.areas[constants.AREA_GAME_RESULTS].y = 0;
             app.loadingGames = app.getGames(function() {
                 app.loadingGames = null;
             });
             break;
     }
+};
+app.selectGame = function(game) {
+    app.filters.game = game;
+    $('.stream-filter-game').addClass('chosen').find('.text').text(game);
+    app.$gameClear.show().find('.text').text(game);
+};
+app.clearGame = function() {
+    app.filters.game = null;
+    $('.stream-filter-game').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_GAME);
+    app.$gameClear.hide();
 };
 app.activateItemsArea = function() {
     app.activeArea = constants.AREA_RESULTS;

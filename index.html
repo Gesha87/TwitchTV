@@ -22,14 +22,14 @@
 	        </div>
 	        <div class="controls">
 	            <div id="pages" class="pages">
-	                <div class="active page" id="page-live-channels" data-page="live-channels">
+	                <div class="active page selected" id="page-live-channels" data-page="live-channels">
 	                    <i class="fa fa-video-camera"></i> <span class="text">Активные каналы</span>
 	                </div><div class="page" id="page-videos" data-page="videos">
 	                    <i class="fa fa-youtube-play"></i> <span class="text">Видеоматериалы</span>
 	                </div>
 	            </div>
 	            <div id="stream-filters" class="filters">
-	                <div class="filter selected" id="stream-filter-game" data-type="game">
+	                <div class="filter stream-filter-game" id="stream-filter-game" data-type="game">
 	                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
 	                </div><div class="filter" id="stream-filter-channels" data-type="channels">
 	                    <i class="fa fa-user"></i> <span class="text">Каналы</span>
@@ -46,7 +46,7 @@
 	                </div> -->
 	            </div>
 	            <div id="video-filters" style="display:none;" class="filters">
-	                <div class="filter" id="video-filter-game" data-type="game">
+	                <div class="filter stream-filter-game" id="video-filter-game" data-type="game">
 	                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
 	                </div><div class="filter" id="video-filter-period" data-type="period">
 	                    <i class="fa fa-calendar"></i> <span class="text">Период</span>
@@ -109,8 +109,13 @@
         <object type="application/avplayer"></object>
     </div>
     <div id="select-game" class="select-wrapper">
-        <div class="caption">Выбор игры</div>
-        <input class="search-input selected" id="game-search-input" placeholder="Поиск игры">
+        <div class="caption">
+            <span class="text">Выбор игры</span>
+            <div id="game-clear" class="selected-game" style="display: nne;">
+                <span class="text"></span> <i class="fa fa-times"></i>
+            </div>
+        </div>
+        <div class="clear"><input class="search-input selected" id="game-search-input" placeholder="Поиск игры"></div>
         <div id="game-items" class="items"></div>
         <div id="select-game-box" class="select-box game-select-box">
             <div class="game-info">
