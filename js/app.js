@@ -98,6 +98,7 @@ app.$gameItems = null;
 app.$gameItemsContainer = null;
 app.$gameSelectBox = null;
 app.$gameSearchInput = null;
+app.$gameClear = null;
 app.init = function() {
     app.$main = $('#main');
     app.$loading = $('#loading-wrapper');
@@ -121,6 +122,7 @@ app.init = function() {
     app.$gameItems = $('#game-items');
     app.$gameSelectBox = $('#select-game-box');
     app.$gameSearchInput = $('#game-search-input');
+    app.$gameClear = $('#game-clear');
     app.translateLayout();
     app.setUnderscore();
     app.areas[constants.AREA_PAGES].columns = app.$pages.find('.page').length;
@@ -168,6 +170,17 @@ app.init = function() {
                             app.showCurrentPage(true);
                         }
                     }
+                } else if (app.state === constants.STATE_SELECT_GAME) {
+                    if (app.activeArea == constants.AREA_GAME_RESULTS) {
+                        var $newActiveCell, $activeCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
+                        if ($activeCell.length > 0 && app.areas[constants.AREA_GAME_RESULTS].x > 0) {
+                            $newActiveCell = $('#game-item-' + (app.areas[constants.AREA_GAME_RESULTS].x - 1) + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
+                            if ($newActiveCell.length > 0) {
+                                app.areas[constants.AREA_GAME_RESULTS].x--;
+                                app.showGameItem($newActiveCell);
+                            }
+                        }
+                    }
                 }
                 break;
             case keys.KEY_UP:
@@ -189,6 +202,21 @@ app.init = function() {
                         }
                     } else if (app.activeArea == constants.AREA_FILTERS) {
                         app.activatePagesArea();
+                    }
+                } else if (app.state === constants.STATE_SELECT_GAME) {
+                    if (app.activeArea == constants.AREA_GAME_RESULTS) {
+                        var $newActiveCell, $activeCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
+                        if ($activeCell.length > 0 && app.areas[constants.AREA_GAME_RESULTS].y > 0) {
+                            $newActiveCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + (app.areas[constants.AREA_GAME_RESULTS].y - 1));
+                            if ($newActiveCell.length > 0) {
+                                app.areas[constants.AREA_GAME_RESULTS].y--;
+                                app.showGameItem($newActiveCell);
+                            }
+                        } else {
+                            app.activateGameSearchArea();
+                        }
+                    } else if (app.activeArea == constants.AREA_GAME_SEARCH && app.filters.game) {
+                        app.activateGameClearArea();
                     }
                 }
                 break;
@@ -212,6 +240,17 @@ app.init = function() {
                         if (app.areas[constants.AREA_PAGES].x < app.areas[constants.AREA_PAGES].columns - 1) {
                             app.areas[constants.AREA_PAGES].x++;
                             app.showCurrentPage(true);
+                        }
+                    }
+                } else if (app.state === constants.STATE_SELECT_GAME) {
+                    if (app.activeArea == constants.AREA_GAME_RESULTS) {
+                        var $newActiveCell, $activeCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
+                        if ($activeCell.length > 0 && app.areas[constants.AREA_GAME_RESULTS].y < app.areas[constants.AREA_GAME_RESULTS].columns - 1) {
+                            $newActiveCell = $('#game-item-' + (app.areas[constants.AREA_GAME_RESULTS].x + 1) + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
+                            if ($newActiveCell.length > 0) {
+                                app.areas[constants.AREA_GAME_RESULTS].x++;
+                                app.showGameItem($newActiveCell);
+                            }
                         }
                     }
                 }
@@ -238,6 +277,21 @@ app.init = function() {
                             app.activateItemsArea();
                         }
                     }
+                } else if (app.state === constants.STATE_SELECT_GAME) {
+                    if (app.activeArea == constants.AREA_GAME_RESULTS) {
+                        var $newActiveCell, $activeCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
+                        if ($activeCell.length > 0 && app.areas[constants.AREA_GAME_RESULTS].y < app.areas[constants.AREA_GAME_RESULTS].rows - 1) {
+                            $newActiveCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + (app.areas[constants.AREA_GAME_RESULTS].y + 1));
+                            if ($newActiveCell.length > 0) {
+                                app.areas[constants.AREA_GAME_RESULTS].y++;
+                                app.showGameItem($newActiveCell);
+                            }
+                        }
+                    } else if (app.activeArea == constants.AREA_GAME_SEARCH) {
+                        app.activateGameItemsArea();
+                    } else if (app.activeArea == constants.AREA_GAME_CLEAR) {
+                        app.activateGameSearchArea();
+                    }
                 }
                 break;
             case keys.KEY_ENTER:
@@ -262,6 +316,13 @@ app.init = function() {
                         app.setState(constants.STATE_TYPING, function() {
                             app.$gameSearchInput.blur();
                         });
+                    } else if (app.activeArea == constants.AREA_GAME_RESULTS) {
+                        var $selectedItem = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
+                        if ($selectedItem.length > 0) {
+                            app.filters.game = $selectedItem.data('name');
+                            app.returnState();
+                            app.refresh();
+                        }
                     }
                 } else if (app.state === constants.STATE_ERROR) {
                     app.hideError();
@@ -642,6 +703,7 @@ app.getGames = function(callback) {
                     <div class="game-name ellipsed">' + game.game.name + '</div>\
                 </div>');
                 $newCell.data('viewers', game.viewers);
+                $newCell.data('channels', game.channels);
                 $newCell.data('name', game.game.name);
                 $newColumn.append($newCell);
                 if (i == 0 && app.activeArea == constants.AREA_GAME_RESULTS) {
@@ -669,6 +731,8 @@ app.showStreamItem = function($element) {
 app.showGameItem = function ($element) {
     app.$gameSelectBox.find('.game-viewers').html('<i class="fa fa-eye"></i> ' + 
             $element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+    app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-video-camera"></i> ' + 
+            $element.data('channels').toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
     app.$gameSelectBox.find('.game-name').html($element.data('name'));
     app.showItem($element, app.$gameItems, app.$gameItemsContainer, app.$gameSelectBox);
 };
@@ -695,6 +759,7 @@ app.showItem = function ($element, $items, $itemsContainer, $selectBox) {
     $selectBox.height($element.height());
     var newOffset = $element.offset();
     newOffset.left -= left + scrollLeft;
+    newOffset.top = Math.round(newOffset.top);
     $selectBox.offset(newOffset);
     app.autoHideScrollbar($items);
     app.clearSelection($items);
@@ -829,6 +894,22 @@ app.activateItemsArea = function() {
     app.clearSelection(app.$main);
     var $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
     app.showStreamItem($activeCell);
+};
+app.activateGameItemsArea = function() {
+    app.activeArea = constants.AREA_GAME_RESULTS;
+    app.clearSelection(app.$selectGame);
+    var $activeCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
+    app.showGameItem($activeCell);
+};
+app.activateGameSearchArea = function() {
+    app.activeArea = constants.AREA_GAME_SEARCH;
+    app.clearSelection(app.$selectGame);
+    app.$gameSearchInput.addClass('selected');
+};
+app.activateGameClearArea = function() {
+    app.activeArea = constants.AREA_GAME_CLEAR;
+    app.clearSelection(app.$selectGame);
+    app.$gameClear.addClass('selected');
 };
 app.clearSelection = function($parent) {
     $('.selected', $parent).removeClass('selected');

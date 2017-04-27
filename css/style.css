@@ -75,7 +75,12 @@ body.init {
     top: 0;
     left: 0;
     max-width: 29.347368vh;
-    line-height: 1.0em;
+    line-height: 1.3em;
+}
+
+.game-select-box .game-name {
+    color: #ffffff;
+    max-width: 29.347368vh;
 }
 
 img.loaded {
