@@ -6,6 +6,7 @@ var constants = {
     STATE_SELECT_GAME: 'select-game',
     STATE_ERROR: 'error',
     STATE_EXIT: 'exit',
+    STATE_TYPING: 'typing',
     
     PAGE_LIVE_CHANNELS: 'live-channels',
     PAGE_VIDEOS: 'videos',
