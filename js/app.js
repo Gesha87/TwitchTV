@@ -137,6 +137,22 @@ app.init = function() {
         }
     }));
     app.$itemsContainer = app.$items.find('.mCSB_container');
+    var searchGameTimeout = null;
+    var searchingGame = null;
+    app.$gameSearchInput.on('keyup', function() {
+    	var query = $.trim(app.$gameSearchInput.val());
+    	if (query) {
+	    	if (searchGameTimeout) { clearTimeout(searchGameTimeout); }
+	    	if (searchingGame) { searchingGame.abort(); }
+	    	searchGameTimeout = setTimeout(function() {
+	    		searchGameTimeout = null;
+	    		app.prepareGamesSearch();
+	    		searchingGame = app.getGamesSearch(query, function() {
+	    			searchingGame = null;
+	    		});
+	    	}, 500);
+    	}
+    });
     document.addEventListener('visibilitychange', function() {
         if (window.webapis && app.state == constants.STATE_WATCH) {
             if (document.hidden) {
@@ -315,9 +331,9 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_GAME) {
                     if (app.activeArea == constants.AREA_GAME_SEARCH) {
                         app.$gameSearchInput.focus();
-                        app.setState(constants.STATE_TYPING, function() {
+                        /*app.setState(constants.STATE_TYPING, function() {
                             app.$gameSearchInput.blur();
-                        });
+                        });*/
                     } else if (app.activeArea == constants.AREA_GAME_RESULTS) {
                         var $selectedItem = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
                         if ($selectedItem.length > 0) {
@@ -335,7 +351,7 @@ app.init = function() {
                 } else if (app.state === constants.STATE_EXIT) {
                     var type = app.$exitDialog.find('.selected').data('type');
                     if (type === constants.BUTTON_TYPE_EXIT) {
-                        sf.core.exit(false);
+                    	tizen.application.getCurrentApplication().exit();
                     } else if (type === constants.BUTTON_TYPE_CLOSE) {
                         app.hideExit();
                     }
@@ -621,10 +637,12 @@ app.getLiveChannels = function(limit, offset, callback) {
             app.$items.mCustomScrollbar('update');
             app.autoHideScrollbar(app.$items);
             app.hasMoreResults = response.streams.length > 0;
-            if (typeof callback == 'function') {
+        },
+        complete: function() {
+        	if (typeof callback == 'function') {
                 callback();
             }
-        }
+        } 
     }));
 };
 app.getVideos = function(limit, offset, callback) {
@@ -682,10 +700,12 @@ app.getVideos = function(limit, offset, callback) {
             app.$items.mCustomScrollbar('update');
             app.autoHideScrollbar(app.$items);
             app.hasMoreResults = response.vods.length > 0;
-            if (typeof callback == 'function') {
+        },
+        complete: function() {
+        	if (typeof callback == 'function') {
                 callback();
             }
-        }
+        } 
     }));
 };
 app.getGames = function(callback) {
@@ -719,10 +739,50 @@ app.getGames = function(callback) {
             app.$loading.hide();
             app.$gameItems.mCustomScrollbar('update');
             app.autoHideScrollbar(app.$gameItems);
-            if (typeof callback == 'function') {
+        },
+        complete: function() {
+        	if (typeof callback == 'function') {
                 callback();
             }
-        }
+        } 
+    }));
+};
+app.getGamesSearch = function(query, callback) {
+	return $.ajax($.extend({}, app.twitchApiOptions, {
+        url: 'https://api.twitch.tv/kraken/search/games/?query=' + encodeURIComponent(query), 
+        success: function(response) {
+            console.log(response);
+            var i, x, y, game, $newCell, $newColumn;
+            var countRows = app.areas[constants.AREA_GAME_RESULTS].rows;
+            for (i = 0; i < response.games.length; i++) {
+                if ((y = i % countRows) == 0) {
+                    $newColumn = $('<div class="column"/>');
+                    app.$gameItemsContainer.append($newColumn);
+                    app.areas[constants.AREA_GAME_RESULTS].columns++;
+                }
+                x = (i - y) / countRows;
+                game = response.games[i];
+                $newCell = $('<div class="cell game-cell" id="game-item-' + x + '-' + y + '">\
+                    <i class="fa fa-fw fa-twitch"></i>\
+                    <img src="' + game.box.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+                    <div class="game-name ellipsed">' + game.name + '</div>\
+                </div>');
+                $newCell.data('popularity', game.popularity);
+                $newCell.data('name', game.name);
+                $newColumn.append($newCell);
+                if (i == 0 && app.activeArea == constants.AREA_GAME_RESULTS) {
+                    app.showGameItem($newCell);
+                }
+            }
+            app.$gameItems.mCustomScrollbar('update');
+            app.autoHideScrollbar(app.$gameItems);
+        },
+        complete: function() {
+        	app.$loading.hide();
+        	if (typeof callback == 'function') {
+                callback();
+            }
+        } 
     }));
 };
 app.timeoutAutoHide = null;
@@ -735,10 +795,25 @@ app.showStreamItem = function($element) {
     app.showItem($element, app.$items, app.$itemsContainer, app.$selectBox);
 };
 app.showGameItem = function ($element) {
-    app.$gameSelectBox.find('.game-viewers').html('<i class="fa fa-eye"></i> ' + 
-            $element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
-    app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-video-camera"></i> ' + 
-            $element.data('channels').toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+	var data;
+	if (data = $element.data('viewers')) {
+	    app.$gameSelectBox.find('.game-viewers').html('<i class="fa fa-eye"></i> ' + 
+	            data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+	} else {
+		app.$gameSelectBox.find('.game-viewers').html('');
+	}
+	if (data = $element.data('channels')) {
+	    app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-video-camera"></i> ' + 
+	            data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+	} else {
+		app.$gameSelectBox.find('.game-channels').html('');
+	}
+	if (data = $element.data('popularity')) {
+	    app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-fire"></i> ' + 
+	            data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+	} else {
+		app.$gameSelectBox.find('.game-popularity').html('');
+	}
     app.$gameSelectBox.find('.game-name').html($element.data('name'));
     app.showItem($element, app.$gameItems, app.$gameItemsContainer, app.$gameSelectBox);
 };
@@ -880,15 +955,10 @@ app.selectCurrentFilter = function() {
                 app.$gameItems.mCustomScrollbar(app.customScrollbarOptions);
                 app.$gameItemsContainer = app.$gameItems.find('.mCSB_container');
             }
-            app.showLoading(messages.LOADING);
+            app.prepareGamesSearch();
             if (app.loadingGames) {
                 app.loadingGames.abort();
-                app.loadingGames = null;
             }
-            app.clearItems(app.$gameItems, app.$gameItemsContainer);
-            app.areas[constants.AREA_GAME_RESULTS].columns = 0;
-            app.areas[constants.AREA_GAME_RESULTS].x = 0;
-            app.areas[constants.AREA_GAME_RESULTS].y = 0;
             app.loadingGames = app.getGames(function() {
                 app.loadingGames = null;
             });
@@ -904,6 +974,13 @@ app.clearGame = function() {
     app.filters.game = null;
     $('.stream-filter-game').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_GAME);
     app.$gameClear.hide();
+};
+app.prepareGamesSearch = function() {
+	app.showLoading(messages.LOADING);
+	app.clearItems(app.$gameItems, app.$gameItemsContainer);
+    app.areas[constants.AREA_GAME_RESULTS].columns = 0;
+    app.areas[constants.AREA_GAME_RESULTS].x = 0;
+    app.areas[constants.AREA_GAME_RESULTS].y = 0;
 };
 app.activateItemsArea = function() {
     app.activeArea = constants.AREA_RESULTS;

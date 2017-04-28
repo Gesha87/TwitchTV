@@ -68,8 +68,8 @@ body.init {
 }
 
 .game-cell img {
-	height: 41vh;
-	width: 29.347368vh;
+	height: 40vh;
+	width: 28.631579vh;
 }
 
 .game-cell .game-name {
@@ -78,13 +78,14 @@ body.init {
 	position: absolute;
     top: 0;
     left: 0;
-    max-width: 29.347368vh;
+    max-width: 28.631579vh;
     line-height: 1.3em;
+    overflow-x: hidden;
 }
 
 .game-select-box .game-name {
     color: #ffffff;
-    max-width: 29.347368vh;
+    max-width: 28.631579vh;
 }
 
 img.loaded {
@@ -139,8 +140,12 @@ img.loaded {
 	left: 0;
 	right: 0;
 	background-color: rgba(0, 0, 0, 0.7);
-	padding: 1.0vh;
+	padding: 1.0vh 0;
 	line-height: 1.3em;
+}
+
+.game-info > div {
+	padding: 0 1.0vh;
 }
 
 .channel-status {
@@ -207,8 +212,9 @@ img.loaded {
 	box-shadow: inherit;
 }
 
-.filter.chosen {
+.chosen {
 	color: #ffffff;
+	box-shadow: #6441a4 0 0 0 2px inset;
 }
 
 .filter-divider {
@@ -336,7 +342,7 @@ img.loaded {
 
 .select-wrapper .caption {
 	font-size: 3.4vh;
-	padding: 1vh;
+	padding: 2vh 1vh;
 }
 .select-wrapper .selected-game {
     display: inline-block;
@@ -349,6 +355,7 @@ img.loaded {
 
 .select-wrapper .caption > .text {
     padding: 1vh;
+    display: inline-block;
 }
 
 .select-wrapper .search-input {
