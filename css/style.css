@@ -21,6 +21,10 @@ body.init {
 	clear: both;
 }
 
+.text-center {
+	text-align: center;
+}
+
 .danger {
 	color: #fc3636;
 }
@@ -49,6 +53,9 @@ body.init {
 
 .cell {
 	position: relative;
+}
+.cell.selected {
+	outline: none;
 }
 
 .cell i {
@@ -252,7 +259,8 @@ img.loaded {
     margin-right: 2.0vh;
 	position: relative;
 	padding: 1.3vh 2.0vh 1.2vh;
-	background-color: #433f4a;
+	box-shadow: #392e5c 0 0 0 2px inset;
+	/* background-color: #433f4a; */
 	color: #9993a5;
 }
 .page:last-child {
@@ -260,9 +268,11 @@ img.loaded {
 }
 .page.active {
 	background-color: #6441a4;
+	box-shadow: inherit;
 	color: #ffffff;
 }
 .page.selected {
+	box-shadow: inherit;
 	color: #ffffff;
 }
 
@@ -421,6 +431,20 @@ img.loaded {
 }
 .select-box.selected {
 	display: block;
+}
+
+.filter-list {
+	display: inline-block;
+	text-align: left;
+}
+
+.filter-list-item {
+	padding: 0.25vh;
+}
+
+.filter-list-item input {
+    height: 2vh;
+    width: 2vh;
 }
 
 .player {

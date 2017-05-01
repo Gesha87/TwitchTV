@@ -32,7 +32,7 @@ var messages = {
 
     EMPTY_RESULTS: "Nothing found",
     
-    ERROR_LOADING_STREAM_FAILED: 'An error occurred while loading',
+    ERROR_LOADING_FAILED: 'An error occurred while loading.<br>Please, try again later',
     ERROR_STREAM_IS_OFFLINE: 'Stream is offline',
     ERROR_CONNECTION_FAILED: 'Connection failed',
     

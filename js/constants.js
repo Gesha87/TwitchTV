@@ -21,5 +21,6 @@ var constants = {
     AREA_GAME_CLEAR: 'game-clear',
 
     BUTTON_TYPE_EXIT: 'exit',
+    BUTTON_TYPE_CANCEL: 'cancel',
     BUTTON_TYPE_CLOSE: 'close',
 };

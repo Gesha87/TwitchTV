@@ -137,21 +137,31 @@ app.init = function() {
         }
     }));
     app.$itemsContainer = app.$items.find('.mCSB_container');
-    var searchGameTimeout = null;
-    var searchingGame = null;
-    app.$gameSearchInput.on('keyup', function() {
+    var lastQuery = '';
+    app.$gameSearchInput.on('keyup', function(e) {
     	var query = $.trim(app.$gameSearchInput.val());
-    	if (query) {
-	    	if (searchGameTimeout) { clearTimeout(searchGameTimeout); }
-	    	if (searchingGame) { searchingGame.abort(); }
-	    	searchGameTimeout = setTimeout(function() {
-	    		searchGameTimeout = null;
-	    		app.prepareGamesSearch();
-	    		searchingGame = app.getGamesSearch(query, function() {
-	    			searchingGame = null;
-	    		});
-	    	}, 500);
+    	if (query == lastQuery) return;
+    	lastQuery = query;
+    	if (app.searchGameTimeout) { 
+    	    clearTimeout(searchGameTimeout);
     	}
+    	if (app.loadingGames) {
+    	    app.loadingGames.abort();
+    	    app.loadingGames = null;
+    	}
+    	app.searchGameTimeout = setTimeout(function() {
+    	    app.searchGameTimeout = null;
+    		app.prepareGamesSearch();
+    		if (query) {
+    		    app.loadingGames = app.getGamesSearch(query, function() {
+    		        app.loadingGames = null;
+	    		});
+    		} else {
+    		    app.loadingGames = app.getGames(function() {
+    		        app.loadingGames = null;
+                }); 
+    		}
+    	}, 500);
     });
     document.addEventListener('visibilitychange', function() {
         if (window.webapis && app.state == constants.STATE_WATCH) {
@@ -197,6 +207,12 @@ app.init = function() {
                             }
                         }
                     }
+                } else if (app.state === constants.STATE_EXIT) {
+                    var $exitButton = $('#button-exit'); 
+                    if (!$exitButton.hasClass('selected')) {
+                        app.clearSelection(app.$exitDialog);
+                        $exitButton.addClass('selected');
+                    }
                 }
                 break;
             case keys.KEY_UP:
@@ -232,6 +248,7 @@ app.init = function() {
                             app.activateGameSearchArea();
                         }
                     } else if (app.activeArea == constants.AREA_GAME_SEARCH && app.filters.game) {
+                        app.$gameSearchInput.blur();
                         app.activateGameClearArea();
                     }
                 }
@@ -269,6 +286,12 @@ app.init = function() {
                             }
                         }
                     }
+                } else if (app.state === constants.STATE_EXIT) {
+                    var $cancelButton = $('#button-cancel'); 
+                    if (!$cancelButton.hasClass('selected')) {
+                        app.clearSelection(app.$exitDialog);
+                        $cancelButton.addClass('selected');
+                    }
                 }
                 break;
             case keys.KEY_DOWN:
@@ -305,6 +328,7 @@ app.init = function() {
                         }
                     } else if (app.activeArea == constants.AREA_GAME_SEARCH) {
                         if (app.areas[constants.AREA_GAME_RESULTS].columns > 0) {
+                            app.$gameSearchInput.blur();
                             app.activateGameItemsArea();
                         }
                     } else if (app.activeArea == constants.AREA_GAME_CLEAR) {
@@ -347,13 +371,15 @@ app.init = function() {
                         app.refresh();
                     }
                 } else if (app.state === constants.STATE_ERROR) {
-                    app.hideError();
+                    app.returnState();
                 } else if (app.state === constants.STATE_EXIT) {
                     var type = app.$exitDialog.find('.selected').data('type');
                     if (type === constants.BUTTON_TYPE_EXIT) {
-                    	tizen.application.getCurrentApplication().exit();
-                    } else if (type === constants.BUTTON_TYPE_CLOSE) {
-                        app.hideExit();
+                        if (window.tizen) {
+                            tizen.application.getCurrentApplication().exit();
+                        }
+                    } else if (type === constants.BUTTON_TYPE_CANCEL) {
+                        app.returnState();
                     }
                 }
                 break;
@@ -413,7 +439,7 @@ app.returnState = function() {
 app.loadingStream = null;
 app.loadingErrorHandler = function(xhr, textStatus, errorThrown) {
     if (errorThrown !== 'abort') {
-        var message = messages.ERROR_LOADING_STREAM_FAILED;
+        var message = messages.ERROR_LOADING_FAILED;
         if (xhr.status > 0) {
             try {
                 var response = $.parseJSON(xhr.responseText);
@@ -456,7 +482,7 @@ app.playStream = function(channelName) {
 app.playVideo = function(id) {
     app.setState(constants.STATE_WATCH, app.stop);
     app.$player.show();
-    app.showLoading(constants.LOADING);
+    app.showLoading(messages.LOADING);
     app.loadingStream = $.get('https://api.twitch.tv/api/vods/' + id + '/access_token', 'json').always(function() {
         app.loadingStream = null;
     }).done(function(data) {
@@ -491,7 +517,7 @@ app.play = function(url) {
                 }
             },
             onerror: function(error) {
-                var message = messages.ERROR_LOADING_STREAM_FAILED;
+                var message = messages.ERROR_LOADING_FAILED;
                 if (error === 'PLAYER_ERROR_CONNECTION_FAILED') {
                     message = messages.ERROR_CONNECTION_FAIL;
                 }
@@ -561,7 +587,7 @@ app.refresh = function(force) {
             app.loadingMoreResults = null;
         }
         app.$selectBox.removeClass('selected');
-        app.showLoading(constants.LOADING);
+        app.showLoading(messages.LOADING);
         app.clearItems(app.$items, app.$itemsContainer);
         app.areas[constants.AREA_RESULTS].count = 0;
         app.areas[constants.AREA_RESULTS].columns = 0;
@@ -633,16 +659,19 @@ app.getLiveChannels = function(limit, offset, callback) {
                 }
             }
             app.areas[constants.AREA_RESULTS].count += response.streams.length;
-            app.$loading.hide();
             app.$items.mCustomScrollbar('update');
             app.autoHideScrollbar(app.$items);
             app.hasMoreResults = response.streams.length > 0;
         },
         complete: function() {
+            app.$loading.hide();
         	if (typeof callback == 'function') {
                 callback();
             }
-        } 
+        },
+        error: function() {
+            app.showError(messages.ERROR_LOADING_FAILED);
+        }
     }));
 };
 app.getVideos = function(limit, offset, callback) {
@@ -696,16 +725,19 @@ app.getVideos = function(limit, offset, callback) {
                 }
             }
             app.areas[constants.AREA_RESULTS].count += response.vods.length;
-            app.$loading.hide();
             app.$items.mCustomScrollbar('update');
             app.autoHideScrollbar(app.$items);
             app.hasMoreResults = response.vods.length > 0;
         },
         complete: function() {
+            app.$loading.hide();
         	if (typeof callback == 'function') {
                 callback();
             }
-        } 
+        },
+        error: function() {
+            app.showError(messages.ERROR_LOADING_FAILED);
+        }
     }));
 };
 app.getGames = function(callback) {
@@ -736,15 +768,18 @@ app.getGames = function(callback) {
                     app.showGameItem($newCell);
                 }
             }
-            app.$loading.hide();
             app.$gameItems.mCustomScrollbar('update');
             app.autoHideScrollbar(app.$gameItems);
         },
         complete: function() {
+            app.$loading.hide();
         	if (typeof callback == 'function') {
                 callback();
             }
-        } 
+        },
+        error: function() {
+            app.showError(messages.ERROR_LOADING_FAILED);
+        }
     }));
 };
 app.getGamesSearch = function(query, callback) {
@@ -782,7 +817,10 @@ app.getGamesSearch = function(query, callback) {
         	if (typeof callback == 'function') {
                 callback();
             }
-        } 
+        },
+        error: function() {
+            app.showError(messages.ERROR_LOADING_FAILED);
+        }
     }));
 };
 app.timeoutAutoHide = null;
@@ -935,6 +973,7 @@ app.showCurrentFilter = function() {
     app.$filters.find('.filter').get(x).classList.add('selected');
 }
 app.loadingGames = null;
+app.searchGameTimeout = null;
 app.selectCurrentFilter = function() {
     var x = app.areas[constants.AREA_FILTERS].x,
         type = app.$filters.find('.filter.selected').data('type');
@@ -942,6 +981,10 @@ app.selectCurrentFilter = function() {
         case 'game':
             app.$selectGame.show();
             app.setState(constants.STATE_SELECT_GAME, function() {
+                if (app.searchGameTimeout) { 
+                    clearTimeout(searchGameTimeout);
+                    app.searchGameTimeout = null;
+                }
                 if (app.loadingGames) {
                     app.loadingGames.abort();
                     app.loadingGames = null;
@@ -950,6 +993,7 @@ app.selectCurrentFilter = function() {
                 app.$loading.hide();
             });
             app.activateGameSearchArea();
+            app.$gameSearchInput.val('');
             if (!app.$selectGame.hasClass('init')) {
                 app.$selectGame.addClass('init');
                 app.$gameItems.mCustomScrollbar(app.customScrollbarOptions);
