@@ -439,12 +439,19 @@ img.loaded {
 }
 
 .filter-list-item {
-	padding: 0.25vh;
+	padding: 0.3vh;
+	white-space: nowrap;
 }
 
 .filter-list-item input {
+	float: left;
     height: 2vh;
     width: 2vh;
+    margin-top: 0.5vh;
+}
+
+.filter-list-item .text {
+	margin-left: 3vh;
 }
 
 .player {
