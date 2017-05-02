@@ -313,7 +313,7 @@ img.loaded {
 	width: 100vw;
 	margin-top: -6.2vh;
 	text-align: center;
-	z-index: 10000;
+	z-index: 1000;
 }
 
 .loading {
@@ -336,7 +336,7 @@ img.loaded {
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.8);
-    z-index: 1000;
+    z-index: 10000;
 }
 
 .select-wrapper {
@@ -349,6 +349,9 @@ img.loaded {
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.8);
     z-index: 500;
+}
+.select-language-wrapper {
+	z-index: 1100;
 }
 
 .select-wrapper .caption {
@@ -446,6 +449,9 @@ img.loaded {
 }
 .filter-list-item.active {
     color: #6441a4;
+}
+.filter-list-item.selected {
+    color: #ffffff;
 }
 
 .filter-list-item input {

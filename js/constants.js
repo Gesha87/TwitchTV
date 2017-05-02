@@ -17,6 +17,7 @@ var constants = {
     AREA_GAME_RESULTS: 'game-results',
     AREA_GAME_SEARCH: 'game-search',
     AREA_GAME_CLEAR: 'game-clear',
+    AREA_LANGUAGES: 'languages',
 
     BUTTON_TYPE_EXIT: 'exit',
     BUTTON_TYPE_CANCEL: 'cancel',

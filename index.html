@@ -29,11 +29,11 @@
 	                </div>
 	            </div>
 	            <div id="stream-filters" class="filters">
-	                <div class="filter stream-filter-game" id="stream-filter-game" data-type="game">
+	                <div class="filter filter-game" id="stream-filter-game" data-type="game">
 	                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
 	                </div><div class="filter" id="stream-filter-channels" data-type="channels">
 	                    <i class="fa fa-user"></i> <span class="text">Каналы</span>
-	                </div><div class="filter" id="stream-filter-languages" data-type="languages">
+	                </div><div class="filter filter-languages" id="stream-filter-languages" data-type="languages">
 	                    <i class="fa fa-globe"></i> <span class="text">Языки</span>
 	                </div><div class="filter" id="stream-filter-type" data-type="stream-type">
 	                    <i class="fa fa-play"></i> <span class="text">Тип</span>
@@ -46,11 +46,11 @@
 	                </div> -->
 	            </div>
 	            <div id="video-filters" style="display:none;" class="filters">
-	                <div class="filter stream-filter-game" id="video-filter-game" data-type="game">
+	                <div class="filter filter-game" id="video-filter-game" data-type="game">
 	                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
 	                </div><div class="filter" id="video-filter-period" data-type="period">
 	                    <i class="fa fa-calendar"></i> <span class="text">Период</span>
-	                </div><div class="filter" id="video-filter-languages" data-type="languages">
+	                </div><div class="filter filter-languages" id="video-filter-languages" data-type="languages">
 	                    <i class="fa fa-globe"></i> <span class="text">Языки</span>
 	                </div><div class="filter" id="video-filter-type" data-type="video-type">
 	                    <i class="fa fa-play"></i> <span class="text">Тип</span>
@@ -126,117 +126,11 @@
             </div>
         </div>
     </div>
-	<div id="select-language" class="select-wrapper text-center">
+	<div id="select-language" class="select-wrapper select-language-wrapper text-center">
 		<div class="caption">
 			<div class="text">Выбор языка</div>
 		</div>
-		<div class="filter-list">
-			<div class="filter-list-item selected">
-				<div class="text" id="clear-language-filter">Очистить</div>
-			</div>
-			<div class="filter-list-item" data-code="ru">
-				<input type="checkbox">
-				<div class="text">Русский</div>
-			</div>
-			<div class="filter-list-item" data-code="en">
-				<input type="checkbox">
-				<div class="text">English</div>
-			</div>
-			<div class="filter-list-item" data-code="da">
-				<input type="checkbox">
-				<div class="text">Dansk</div>
-			</div>
-			<div class="filter-list-item" data-code="de">
-				<input type="checkbox">
-				<div class="text">Deutsch</div>
-			</div>
-			<div class="filter-list-item" data-code="es">
-				<input type="checkbox">
-				<div class="text">Español</div>
-			</div>
-			<div class="filter-list-item" data-code="fr">
-				<input type="checkbox">
-				<div class="text">Français</div>
-			</div>
-			<div class="filter-list-item" data-code="it">
-				<input type="checkbox">
-				<div class="text">Italiano</div>
-			</div>
-			<div class="filter-list-item" data-code="hu">
-				<input type="checkbox">
-				<div class="text">Magyar</div>
-			</div>
-			<div class="filter-list-item" data-code="nl">
-				<input type="checkbox">
-				<div class="text">Nederlands</div>
-			</div>
-			<div class="filter-list-item" data-code="no">
-				<input type="checkbox">
-				<div class="text">Norsk</div>
-			</div>
-			<div class="filter-list-item" data-code="pl">
-				<input type="checkbox">
-				<div class="text">Polski</div>
-			</div>
-			<div class="filter-list-item" data-code="pt">
-				<input type="checkbox">
-				<div class="text">Português</div>
-			</div>
-		</div>
-		<div class="filter-list">
-			<div class="filter-list-item" data-code="sk">
-				<input type="checkbox">
-				<div class="text">Slovenčina</div>
-			</div>
-			<div class="filter-list-item" data-code="fi">
-				<input type="checkbox">
-				<div class="text">Suomi</div>
-			</div>
-			<div class="filter-list-item" data-code="sv">
-				<input type="checkbox">
-				<div class="text">Svenska</div>
-			</div>
-			<div class="filter-list-item" data-code="vi">
-				<input type="checkbox">
-				<div class="text">Tiếng Việt</div>
-			</div>
-			<div class="filter-list-item" data-code="tr">
-				<input type="checkbox">
-				<div class="text">Türkçe</div>
-			</div>
-			<div class="filter-list-item" data-code="cs">
-				<input type="checkbox">
-				<div class="text">Čeština</div>
-			</div>
-			<div class="filter-list-item" data-code="el">
-				<input type="checkbox">
-				<div class="text">Ελληνικά</div>
-			</div>
-			<div class="filter-list-item" data-code="bg">
-				<input type="checkbox">
-				<div class="text">Български</div>
-			</div>
-			<div class="filter-list-item" data-code="ar">
-				<input type="checkbox">
-				<div class="text">العربية</div>
-			</div>
-			<div class="filter-list-item" data-code="th">
-				<input type="checkbox">
-				<div class="text">ภาษาไทย</div>
-			</div>
-			<div class="filter-list-item" data-code="zh">
-				<input type="checkbox">
-				<div class="text">中文</div>
-			</div>
-			<div class="filter-list-item" data-code="ja">
-				<input type="checkbox">
-				<div class="text">日本語</div>
-			</div>
-			<div class="filter-list-item" data-code="ko">
-				<input type="checkbox">
-				<div class="text">한국어</div>
-			</div>
-		</div>
+		<div id="language-items"></div>
 	</div>
 	<div id="error-dialog" class="dialog-wrapper">
         <div class="content">

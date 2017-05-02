@@ -10,14 +10,72 @@ app.areas[constants.AREA_STREAM_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_VIDEO_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_PAGES] = { columns: 0, x: 0 };
 app.areas[constants.AREA_GAME_RESULTS] = { columns: 0, rows: 2, x: 0, y: 0 };
+app.areas[constants.AREA_LANGUAGES] = { columns: 0, rows: 13, x: 0, y: 1 };
 app.filters = {
     game: null,
     channels: null,
-    languages: null,
+    languages: [],
     streamType: null,
     period: null,
     videoType: null,
     sort: null
+};
+app.laguagesFilter = {
+    clear: messages.LANGUAGE_CLEAR,
+    ru: 'Русский',
+    en: 'English',
+    da: 'Dansk',
+    de: 'Deutsch',
+    es: 'Español',
+    fr: 'Français',
+    it: 'Italiano',
+    hu: 'Magyar',
+    nl: 'Nederlands',
+    no: 'Norsk',
+    pl: 'Polski',
+    pt: 'Português',
+    sk: 'Slovenčina',
+    fi: 'Suomi',
+    sv: 'Svenska',
+    vi: 'Tiếng Việt',
+    tr: 'Türkçe',
+    cs: 'Čeština',
+    el: 'Ελληνικά',
+    bg: 'Български',
+    ar: 'العربية',
+    th: 'ภาษาไทย',
+    zh: '中文',
+    ja: '日本語',
+    ko: '한국어'
+};
+app.initLangugesFilter = function() {
+    var $items = $('#language-items');
+    var i = 0, code, text, countRows = app.areas[constants.AREA_LANGUAGES].rows;
+    for (code in app.laguagesFilter) {
+        text = app.laguagesFilter[code];
+        if ((y = i % countRows) == 0) {
+            $newColumn = $('<div class="filter-list"/>');
+            $items.append($newColumn);
+            app.areas[constants.AREA_LANGUAGES].columns++;
+        }
+        x = (i - y) / countRows;
+        if (code == 'clear') {
+            $newCell = $('<div class="filter-list-item" id="language-item-' + x + '-' + y + '">\
+                <div class="text">' + text + '</div>\
+            </div>');
+        } else {
+            $newCell = $('<div class="filter-list-item" id="language-item-' + x + '-' + y + '">\
+                <input type="checkbox">\
+                <div class="text">' + text + '</div>\
+            </div>');
+        }
+        $newCell.data('code', code);
+        if (i == 1) {
+            $newCell.addClass('selected');
+        }
+        $newColumn.append($newCell);
+        i++;
+    }
 };
 app.customScrollbarOptions = {
     scrollInertia: 0,
@@ -68,8 +126,7 @@ app.translateLayout = function() {
     app.$selectGame.find('.caption > .text').text(messages.GAME_SELECT);
     $('#game-search-input').attr('placeholder', messages.GAME_SEARCH);
     // select language
-    app.$selectlanguage.find('.caption > .text').text(messages.LANGUAGE_SELECT);
-    $('#clear-language-filter').text(messages.LANGUAGE_CLEAR);
+    app.$selectLanguage.find('.caption > .text').text(messages.LANGUAGE_SELECT);
     // others
     $('#loading').find('.text').text(messages.LOADING);
     $('#confirm-exit').text(messages.CONFIRM_EXIT);
@@ -105,7 +162,7 @@ app.$gameItemsContainer = null;
 app.$gameSelectBox = null;
 app.$gameSearchInput = null;
 app.$gameClear = null;
-app.$selectlanguage = null;
+app.$selectLanguage = null;
 app.init = function() {
     app.$main = $('#main');
     app.$loading = $('#loading-wrapper');
@@ -130,7 +187,7 @@ app.init = function() {
     app.$gameSelectBox = $('#select-game-box');
     app.$gameSearchInput = $('#game-search-input');
     app.$gameClear = $('#game-clear');
-    app.$selectlanguage = $('#select-language');
+    app.$selectLanguage = $('#select-language');
     app.translateLayout();
     app.setUnderscore();
     app.areas[constants.AREA_PAGES].columns = app.$pages.find('.page').length;
@@ -138,6 +195,7 @@ app.init = function() {
     app.areas[constants.AREA_VIDEO_FILTERS].columns = app.$videoFilters.find('.filter').length;
     app.areas[constants.AREA_FILTERS] = app.areas[constants.AREA_STREAM_FILTERS];
     $('body').addClass('init');
+    app.initLangugesFilter();
     app.$items.mCustomScrollbar($.extend({}, app.customScrollbarOptions, {
         callbacks: {
             onTotalScroll: app.loadMore,
@@ -185,14 +243,7 @@ app.init = function() {
             case keys.KEY_LEFT:
                 if (app.state === constants.STATE_BROWSE) {
                     if (app.activeArea === constants.AREA_RESULTS) {
-                        var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
-                        if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].x > 0) {
-                            $newActiveCell = $('#item-' + (app.areas[constants.AREA_RESULTS].x - 1) + '-' + app.areas[constants.AREA_RESULTS].y);
-                            if ($newActiveCell.length > 0) {
-                                app.areas[constants.AREA_RESULTS].x--;
-                                app.showStreamItem($newActiveCell);
-                            }
-                        }
+                        app.navigateItems(keys.KEY_LEFT);
                     } else if (app.activeArea == constants.AREA_FILTERS) {
                         if (app.areas[constants.AREA_FILTERS].x > 0) {
                             app.areas[constants.AREA_FILTERS].x--;
@@ -206,15 +257,10 @@ app.init = function() {
                     }
                 } else if (app.state === constants.STATE_SELECT_GAME) {
                     if (app.activeArea == constants.AREA_GAME_RESULTS) {
-                        var $newActiveCell, $activeCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
-                        if ($activeCell.length > 0 && app.areas[constants.AREA_GAME_RESULTS].x > 0) {
-                            $newActiveCell = $('#game-item-' + (app.areas[constants.AREA_GAME_RESULTS].x - 1) + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
-                            if ($newActiveCell.length > 0) {
-                                app.areas[constants.AREA_GAME_RESULTS].x--;
-                                app.showGameItem($newActiveCell);
-                            }
-                        }
+                        app.navigateGameItems(keys.KEY_LEFT);
                     }
+                } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
+                    app.navigateLanguageItems(keys.KEY_LEFT);
                 } else if (app.state === constants.STATE_EXIT) {
                     var $exitButton = $('#button-exit'); 
                     if (!$exitButton.hasClass('selected')) {
@@ -226,52 +272,33 @@ app.init = function() {
             case keys.KEY_UP:
                 if (app.state === constants.STATE_BROWSE) {
                     if (app.activeArea == constants.AREA_RESULTS) {
-                        var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
-                        if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].y > 0) {
-                            $newActiveCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + (app.areas[constants.AREA_RESULTS].y - 1));
-                            if ($newActiveCell.length > 0) {
-                                app.areas[constants.AREA_RESULTS].y--;
-                                app.showStreamItem($newActiveCell);
-                            }
-                        } else if (app.areas[constants.AREA_RESULTS].y == 0) {
+                        app.navigateItems(keys.KEY_UP, function() {
                             if (app.areas[constants.AREA_FILTERS].columns > 0) {
                                 app.activateFiltersArea();
                             } else {
                                 app.activatePagesArea();
                             }
-                        }
+                        });
                     } else if (app.activeArea == constants.AREA_FILTERS) {
                         app.activatePagesArea();
                     }
                 } else if (app.state === constants.STATE_SELECT_GAME) {
                     if (app.activeArea == constants.AREA_GAME_RESULTS) {
-                        var $newActiveCell, $activeCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
-                        if ($activeCell.length > 0 && app.areas[constants.AREA_GAME_RESULTS].y > 0) {
-                            $newActiveCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + (app.areas[constants.AREA_GAME_RESULTS].y - 1));
-                            if ($newActiveCell.length > 0) {
-                                app.areas[constants.AREA_GAME_RESULTS].y--;
-                                app.showGameItem($newActiveCell);
-                            }
-                        } else {
+                        app.navigateGameItems(keys.KEY_UP, function() {
                             app.activateGameSearchArea();
-                        }
+                        });
                     } else if (app.activeArea == constants.AREA_GAME_SEARCH && app.filters.game) {
                         app.$gameSearchInput.blur();
                         app.activateGameClearArea();
                     }
+                } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
+                    app.navigateLanguageItems(keys.KEY_UP);
                 }
                 break;
             case keys.KEY_RIGHT:
                 if (app.state === constants.STATE_BROWSE) {
                     if (app.activeArea == constants.AREA_RESULTS) {
-                        var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
-                        if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].x < app.areas[constants.AREA_RESULTS].columns - 1) {
-                            $newActiveCell = $('#item-' + (app.areas[constants.AREA_RESULTS].x + 1) + '-' + app.areas[constants.AREA_RESULTS].y);
-                            if ($newActiveCell.length > 0) {
-                                app.areas[constants.AREA_RESULTS].x++;
-                                app.showStreamItem($newActiveCell);
-                            }
-                        }
+                        app.navigateItems(keys.KEY_RIGHT);
                     } else if (app.activeArea == constants.AREA_FILTERS) {
                         if (app.areas[constants.AREA_FILTERS].x < app.areas[constants.AREA_FILTERS].columns - 1) {
                             app.areas[constants.AREA_FILTERS].x++;
@@ -285,15 +312,10 @@ app.init = function() {
                     }
                 } else if (app.state === constants.STATE_SELECT_GAME) {
                     if (app.activeArea == constants.AREA_GAME_RESULTS) {
-                        var $newActiveCell, $activeCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
-                        if ($activeCell.length > 0 && app.areas[constants.AREA_GAME_RESULTS].y < app.areas[constants.AREA_GAME_RESULTS].columns - 1) {
-                            $newActiveCell = $('#game-item-' + (app.areas[constants.AREA_GAME_RESULTS].x + 1) + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
-                            if ($newActiveCell.length > 0) {
-                                app.areas[constants.AREA_GAME_RESULTS].x++;
-                                app.showGameItem($newActiveCell);
-                            }
-                        }
+                        app.navigateGameItems(keys.KEY_RIGHT);
                     }
+                } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
+                    app.navigateLanguageItems(keys.KEY_RIGHT);
                 } else if (app.state === constants.STATE_EXIT) {
                     var $cancelButton = $('#button-cancel'); 
                     if (!$cancelButton.hasClass('selected')) {
@@ -305,14 +327,7 @@ app.init = function() {
             case keys.KEY_DOWN:
                 if (app.state === constants.STATE_BROWSE) {
                     if (app.activeArea == constants.AREA_RESULTS) {
-                        var $newActiveCell, $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
-                        if ($activeCell.length > 0 && app.areas[constants.AREA_RESULTS].y < app.areas[constants.AREA_RESULTS].rows - 1) {
-                            $newActiveCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + (app.areas[constants.AREA_RESULTS].y + 1));
-                            if ($newActiveCell.length > 0) {
-                                app.areas[constants.AREA_RESULTS].y++;
-                                app.showStreamItem($newActiveCell);
-                            }
-                        }
+                        app.navigateItems(keys.KEY_DOWN);
                     } else if (app.activeArea == constants.AREA_FILTERS) {
                         if (app.areas[constants.AREA_RESULTS].count > 0) {
                             app.activateItemsArea();
@@ -326,14 +341,7 @@ app.init = function() {
                     }
                 } else if (app.state === constants.STATE_SELECT_GAME) {
                     if (app.activeArea == constants.AREA_GAME_RESULTS) {
-                        var $newActiveCell, $activeCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
-                        if ($activeCell.length > 0 && app.areas[constants.AREA_GAME_RESULTS].y < app.areas[constants.AREA_GAME_RESULTS].rows - 1) {
-                            $newActiveCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + (app.areas[constants.AREA_GAME_RESULTS].y + 1));
-                            if ($newActiveCell.length > 0) {
-                                app.areas[constants.AREA_GAME_RESULTS].y++;
-                                app.showGameItem($newActiveCell);
-                            }
-                        }
+                        app.navigateGameItems(keys.KEY_DOWN);
                     } else if (app.activeArea == constants.AREA_GAME_SEARCH) {
                         if (app.areas[constants.AREA_GAME_RESULTS].columns > 0) {
                             app.$gameSearchInput.blur();
@@ -342,6 +350,8 @@ app.init = function() {
                     } else if (app.activeArea == constants.AREA_GAME_CLEAR) {
                         app.activateGameSearchArea();
                     }
+                } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
+                    app.navigateLanguageItems(keys.KEY_DOWN);
                 }
                 break;
             case keys.KEY_ENTER:
@@ -374,6 +384,18 @@ app.init = function() {
                         app.clearGame();
                         app.returnState();
                         app.refresh();
+                    }
+                } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
+                    var $selectedItem = $('#language-item-' + app.areas[constants.AREA_LANGUAGES].x + '-' + app.areas[constants.AREA_LANGUAGES].y);
+                    if ($selectedItem.length > 0) {
+                        app.toggleLanguage($selectedItem);
+                        if (app.timeoutRefresh) {
+                            clearTimeout(app.timeoutRefresh);
+                        }
+                        app.timeoutRefresh = setTimeout(function() {
+                            app.timeoutRefresh = null;
+                            app.refresh(true);
+                        }, 500);
                     }
                 } else if (app.state === constants.STATE_ERROR) {
                     app.returnState();
@@ -419,6 +441,73 @@ app.init = function() {
         }
     });
     app.refresh();
+};
+app.getNewActiveCell = function(prefix, area, keyCode, initUpperArea) {
+    switch (keyCode) {
+        case keys.KEY_LEFT:
+            var $newActiveCell, $activeCell = $('#' + prefix + '-' + app.areas[area].x + '-' + app.areas[area].y);
+            if ($activeCell.length > 0 && app.areas[area].x > 0) {
+                $newActiveCell = $('#' + prefix + '-' + (app.areas[area].x - 1) + '-' + app.areas[area].y);
+                if ($newActiveCell.length > 0) {
+                    app.areas[area].x--;
+                    return $newActiveCell;
+                }
+            }
+            break;
+        case keys.KEY_UP:
+            var $newActiveCell, $activeCell = $('#' + prefix + '-' + app.areas[area].x + '-' + app.areas[area].y);
+            if ($activeCell.length > 0 && app.areas[area].y > 0) {
+                $newActiveCell = $('#' + prefix + '-' + app.areas[area].x + '-' + (app.areas[area].y - 1));
+                if ($newActiveCell.length > 0) {
+                    app.areas[area].y--;
+                    return $newActiveCell;
+                }
+            } else if (typeof initUpperArea === 'function') {
+                initUpperArea();
+            }
+            break;
+        case keys.KEY_RIGHT:
+            var $newActiveCell, $activeCell = $('#' + prefix + '-' + app.areas[area].x + '-' + app.areas[area].y);
+            if ($activeCell.length > 0 && app.areas[area].x < app.areas[area].columns - 1) {
+                $newActiveCell = $('#' + prefix + '-' + (app.areas[area].x + 1) + '-' + app.areas[area].y);
+                if ($newActiveCell.length > 0) {
+                    app.areas[area].x++;
+                    return $newActiveCell;
+                }
+            }
+            break;
+        case keys.KEY_DOWN:
+            var $newActiveCell, $activeCell = $('#' + prefix + '-' + app.areas[area].x + '-' + app.areas[area].y);
+            if ($activeCell.length > 0 && app.areas[area].y < app.areas[area].rows - 1) {
+                $newActiveCell = $('#' + prefix + '-' + app.areas[area].x + '-' + (app.areas[area].y + 1));
+                if ($newActiveCell.length > 0) {
+                    app.areas[area].y++;
+                    return $newActiveCell;
+                }
+            }
+            break;
+    }
+    
+    return null;
+};
+app.navigateItems = function(keyCode, initUpperArea) {
+    var $newActiveCell = app.getNewActiveCell('item', constants.AREA_RESULTS, keyCode, initUpperArea);
+    if ($newActiveCell) {
+        app.showStreamItem($newActiveCell);
+    }
+};
+app.navigateGameItems = function(keyCode, initUpperArea) {
+    var $newActiveCell = app.getNewActiveCell('game-item', constants.AREA_GAME_RESULTS, keyCode, initUpperArea);
+    if ($newActiveCell) {
+        app.showGameItem($newActiveCell);
+    }
+};
+app.navigateLanguageItems = function(keyCode, initUpperArea) {
+    var $newActiveCell = app.getNewActiveCell('language-item', constants.AREA_LANGUAGES, keyCode, initUpperArea);
+    if ($newActiveCell) {
+        app.clearSelection(app.$selectLanguage);
+        $newActiveCell.addClass('selected');
+    }
 };
 app.setState = function(state, callback) {
     app.returnStack.push({
@@ -580,6 +669,7 @@ app.loadMore = function() {
         });
     }
 }
+app.timeoutRefresh = null;
 app.refreshing = null;
 app.refresh = function(force) {
     if (app.refreshing && force) {
@@ -625,8 +715,8 @@ app.getLiveChannels = function(limit, offset, callback) {
     if (app.filters.channels) {
         url += '&channels=' + encodeURIComponent(app.filters.channels);
     }
-    if (app.filters.languages) {
-        url += '&language=' + encodeURIComponent(app.filters.languages);
+    if (app.filters.languages.length > 0) {
+        url += '&language=' + encodeURIComponent(app.filters.languages.join(','));
     }
     if (app.filters.streamType) {
         url += '&type=' + encodeURIComponent(app.filters.streamType);
@@ -686,8 +776,8 @@ app.getVideos = function(limit, offset, callback) {
     if (app.filters.period) {
         url += '&period=' + encodeURIComponent(app.filters.period);
     }
-    if (app.filters.languages) {
-        url += '&language=' + encodeURIComponent(app.filters.languages);
+    if (app.filters.languages.length > 0) {
+        url += '&language=' + encodeURIComponent(app.filters.languages.join(','));
     }
     if (app.filters.videoType) {
         url += '&type=' + encodeURIComponent(app.filters.videoType);
@@ -1005,21 +1095,51 @@ app.selectCurrentFilter = function() {
             });
             break;
         case 'languages':
-        	app.$selectlanguage.show();
+        	app.$selectLanguage.show();
         	app.setState(constants.STATE_SELECT_LANGUAGE, function() {
-                app.$selectlanguage.hide();
+                app.$selectLanguage.hide();
             });
         	break;
     }
 };
+app.toggleLanguage = function($selectedItem) {
+    var code = $selectedItem.data('code');
+    if (code === 'clear') {
+        app.filters.languages = [];
+        var $active = app.$selectLanguage.find('.active').each(function() {
+            $(this).removeClass('active');
+            $(this).find('input').prop('checked', false);
+        });
+        $('.filter-languages').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_LANGUAGES);
+    } else {
+        var $input = $selectedItem.find('input');
+        if ($selectedItem.hasClass('active')) {
+            $selectedItem.removeClass('active');
+            $input.prop('checked', false);
+            while ((x = app.filters.languages.indexOf(code)) !== -1) {
+                app.filters.languages.splice(x, 1);
+            }
+        } else {
+            $selectedItem.addClass('active');
+            $input.prop('checked', true);
+            app.filters.languages.push(code);
+        }
+    }
+    if (app.filters.languages.length > 0) {
+        $('.filter-languages').addClass('chosen').find('.text').text('(' + app.filters.languages.length + ') ' + 
+                messages.FILTER_STREAM_LANGUAGES);
+    } else {
+        $('.filter-languages').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_LANGUAGES);
+    }
+};
 app.selectGame = function(game) {
     app.filters.game = game;
-    $('.stream-filter-game').addClass('chosen').find('.text').text(game);
+    $('.filter-game').addClass('chosen').find('.text').text(game);
     app.$gameClear.show().find('.text').text(game);
 };
 app.clearGame = function() {
     app.filters.game = null;
-    $('.stream-filter-game').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_GAME);
+    $('.filter-game').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_GAME);
     app.$gameClear.hide();
 };
 app.prepareGamesSearch = function() {
