@@ -21,6 +21,12 @@ var messages = {
 	HINT_PRESETS: "Presets",
 	HINT_SEARCH: "Search",
 	
+	GAME_SELECT: "Select game",
+	GAME_SEARCH: "Search game",
+	
+	LANGUAGE_SELECT: "Select language",
+	LANGUAGE_CLEAR: "Clear",
+	
 	LOADING: "Loading...",
     BUFFERING: "Buffering...",
     

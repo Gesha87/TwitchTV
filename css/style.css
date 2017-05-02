@@ -42,6 +42,9 @@ body.init {
 	margin: 3vh 0 0 0;
 	line-height: 0;
 }
+.column.text {
+	line-height: 1.2;
+}
 
 .column:first-child {
 	margin-left: 2vh;
@@ -186,7 +189,6 @@ img.loaded {
 
 .logo {
 	padding: 2.0vh;
-	/* display: inline-block; */
 	float: left;
 }
 
@@ -195,7 +197,6 @@ img.loaded {
 }
 
 .controls {
-	/* display: inline-block; */
 	float: left;
 }
 
@@ -439,8 +440,12 @@ img.loaded {
 }
 
 .filter-list-item {
-	padding: 0.3vh;
+	padding: 1vh;
 	white-space: nowrap;
+	color: #bbb8c0;
+}
+.filter-list-item.active {
+    color: #6441a4;
 }
 
 .filter-list-item input {

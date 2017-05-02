@@ -64,6 +64,12 @@ app.translateLayout = function() {
     $('#button-exit').text(messages.BUTTON_EXIT);
     $('#button-cancel').text(messages.BUTTON_CANCEL);
     $('#button-close').text(messages.BUTTON_CLOSE);
+    // select game
+    app.$selectGame.find('.caption > .text').text(messages.GAME_SELECT);
+    $('#game-search-input').attr('placeholder', messages.GAME_SEARCH);
+    // select language
+    app.$selectlanguage.find('.caption > .text').text(messages.LANGUAGE_SELECT);
+    $('#clear-language-filter').text(messages.LANGUAGE_CLEAR);
     // others
     $('#loading').find('.text').text(messages.LOADING);
     $('#confirm-exit').text(messages.CONFIRM_EXIT);
@@ -99,6 +105,7 @@ app.$gameItemsContainer = null;
 app.$gameSelectBox = null;
 app.$gameSearchInput = null;
 app.$gameClear = null;
+app.$selectlanguage = null;
 app.init = function() {
     app.$main = $('#main');
     app.$loading = $('#loading-wrapper');
@@ -123,6 +130,7 @@ app.init = function() {
     app.$gameSelectBox = $('#select-game-box');
     app.$gameSearchInput = $('#game-search-input');
     app.$gameClear = $('#game-clear');
+    app.$selectlanguage = $('#select-language');
     app.translateLayout();
     app.setUnderscore();
     app.areas[constants.AREA_PAGES].columns = app.$pages.find('.page').length;
@@ -143,7 +151,7 @@ app.init = function() {
     	if (query == lastQuery) return;
     	lastQuery = query;
     	if (app.searchGameTimeout) { 
-    	    clearTimeout(searchGameTimeout);
+    	    clearTimeout(app.searchGameTimeout);
     	}
     	if (app.loadingGames) {
     	    app.loadingGames.abort();
@@ -355,9 +363,6 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_GAME) {
                     if (app.activeArea == constants.AREA_GAME_SEARCH) {
                         app.$gameSearchInput.focus();
-                        /*app.setState(constants.STATE_TYPING, function() {
-                            app.$gameSearchInput.blur();
-                        });*/
                     } else if (app.activeArea == constants.AREA_GAME_RESULTS) {
                         var $selectedItem = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
                         if ($selectedItem.length > 0) {
@@ -627,52 +632,51 @@ app.getLiveChannels = function(limit, offset, callback) {
         url += '&type=' + encodeURIComponent(app.filters.streamType);
     }
     return $.ajax($.extend({}, app.twitchApiOptions, {
-        url: url, 
-        success: function(response) {
-            console.log(response);
-            var i, ii, x, y, stream, $newCell;
-            var countResults = app.areas[constants.AREA_RESULTS].count;
-            var countRows = app.areas[constants.AREA_RESULTS].rows;
-            var $newColumn = app.$itemsContainer.find('.column:last-child');
-            for (i = 0; i < response.streams.length; i++) {
-                ii = i + countResults;
-                if ((y = ii % countRows) == 0) {
-                    $newColumn = $('<div class="column"/>');
-                    app.$itemsContainer.append($newColumn);
-                    app.areas[constants.AREA_RESULTS].columns++;
-                }
-                x = (ii - y) / countRows;
-                stream = response.streams[i];
-                $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
-                    <i class="fa fa-fw fa-twitch"></i>\
-                    <img src="' + stream.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
-                    <div class="stream-channel-name">' + stream.channel.display_name + '</div>\
-                </div>');
-                $newCell.data('channel', stream.channel.name);
-                $newCell.data('channel-name', stream.channel.display_name);
-                $newCell.data('viewers', stream.viewers);
-                $newCell.data('game', stream.game);
-                $newCell.data('status', stream.channel.status);
-                $newColumn.append($newCell);
-                if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
-                    app.showStreamItem($newCell);
-                }
-            }
-            app.areas[constants.AREA_RESULTS].count += response.streams.length;
-            app.$items.mCustomScrollbar('update');
-            app.autoHideScrollbar(app.$items);
-            app.hasMoreResults = response.streams.length > 0;
-        },
-        complete: function() {
-            app.$loading.hide();
-        	if (typeof callback == 'function') {
-                callback();
-            }
-        },
-        error: function() {
-            app.showError(messages.ERROR_LOADING_FAILED);
+    	url: url
+    })).done(function(response) {
+        console.log(response);
+        if (response.streams.length > 0) {
+	        var i, ii, x, y, stream, $newCell;
+	        var countResults = app.areas[constants.AREA_RESULTS].count;
+	        var countRows = app.areas[constants.AREA_RESULTS].rows;
+	        var $newColumn = app.$itemsContainer.find('.column:last-child');
+	        for (i = 0; i < response.streams.length; i++) {
+	            ii = i + countResults;
+	            if ((y = ii % countRows) == 0) {
+	                $newColumn = $('<div class="column"/>');
+	                app.$itemsContainer.append($newColumn);
+	                app.areas[constants.AREA_RESULTS].columns++;
+	            }
+	            x = (ii - y) / countRows;
+	            stream = response.streams[i];
+	            $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
+	                <i class="fa fa-fw fa-twitch"></i>\
+	                <img src="' + stream.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+	                <div class="stream-channel-name">' + stream.channel.display_name + '</div>\
+	            </div>');
+	            $newCell.data('channel', stream.channel.name);
+	            $newCell.data('channel-name', stream.channel.display_name);
+	            $newCell.data('viewers', stream.viewers);
+	            $newCell.data('game', stream.game);
+	            $newCell.data('status', stream.channel.status);
+	            $newColumn.append($newCell);
+	            if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
+	                app.showStreamItem($newCell);
+	            }
+	        }
+	        app.areas[constants.AREA_RESULTS].count += response.streams.length;
+        } else if (offset == 0) {
+        	app.$itemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
         }
-    }));
+        app.$items.mCustomScrollbar('update');
+        app.autoHideScrollbar(app.$items);
+        app.hasMoreResults = response.streams.length > 0;
+    }).fail(app.loadingErrorHandler).always(function() {
+        app.$loading.hide();
+    	if (typeof callback == 'function') {
+            callback();
+        }
+    });
 };
 app.getVideos = function(limit, offset, callback) {
     var url = 'https://api.twitch.tv/kraken/videos/top?limit=' + limit + '&offset=' + offset;
@@ -692,101 +696,96 @@ app.getVideos = function(limit, offset, callback) {
         url += '&sort=' + encodeURIComponent(app.filters.sort);
     }
     return $.ajax($.extend({}, app.twitchApiOptions, {
-        url: url, 
-        success: function(response) {
-            console.log(response);
-            var i, ii, x, y, vod, $newCell;
-            var countResults = app.areas[constants.AREA_RESULTS].count;
-            var countRows = app.areas[constants.AREA_RESULTS].rows;
-            var $newColumn = app.$itemsContainer.find('.column:last-child');
-            for (i = 0; i < response.vods.length; i++) {
-                ii = i + countResults;
-                if ((y = ii % countRows) == 0) {
-                    $newColumn = $('<div class="column"/>');
-                    app.$itemsContainer.append($newColumn);
-                    app.areas[constants.AREA_RESULTS].columns++;
-                }
-                x = (ii - y) / countRows;
-                vod = response.vods[i];
-                $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
-                    <i class="fa fa-fw fa-twitch"></i>\
-                    <img src="' + vod.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
-                    <div class="stream-channel-name">' + vod.channel.display_name + '</div>\
-                </div>');
-                $newCell.data('channel', vod.channel.name);
-                $newCell.data('channel-name', vod.channel.display_name);
-                $newCell.data('viewers', vod.views);
-                $newCell.data('game', vod.game);
-                $newCell.data('status', vod.title);
-                $newCell.data('vod-id', vod._id.toString().replace(/[^0-9]/g, ''));
-                $newColumn.append($newCell);
-                if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
-                    app.showStreamItem($newCell);
-                }
-            }
-            app.areas[constants.AREA_RESULTS].count += response.vods.length;
-            app.$items.mCustomScrollbar('update');
-            app.autoHideScrollbar(app.$items);
-            app.hasMoreResults = response.vods.length > 0;
-        },
-        complete: function() {
-            app.$loading.hide();
-        	if (typeof callback == 'function') {
-                callback();
-            }
-        },
-        error: function() {
-            app.showError(messages.ERROR_LOADING_FAILED);
+        url: url
+    })).done(function(response) {
+        console.log(response);
+        if (response.vods.length > 0) {
+	        var i, ii, x, y, vod, $newCell;
+	        var countResults = app.areas[constants.AREA_RESULTS].count;
+	        var countRows = app.areas[constants.AREA_RESULTS].rows;
+	        var $newColumn = app.$itemsContainer.find('.column:last-child');
+	        for (i = 0; i < response.vods.length; i++) {
+	            ii = i + countResults;
+	            if ((y = ii % countRows) == 0) {
+	                $newColumn = $('<div class="column"/>');
+	                app.$itemsContainer.append($newColumn);
+	                app.areas[constants.AREA_RESULTS].columns++;
+	            }
+	            x = (ii - y) / countRows;
+	            vod = response.vods[i];
+	            $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
+	                <i class="fa fa-fw fa-twitch"></i>\
+	                <img src="' + vod.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+	                <div class="stream-channel-name">' + vod.channel.display_name + '</div>\
+	            </div>');
+	            $newCell.data('channel', vod.channel.name);
+	            $newCell.data('channel-name', vod.channel.display_name);
+	            $newCell.data('viewers', vod.views);
+	            $newCell.data('game', vod.game);
+	            $newCell.data('status', vod.title);
+	            $newCell.data('vod-id', vod._id.toString().replace(/[^0-9]/g, ''));
+	            $newColumn.append($newCell);
+	            if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
+	                app.showStreamItem($newCell);
+	            }
+	        }
+	        app.areas[constants.AREA_RESULTS].count += response.vods.length;
+        } else if (offset == 0) {
+        	app.$itemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
         }
-    }));
+        app.$items.mCustomScrollbar('update');
+        app.autoHideScrollbar(app.$items);
+        app.hasMoreResults = response.vods.length > 0;
+    }).fail(app.loadingErrorHandler).always(function() {
+        app.$loading.hide();
+    	if (typeof callback == 'function') {
+            callback();
+        }
+    });
 };
 app.getGames = function(callback) {
     return $.ajax($.extend({}, app.twitchApiOptions, {
-        url: 'https://api.twitch.tv/kraken/games/top?limit=100', 
-        success: function(response) {
-            console.log(response);
-            var i, x, y, game, $newCell, $newColumn;
-            var countRows = app.areas[constants.AREA_GAME_RESULTS].rows;
-            for (i = 0; i < response.top.length; i++) {
-                if ((y = i % countRows) == 0) {
-                    $newColumn = $('<div class="column"/>');
-                    app.$gameItemsContainer.append($newColumn);
-                    app.areas[constants.AREA_GAME_RESULTS].columns++;
-                }
-                x = (i - y) / countRows;
-                game = response.top[i];
-                $newCell = $('<div class="cell game-cell" id="game-item-' + x + '-' + y + '">\
-                    <i class="fa fa-fw fa-twitch"></i>\
-                    <img src="' + game.game.box.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
-                    <div class="game-name ellipsed">' + game.game.name + '</div>\
-                </div>');
-                $newCell.data('viewers', game.viewers);
-                $newCell.data('channels', game.channels);
-                $newCell.data('name', game.game.name);
-                $newColumn.append($newCell);
-                if (i == 0 && app.activeArea == constants.AREA_GAME_RESULTS) {
-                    app.showGameItem($newCell);
-                }
+        url: 'https://api.twitch.tv/kraken/games/top?limit=100'
+    })).done(function(response) {
+        console.log(response);
+        var i, x, y, game, $newCell, $newColumn;
+        var countRows = app.areas[constants.AREA_GAME_RESULTS].rows;
+        for (i = 0; i < response.top.length; i++) {
+            if ((y = i % countRows) == 0) {
+                $newColumn = $('<div class="column"/>');
+                app.$gameItemsContainer.append($newColumn);
+                app.areas[constants.AREA_GAME_RESULTS].columns++;
             }
-            app.$gameItems.mCustomScrollbar('update');
-            app.autoHideScrollbar(app.$gameItems);
-        },
-        complete: function() {
-            app.$loading.hide();
-        	if (typeof callback == 'function') {
-                callback();
+            x = (i - y) / countRows;
+            game = response.top[i];
+            $newCell = $('<div class="cell game-cell" id="game-item-' + x + '-' + y + '">\
+                <i class="fa fa-fw fa-twitch"></i>\
+                <img src="' + game.game.box.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+                <div class="game-name ellipsed">' + game.game.name + '</div>\
+            </div>');
+            $newCell.data('viewers', game.viewers);
+            $newCell.data('channels', game.channels);
+            $newCell.data('name', game.game.name);
+            $newColumn.append($newCell);
+            if (i == 0 && app.activeArea == constants.AREA_GAME_RESULTS) {
+                app.showGameItem($newCell);
             }
-        },
-        error: function() {
-            app.showError(messages.ERROR_LOADING_FAILED);
         }
-    }));
+        app.$gameItems.mCustomScrollbar('update');
+        app.autoHideScrollbar(app.$gameItems);
+    }).fail(app.loadingErrorHandler).always(function() {
+        app.$loading.hide();
+    	if (typeof callback == 'function') {
+            callback();
+        }
+    });
 };
 app.getGamesSearch = function(query, callback) {
 	return $.ajax($.extend({}, app.twitchApiOptions, {
-        url: 'https://api.twitch.tv/kraken/search/games/?query=' + encodeURIComponent(query), 
-        success: function(response) {
-            console.log(response);
+        url: 'https://api.twitch.tv/kraken/search/games/?query=' + encodeURIComponent(query)
+    })).done(function(response) {
+        console.log(response);
+        if (response.games) {
             var i, x, y, game, $newCell, $newColumn;
             var countRows = app.areas[constants.AREA_GAME_RESULTS].rows;
             for (i = 0; i < response.games.length; i++) {
@@ -809,21 +808,18 @@ app.getGamesSearch = function(query, callback) {
                     app.showGameItem($newCell);
                 }
             }
-            app.$gameItems.mCustomScrollbar('update');
-            app.autoHideScrollbar(app.$gameItems);
-        },
-        complete: function() {
-        	app.$loading.hide();
-        	if (typeof callback == 'function') {
-                callback();
-            }
-        },
-        error: function() {
-            app.showError(messages.ERROR_LOADING_FAILED);
+        } else {
+        	app.$gameItemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
         }
-    }));
+        app.$gameItems.mCustomScrollbar('update');
+        app.autoHideScrollbar(app.$gameItems);
+    }).fail(app.loadingErrorHandler).always(function() {
+        app.$loading.hide();
+    	if (typeof callback == 'function') {
+            callback();
+        }
+    });
 };
-app.timeoutAutoHide = null;
 app.showStreamItem = function($element) {
     app.$selectBox.find('.stream-channel-name').html($element.data('channel-name'));
     app.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + 
@@ -834,19 +830,19 @@ app.showStreamItem = function($element) {
 };
 app.showGameItem = function ($element) {
 	var data;
-	if (data = $element.data('viewers')) {
+	if ((data = $element.data('viewers')) !== undefined) {
 	    app.$gameSelectBox.find('.game-viewers').html('<i class="fa fa-eye"></i> ' + 
 	            data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
 	} else {
 		app.$gameSelectBox.find('.game-viewers').html('');
 	}
-	if (data = $element.data('channels')) {
+	if ((data = $element.data('channels')) !== undefined) {
 	    app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-video-camera"></i> ' + 
 	            data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
 	} else {
 		app.$gameSelectBox.find('.game-channels').html('');
 	}
-	if (data = $element.data('popularity')) {
+	if ((data = $element.data('popularity')) !== undefined) {
 	    app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-fire"></i> ' + 
 	            data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
 	} else {
@@ -884,6 +880,7 @@ app.showItem = function ($element, $items, $itemsContainer, $selectBox) {
     app.clearSelection($items);
     $element.addClass('selected');
 };
+app.timeoutAutoHide = null;
 app.autoHideScrollbar = function($items) {
     if (app.timeoutAutoHide) {
         clearTimeout(app.timeoutAutoHide);
@@ -892,7 +889,7 @@ app.autoHideScrollbar = function($items) {
     $items.removeClass('mCS-autoHide');
     app.timeoutAutoHide = setTimeout(function() {
         $items.addClass('mCS-autoHide');
-    }, 2000);
+    }, 1500);
 };
 app.clearItems = function($items, $container) {
     $container.empty();
@@ -1007,6 +1004,12 @@ app.selectCurrentFilter = function() {
                 app.loadingGames = null;
             });
             break;
+        case 'languages':
+        	app.$selectlanguage.show();
+        	app.setState(constants.STATE_SELECT_LANGUAGE, function() {
+                app.$selectlanguage.hide();
+            });
+        	break;
     }
 };
 app.selectGame = function(game) {

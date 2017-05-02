@@ -126,93 +126,119 @@
             </div>
         </div>
     </div>
-    <div id="select-language" class="select-wrapper text-center" style="display: block;">
-        <div class="caption">
-            <div class="text">Выбор языка</div>
-        </div>
-        <div class="filter-list">
-            <div class="filter-list-item">
-                <div class="text">Очистить фильтр</div>
-            </div>
-		    <div class="filter-list-item">
-                <input type="checkbox" data-code="ru"> <div class="text">Русский</div>
-		    </div>
-		    <div class="filter-list-item">
-                <input type="checkbox" data-code="en"> <div class="text">English</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="da"> <div class="text">Dansk</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="de"> <div class="text">Deutsch</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="es"> <div class="text">Español</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="fr"> <div class="text">Français</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="it"> <div class="text">Italiano</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="hu"> <div class="text">Magyar</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="nl"> <div class="text">Nederlands</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="no"> <div class="text">Norsk</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="pl"> <div class="text">Polski</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="pt"> <div class="text">Português</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="sk"> <div class="text">Slovenčina</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="fi"> <div class="text">Suomi</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="sv"> <div class="text">Svenska</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="vi"> <div class="text">Tiếng Việt</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="tr"> <div class="text">Türkçe</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="cs"> <div class="text">Čeština</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="el"> <div class="text">Ελληνικά</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="bg"> <div class="text">Български</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="ar"> <div class="text">العربية
-		    </div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="th"> <div class="text">ภาษาไทย</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="zh"> <div class="text">中文</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="ja"> <div class="text">日本語</div>
-		    </div>
-		    <div class="filter-list-item">
-		      <input type="checkbox" data-code="ko"> <div class="text">한국어</div>
-		    </div>
+	<div id="select-language" class="select-wrapper text-center">
+		<div class="caption">
+			<div class="text">Выбор языка</div>
 		</div>
-    </div>
-    <div id="error-dialog" class="dialog-wrapper">
+		<div class="filter-list">
+			<div class="filter-list-item selected">
+				<div class="text" id="clear-language-filter">Очистить</div>
+			</div>
+			<div class="filter-list-item" data-code="ru">
+				<input type="checkbox">
+				<div class="text">Русский</div>
+			</div>
+			<div class="filter-list-item" data-code="en">
+				<input type="checkbox">
+				<div class="text">English</div>
+			</div>
+			<div class="filter-list-item" data-code="da">
+				<input type="checkbox">
+				<div class="text">Dansk</div>
+			</div>
+			<div class="filter-list-item" data-code="de">
+				<input type="checkbox">
+				<div class="text">Deutsch</div>
+			</div>
+			<div class="filter-list-item" data-code="es">
+				<input type="checkbox">
+				<div class="text">Español</div>
+			</div>
+			<div class="filter-list-item" data-code="fr">
+				<input type="checkbox">
+				<div class="text">Français</div>
+			</div>
+			<div class="filter-list-item" data-code="it">
+				<input type="checkbox">
+				<div class="text">Italiano</div>
+			</div>
+			<div class="filter-list-item" data-code="hu">
+				<input type="checkbox">
+				<div class="text">Magyar</div>
+			</div>
+			<div class="filter-list-item" data-code="nl">
+				<input type="checkbox">
+				<div class="text">Nederlands</div>
+			</div>
+			<div class="filter-list-item" data-code="no">
+				<input type="checkbox">
+				<div class="text">Norsk</div>
+			</div>
+			<div class="filter-list-item" data-code="pl">
+				<input type="checkbox">
+				<div class="text">Polski</div>
+			</div>
+			<div class="filter-list-item" data-code="pt">
+				<input type="checkbox">
+				<div class="text">Português</div>
+			</div>
+		</div>
+		<div class="filter-list">
+			<div class="filter-list-item" data-code="sk">
+				<input type="checkbox">
+				<div class="text">Slovenčina</div>
+			</div>
+			<div class="filter-list-item" data-code="fi">
+				<input type="checkbox">
+				<div class="text">Suomi</div>
+			</div>
+			<div class="filter-list-item" data-code="sv">
+				<input type="checkbox">
+				<div class="text">Svenska</div>
+			</div>
+			<div class="filter-list-item" data-code="vi">
+				<input type="checkbox">
+				<div class="text">Tiếng Việt</div>
+			</div>
+			<div class="filter-list-item" data-code="tr">
+				<input type="checkbox">
+				<div class="text">Türkçe</div>
+			</div>
+			<div class="filter-list-item" data-code="cs">
+				<input type="checkbox">
+				<div class="text">Čeština</div>
+			</div>
+			<div class="filter-list-item" data-code="el">
+				<input type="checkbox">
+				<div class="text">Ελληνικά</div>
+			</div>
+			<div class="filter-list-item" data-code="bg">
+				<input type="checkbox">
+				<div class="text">Български</div>
+			</div>
+			<div class="filter-list-item" data-code="ar">
+				<input type="checkbox">
+				<div class="text">العربية</div>
+			</div>
+			<div class="filter-list-item" data-code="th">
+				<input type="checkbox">
+				<div class="text">ภาษาไทย</div>
+			</div>
+			<div class="filter-list-item" data-code="zh">
+				<input type="checkbox">
+				<div class="text">中文</div>
+			</div>
+			<div class="filter-list-item" data-code="ja">
+				<input type="checkbox">
+				<div class="text">日本語</div>
+			</div>
+			<div class="filter-list-item" data-code="ko">
+				<input type="checkbox">
+				<div class="text">한국어</div>
+			</div>
+		</div>
+	</div>
+	<div id="error-dialog" class="dialog-wrapper">
         <div class="content">
             <div class="text" id="error-dialog-text">Ошибка</div>
             <div class="dialog-buttons">

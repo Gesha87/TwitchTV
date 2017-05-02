@@ -1,12 +1,10 @@
 var constants = {
     STATE_BROWSE: 'browse',
-    STATE_LOADING_TOKEN: 'loading-token',
-    STATE_LOADING_STREAM_INFO: 'loading-stream-info',
     STATE_WATCH: 'watch',
     STATE_SELECT_GAME: 'select-game',
+    STATE_SELECT_LANGUAGE: 'select-language',
     STATE_ERROR: 'error',
     STATE_EXIT: 'exit',
-    STATE_TYPING: 'typing',
     
     PAGE_LIVE_CHANNELS: 'live-channels',
     PAGE_VIDEOS: 'videos',
