@@ -11,6 +11,7 @@ app.areas[constants.AREA_VIDEO_FILTERS] = { columns: 0, x: 0 };
 app.areas[constants.AREA_PAGES] = { columns: 0, x: 0 };
 app.areas[constants.AREA_GAME_RESULTS] = { columns: 0, rows: 2, x: 0, y: 0 };
 app.areas[constants.AREA_LANGUAGES] = { columns: 0, rows: 13, x: 0, y: 1 };
+app.areas[constants.AREA_STREAM_TYPE] = { columns: 1, rows: 3, x: 0, y: 0 };
 app.filters = {
     game: null,
     channels: null,
@@ -163,6 +164,7 @@ app.$gameSelectBox = null;
 app.$gameSearchInput = null;
 app.$gameClear = null;
 app.$selectLanguage = null;
+app.$selectStreamType = null;
 app.init = function() {
     app.$main = $('#main');
     app.$loading = $('#loading-wrapper');
@@ -188,6 +190,7 @@ app.init = function() {
     app.$gameSearchInput = $('#game-search-input');
     app.$gameClear = $('#game-clear');
     app.$selectLanguage = $('#select-language');
+    app.$selectStreamType = $('#select-stream-type');
     app.translateLayout();
     app.setUnderscore();
     app.areas[constants.AREA_PAGES].columns = app.$pages.find('.page').length;
@@ -293,6 +296,8 @@ app.init = function() {
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_UP);
+                } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
+                	app.navigateStreamTypeItems(keys.KEY_UP);
                 }
                 break;
             case keys.KEY_RIGHT:
@@ -352,6 +357,8 @@ app.init = function() {
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_DOWN);
+                } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
+                	app.navigateStreamTypeItems(keys.KEY_DOWN);
                 }
                 break;
             case keys.KEY_ENTER:
@@ -378,12 +385,12 @@ app.init = function() {
                         if ($selectedItem.length > 0) {
                             app.selectGame($selectedItem.data('name'));
                             app.returnState();
-                            app.refresh();
+                            app.refresh(true);
                         }
                     } else if (app.activeArea == constants.AREA_GAME_CLEAR) {
                         app.clearGame();
                         app.returnState();
-                        app.refresh();
+                        app.refresh(true);
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     var $selectedItem = $('#language-item-' + app.areas[constants.AREA_LANGUAGES].x + '-' + app.areas[constants.AREA_LANGUAGES].y);
@@ -397,6 +404,13 @@ app.init = function() {
                             app.refresh(true);
                         }, 500);
                     }
+                } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
+                	var $selectedItem = $('#stream-type-item-' + app.areas[constants.AREA_STREAM_TYPE].x + '-' + app.areas[constants.AREA_STREAM_TYPE].y);
+                	if ($selectedItem.length > 0) {
+                		app.selectStreamType($selectedItem.data('type'));
+                		app.returnState();
+                		app.refresh(true);
+                	}
                 } else if (app.state === constants.STATE_ERROR) {
                     app.returnState();
                 } else if (app.state === constants.STATE_EXIT) {
@@ -506,6 +520,13 @@ app.navigateLanguageItems = function(keyCode, initUpperArea) {
     var $newActiveCell = app.getNewActiveCell('language-item', constants.AREA_LANGUAGES, keyCode, initUpperArea);
     if ($newActiveCell) {
         app.clearSelection(app.$selectLanguage);
+        $newActiveCell.addClass('selected');
+    }
+};
+app.navigateStreamTypeItems = function(keyCode, initUpperArea) {
+    var $newActiveCell = app.getNewActiveCell('stream-type-item', constants.AREA_STREAM_TYPE, keyCode, initUpperArea);
+    if ($newActiveCell) {
+        app.clearSelection(app.$selectStreamType);
         $newActiveCell.addClass('selected');
     }
 };
@@ -664,9 +685,15 @@ app.hasMoreResults = true;
 app.loadingMoreResults = null;
 app.loadMore = function() {
     if (app.hasMoreResults && !app.loadingMoreResults) {
-        app.loadingMoreResults = app.getLiveChannels(66, app.areas[constants.AREA_RESULTS].count, function() {
-            app.loadingMoreResults = null;
-        });
+    	if (app.page === constants.PAGE_LIVE_CHANNELS) {
+	        app.loadingMoreResults = app.getLiveChannels(66, app.areas[constants.AREA_RESULTS].count, function() {
+	            app.loadingMoreResults = null;
+	        });
+    	} else if (app.page === constants.PAGE_VIDEOS) {
+    		app.loadingMoreResults = app.getVideos(66, app.areas[constants.AREA_RESULTS].count, function() {
+	            app.loadingMoreResults = null;
+	        });
+    	}
     }
 }
 app.timeoutRefresh = null;
@@ -719,7 +746,7 @@ app.getLiveChannels = function(limit, offset, callback) {
         url += '&language=' + encodeURIComponent(app.filters.languages.join(','));
     }
     if (app.filters.streamType) {
-        url += '&type=' + encodeURIComponent(app.filters.streamType);
+        url += '&stream_type=' + encodeURIComponent(app.filters.streamType);
     }
     return $.ajax($.extend({}, app.twitchApiOptions, {
     	url: url
@@ -1100,6 +1127,12 @@ app.selectCurrentFilter = function() {
                 app.$selectLanguage.hide();
             });
         	break;
+        case 'stream-type':
+        	app.$selectStreamType.show();
+        	app.setState(constants.STATE_SELECT_STREAM_TYPE, function() {
+                app.$selectStreamType.hide();
+            });
+        	break;
     }
 };
 app.toggleLanguage = function($selectedItem) {
@@ -1131,6 +1164,15 @@ app.toggleLanguage = function($selectedItem) {
     } else {
         $('.filter-languages').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_LANGUAGES);
     }
+};
+app.selectStreamType = function(type) {
+	if (type === 'live') {
+		app.filters.streamType = null;
+		$('#stream-filter-type').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_TYPE);
+	} else {
+		app.filters.streamType = type;
+		$('#stream-filter-type').addClass('chosen').find('.text').text(type);
+	}
 };
 app.selectGame = function(game) {
     app.filters.game = game;

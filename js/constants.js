@@ -3,6 +3,7 @@ var constants = {
     STATE_WATCH: 'watch',
     STATE_SELECT_GAME: 'select-game',
     STATE_SELECT_LANGUAGE: 'select-language',
+    STATE_SELECT_STREAM_TYPE: 'select-stream-type',
     STATE_ERROR: 'error',
     STATE_EXIT: 'exit',
     
@@ -18,6 +19,7 @@ var constants = {
     AREA_GAME_SEARCH: 'game-search',
     AREA_GAME_CLEAR: 'game-clear',
     AREA_LANGUAGES: 'languages',
+    AREA_STREAM_TYPE: 'stream-type',
 
     BUTTON_TYPE_EXIT: 'exit',
     BUTTON_TYPE_CANCEL: 'cancel',
