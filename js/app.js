@@ -4,14 +4,47 @@ app.returnStack = [];
 app.state = constants.STATE_BROWSE;
 app.activeArea = constants.AREA_PAGES;
 app.areas = {};
-app.areas[constants.AREA_RESULTS] = { count: 0, columns: 0, rows: 3, x: 0, y: 0 };
-app.areas[constants.AREA_FILTERS] = { columns: 0, x: 0 };
-app.areas[constants.AREA_STREAM_FILTERS] = { columns: 0, x: 0 };
-app.areas[constants.AREA_VIDEO_FILTERS] = { columns: 0, x: 0 };
-app.areas[constants.AREA_PAGES] = { columns: 0, x: 0 };
-app.areas[constants.AREA_GAME_RESULTS] = { columns: 0, rows: 2, x: 0, y: 0 };
-app.areas[constants.AREA_LANGUAGES] = { columns: 0, rows: 13, x: 0, y: 1 };
-app.areas[constants.AREA_STREAM_TYPE] = { columns: 1, rows: 3, x: 0, y: 0 };
+app.areas[constants.AREA_RESULTS] = {
+    count: 0,
+    columns: 0,
+    rows: 3,
+    x: 0,
+    y: 0
+};
+app.areas[constants.AREA_FILTERS] = {
+    columns: 0,
+    x: 0
+};
+app.areas[constants.AREA_STREAM_FILTERS] = {
+    columns: 0,
+    x: 0
+};
+app.areas[constants.AREA_VIDEO_FILTERS] = {
+    columns: 0,
+    x: 0
+};
+app.areas[constants.AREA_PAGES] = {
+    columns: 0,
+    x: 0
+};
+app.areas[constants.AREA_GAME_RESULTS] = {
+    columns: 0,
+    rows: 2,
+    x: 0,
+    y: 0
+};
+app.areas[constants.AREA_LANGUAGES] = {
+    columns: 0,
+    rows: 13,
+    x: 0,
+    y: 1
+};
+app.areas[constants.AREA_STREAM_TYPE] = {
+    columns: 1,
+    rows: 3,
+    x: 0,
+    y: 0
+};
 app.filters = {
     game: null,
     channels: null,
@@ -125,7 +158,11 @@ app.translateLayout = function() {
     $('#button-close').text(messages.BUTTON_CLOSE);
     // select game
     app.$selectGame.find('.caption > .text').text(messages.GAME_SELECT);
-    $('#game-search-input').attr('placeholder', messages.GAME_SEARCH);
+    app.$gameSearchInput.attr('placeholder', messages.GAME_SEARCH);
+    // select channels
+    app.$selectChannels.find('.caption > .text').text(messages.CHANNELS_SELECT);
+    app.$channelsSearchInput.attr('placeholder', messages.CHANNELS_SEARCH);
+    $('#channels-clear').find('.text').text(messages.CHANNELS_CLEAR);
     // select stream type
     app.$selectStreamType.find('.caption > .text').text(messages.STREAM_TYPE_SELECT);
     $('#stream-type-item-0-0').text(messages.STREAM_TYPE_LIVE);
@@ -170,6 +207,10 @@ app.$gameSearchInput = null;
 app.$gameClear = null;
 app.$selectLanguage = null;
 app.$selectStreamType = null;
+app.$selectChannels = null;
+app.$channelsItems = null;
+app.$channelsItemsContainer = null;
+app.$channelsSearchInput = null;
 app.init = function() {
     app.$main = $('#main');
     app.$loading = $('#loading-wrapper');
@@ -196,6 +237,9 @@ app.init = function() {
     app.$gameClear = $('#game-clear');
     app.$selectLanguage = $('#select-language');
     app.$selectStreamType = $('#select-stream-type');
+    app.$selectChannels = $('#select-channels');
+    app.$channelsItems = $('#channels-items');
+    app.$channelsSearchInput = $('#channels-search-input');
     app.translateLayout();
     app.setUnderscore();
     app.areas[constants.AREA_PAGES].columns = app.$pages.find('.page').length;
@@ -211,31 +255,42 @@ app.init = function() {
         }
     }));
     app.$itemsContainer = app.$items.find('.mCSB_container');
-    var lastQuery = '';
+    var lastGameQuery = '';
     app.$gameSearchInput.on('keyup', function(e) {
-    	var query = $.trim(app.$gameSearchInput.val());
-    	if (query == lastQuery) return;
-    	lastQuery = query;
-    	if (app.searchGameTimeout) { 
-    	    clearTimeout(app.searchGameTimeout);
-    	}
-    	if (app.loadingGames) {
-    	    app.loadingGames.abort();
-    	    app.loadingGames = null;
-    	}
-    	app.searchGameTimeout = setTimeout(function() {
-    	    app.searchGameTimeout = null;
-    		app.prepareGamesSearch();
-    		if (query) {
-    		    app.loadingGames = app.getGamesSearch(query, function() {
-    		        app.loadingGames = null;
-	    		});
-    		} else {
-    		    app.loadingGames = app.getGames(function() {
-    		        app.loadingGames = null;
-                }); 
-    		}
-    	}, 500);
+        var query = $.trim(app.$gameSearchInput.val());
+        if (query == lastGameQuery) return;
+        lastGameQuery = query;
+        if (app.searchGameTimeout) {
+            clearTimeout(app.searchGameTimeout);
+        }
+        if (app.loadingGames) {
+            app.loadingGames.abort();
+            app.loadingGames = null;
+        }
+        app.searchGameTimeout = setTimeout(function() {
+            app.searchGameTimeout = null;
+            app.prepareGamesSearch();
+            if (query) {
+                app.loadingGames = app.getGamesSearch(query, function() {
+                    app.loadingGames = null;
+                });
+            } else {
+                app.loadingGames = app.getGames(function() {
+                    app.loadingGames = null;
+                });
+            }
+        }, 500);
+    });
+    var lastChannelQuery = '';
+    app.$channelsSearchInput.on('keyup', function(e) {
+        var query = $.trim(app.$channelsSearchInput.val());
+        if (query == lastChannelQuery) return;
+        lastChannelQuery = query;
+        /*return $.ajax($.extend({}, app.twitchApiOptions, {
+            url: 'https://api.twitch.tv/kraken/search/channels?limit=100&query=' + encodeURIComponent(query)
+        })).done(function(response) {
+            console.log(response);
+        });*/
     });
     document.addEventListener('visibilitychange', function() {
         if (window.webapis && app.state == constants.STATE_WATCH) {
@@ -270,7 +325,7 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_LEFT);
                 } else if (app.state === constants.STATE_EXIT) {
-                    var $exitButton = $('#button-exit'); 
+                    var $exitButton = $('#button-exit');
                     if (!$exitButton.hasClass('selected')) {
                         app.clearSelection(app.$exitDialog);
                         $exitButton.addClass('selected');
@@ -302,7 +357,7 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_UP);
                 } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
-                	app.navigateStreamTypeItems(keys.KEY_UP);
+                    app.navigateStreamTypeItems(keys.KEY_UP);
                 }
                 break;
             case keys.KEY_RIGHT:
@@ -327,7 +382,7 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_RIGHT);
                 } else if (app.state === constants.STATE_EXIT) {
-                    var $cancelButton = $('#button-cancel'); 
+                    var $cancelButton = $('#button-cancel');
                     if (!$cancelButton.hasClass('selected')) {
                         app.clearSelection(app.$exitDialog);
                         $cancelButton.addClass('selected');
@@ -363,7 +418,7 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_DOWN);
                 } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
-                	app.navigateStreamTypeItems(keys.KEY_DOWN);
+                    app.navigateStreamTypeItems(keys.KEY_DOWN);
                 }
                 break;
             case keys.KEY_ENTER:
@@ -397,6 +452,10 @@ app.init = function() {
                         app.returnState();
                         app.refresh(true);
                     }
+                } else if (app.state === constants.STATE_SELECT_CHANNELS) {
+                    if (app.activeArea == constants.AREA_CHANNELS_SEARCH) {
+                        app.$channelsSearchInput.focus();
+                    }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     var $selectedItem = $('#language-item-' + app.areas[constants.AREA_LANGUAGES].x + '-' + app.areas[constants.AREA_LANGUAGES].y);
                     if ($selectedItem.length > 0) {
@@ -410,12 +469,12 @@ app.init = function() {
                         }, 500);
                     }
                 } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
-                	var $selectedItem = $('#stream-type-item-' + app.areas[constants.AREA_STREAM_TYPE].x + '-' + app.areas[constants.AREA_STREAM_TYPE].y);
-                	if ($selectedItem.length > 0) {
-                		app.selectStreamType($selectedItem);
-                		app.returnState();
-                		app.refresh(true);
-                	}
+                    var $selectedItem = $('#stream-type-item-' + app.areas[constants.AREA_STREAM_TYPE].x + '-' + app.areas[constants.AREA_STREAM_TYPE].y);
+                    if ($selectedItem.length > 0) {
+                        app.selectStreamType($selectedItem);
+                        app.returnState();
+                        app.refresh(true);
+                    }
                 } else if (app.state === constants.STATE_ERROR) {
                     app.returnState();
                 } else if (app.state === constants.STATE_EXIT) {
@@ -432,6 +491,13 @@ app.init = function() {
             case 27:
             case keys.KEY_RETURN:
                 app.returnState();
+                break;
+            case keys.KEY_DONE:
+            case keys.KEY_CANCEL:
+                if (app.activeArea == constants.AREA_GAME_SEARCH) {
+                    app.$gameSearchInput.blur();
+                    app.$channelsSearchInput.blur();
+                }
                 break;
             case keys.KEY_1:
             case keys.KEY_RED:
@@ -460,6 +526,17 @@ app.init = function() {
         }
     });
     app.refresh();
+    $(window).resize(function() {
+        if (app.state === constants.STATE_SELECT_GAME) {
+            app.$selectGame.css('z-index', 500);
+            app.$gameItems.mCustomScrollbar('update');
+        } else if (app.state === constants.STATE_SELECT_CHANNELS) {
+            app.$selectChannels.css('z-index', 500);
+            app.$channelsItems.mCustomScrollbar('update');
+        } else if (app.state === constants.STATE_BROWSE) {
+            app.$items.mCustomScrollbar('update');
+        }
+    });
 };
 app.getNewActiveCell = function(prefix, area, keyCode, initUpperArea) {
     switch (keyCode) {
@@ -564,7 +641,8 @@ app.loadingErrorHandler = function(xhr, textStatus, errorThrown) {
             try {
                 var response = $.parseJSON(xhr.responseText);
                 message = message + '<br>' + response.message;
-            } catch(e) {}
+            } catch (e) {
+            }
         }
         app.showLoadingError(message);
     }
@@ -629,7 +707,8 @@ app.play = function(url) {
             onbufferingcomplete: function() {
                 app.$loading.hide();
             },
-            oncurrentplaytime: function(currentTime) {},
+            oncurrentplaytime: function(currentTime) {
+            },
             onevent: function(eventType, eventData) {
                 console.log("event type: " + eventType + ", data: " + eventData);
                 if (eventType == 'PLAYER_MSG_RESOLUTION_CHANGED') {
@@ -644,8 +723,10 @@ app.play = function(url) {
                 app.returnState();
                 app.showError(message);
             },
-            onsubtitlechange: function(duration, text) {},
-            ondrmevent: function(drmEvent, drmData) {},
+            onsubtitlechange: function(duration, text) {
+            },
+            ondrmevent: function(drmEvent, drmData) {
+            },
             onstreamcompleted: function() {
                 webapis.avplay.stop();
             }
@@ -690,15 +771,15 @@ app.hasMoreResults = true;
 app.loadingMoreResults = null;
 app.loadMore = function() {
     if (app.hasMoreResults && !app.loadingMoreResults) {
-    	if (app.page === constants.PAGE_LIVE_CHANNELS) {
-	        app.loadingMoreResults = app.getLiveChannels(66, app.areas[constants.AREA_RESULTS].count, function() {
-	            app.loadingMoreResults = null;
-	        });
-    	} else if (app.page === constants.PAGE_VIDEOS) {
-    		app.loadingMoreResults = app.getVideos(66, app.areas[constants.AREA_RESULTS].count, function() {
-	            app.loadingMoreResults = null;
-	        });
-    	}
+        if (app.page === constants.PAGE_LIVE_CHANNELS) {
+            app.loadingMoreResults = app.getLiveChannels(66, app.areas[constants.AREA_RESULTS].count, function() {
+                app.loadingMoreResults = null;
+            });
+        } else if (app.page === constants.PAGE_VIDEOS) {
+            app.loadingMoreResults = app.getVideos(66, app.areas[constants.AREA_RESULTS].count, function() {
+                app.loadingMoreResults = null;
+            });
+        }
     }
 }
 app.timeoutRefresh = null;
@@ -737,7 +818,7 @@ app.twitchApiOptions = {
     accepts: {
         json: 'application/vnd.twitchtv.v5+json'
     },
-    
+
 };
 app.getLiveChannels = function(limit, offset, callback) {
     var url = 'https://api.twitch.tv/kraken/streams?limit=' + limit + '&offset=' + offset;
@@ -754,48 +835,48 @@ app.getLiveChannels = function(limit, offset, callback) {
         url += '&stream_type=' + encodeURIComponent(app.filters.streamType);
     }
     return $.ajax($.extend({}, app.twitchApiOptions, {
-    	url: url
+        url: url
     })).done(function(response) {
         console.log(response);
         if (response.streams.length > 0) {
-	        var i, ii, x, y, stream, $newCell;
-	        var countResults = app.areas[constants.AREA_RESULTS].count;
-	        var countRows = app.areas[constants.AREA_RESULTS].rows;
-	        var $newColumn = app.$itemsContainer.find('.column:last-child');
-	        for (i = 0; i < response.streams.length; i++) {
-	            ii = i + countResults;
-	            if ((y = ii % countRows) == 0) {
-	                $newColumn = $('<div class="column"/>');
-	                app.$itemsContainer.append($newColumn);
-	                app.areas[constants.AREA_RESULTS].columns++;
-	            }
-	            x = (ii - y) / countRows;
-	            stream = response.streams[i];
-	            $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
+            var i, ii, x, y, stream, $newCell;
+            var countResults = app.areas[constants.AREA_RESULTS].count;
+            var countRows = app.areas[constants.AREA_RESULTS].rows;
+            var $newColumn = app.$itemsContainer.find('.column:last-child');
+            for (i = 0; i < response.streams.length; i++) {
+                ii = i + countResults;
+                if ((y = ii % countRows) == 0) {
+                    $newColumn = $('<div class="column"/>');
+                    app.$itemsContainer.append($newColumn);
+                    app.areas[constants.AREA_RESULTS].columns++;
+                }
+                x = (ii - y) / countRows;
+                stream = response.streams[i];
+                $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
 	                <i class="fa fa-fw fa-twitch"></i>\
 	                <img src="' + stream.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
 	                <div class="stream-channel-name">' + stream.channel.display_name + '</div>\
 	            </div>');
-	            $newCell.data('channel', stream.channel.name);
-	            $newCell.data('channel-name', stream.channel.display_name);
-	            $newCell.data('viewers', stream.viewers);
-	            $newCell.data('game', stream.game);
-	            $newCell.data('status', stream.channel.status);
-	            $newColumn.append($newCell);
-	            if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
-	                app.showStreamItem($newCell);
-	            }
-	        }
-	        app.areas[constants.AREA_RESULTS].count += response.streams.length;
+                $newCell.data('channel', stream.channel.name);
+                $newCell.data('channel-name', stream.channel.display_name);
+                $newCell.data('viewers', stream.viewers);
+                $newCell.data('game', stream.game);
+                $newCell.data('status', stream.channel.status);
+                $newColumn.append($newCell);
+                if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
+                    app.showStreamItem($newCell);
+                }
+            }
+            app.areas[constants.AREA_RESULTS].count += response.streams.length;
         } else if (offset == 0) {
-        	app.$itemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
+            app.$itemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
         }
         app.$items.mCustomScrollbar('update');
         app.autoHideScrollbar(app.$items);
         app.hasMoreResults = response.streams.length > 0;
     }).fail(app.loadingErrorHandler).always(function() {
         app.$loading.hide();
-    	if (typeof callback == 'function') {
+        if (typeof callback == 'function') {
             callback();
         }
     });
@@ -822,45 +903,45 @@ app.getVideos = function(limit, offset, callback) {
     })).done(function(response) {
         console.log(response);
         if (response.vods.length > 0) {
-	        var i, ii, x, y, vod, $newCell;
-	        var countResults = app.areas[constants.AREA_RESULTS].count;
-	        var countRows = app.areas[constants.AREA_RESULTS].rows;
-	        var $newColumn = app.$itemsContainer.find('.column:last-child');
-	        for (i = 0; i < response.vods.length; i++) {
-	            ii = i + countResults;
-	            if ((y = ii % countRows) == 0) {
-	                $newColumn = $('<div class="column"/>');
-	                app.$itemsContainer.append($newColumn);
-	                app.areas[constants.AREA_RESULTS].columns++;
-	            }
-	            x = (ii - y) / countRows;
-	            vod = response.vods[i];
-	            $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
+            var i, ii, x, y, vod, $newCell;
+            var countResults = app.areas[constants.AREA_RESULTS].count;
+            var countRows = app.areas[constants.AREA_RESULTS].rows;
+            var $newColumn = app.$itemsContainer.find('.column:last-child');
+            for (i = 0; i < response.vods.length; i++) {
+                ii = i + countResults;
+                if ((y = ii % countRows) == 0) {
+                    $newColumn = $('<div class="column"/>');
+                    app.$itemsContainer.append($newColumn);
+                    app.areas[constants.AREA_RESULTS].columns++;
+                }
+                x = (ii - y) / countRows;
+                vod = response.vods[i];
+                $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
 	                <i class="fa fa-fw fa-twitch"></i>\
 	                <img src="' + vod.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
 	                <div class="stream-channel-name">' + vod.channel.display_name + '</div>\
 	            </div>');
-	            $newCell.data('channel', vod.channel.name);
-	            $newCell.data('channel-name', vod.channel.display_name);
-	            $newCell.data('viewers', vod.views);
-	            $newCell.data('game', vod.game);
-	            $newCell.data('status', vod.title);
-	            $newCell.data('vod-id', vod._id.toString().replace(/[^0-9]/g, ''));
-	            $newColumn.append($newCell);
-	            if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
-	                app.showStreamItem($newCell);
-	            }
-	        }
-	        app.areas[constants.AREA_RESULTS].count += response.vods.length;
+                $newCell.data('channel', vod.channel.name);
+                $newCell.data('channel-name', vod.channel.display_name);
+                $newCell.data('viewers', vod.views);
+                $newCell.data('game', vod.game);
+                $newCell.data('status', vod.title);
+                $newCell.data('vod-id', vod._id.toString().replace(/[^0-9]/g, ''));
+                $newColumn.append($newCell);
+                if (ii == 0 && app.activeArea == constants.AREA_RESULTS) {
+                    app.showStreamItem($newCell);
+                }
+            }
+            app.areas[constants.AREA_RESULTS].count += response.vods.length;
         } else if (offset == 0) {
-        	app.$itemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
+            app.$itemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
         }
         app.$items.mCustomScrollbar('update');
         app.autoHideScrollbar(app.$items);
         app.hasMoreResults = response.vods.length > 0;
     }).fail(app.loadingErrorHandler).always(function() {
         app.$loading.hide();
-    	if (typeof callback == 'function') {
+        if (typeof callback == 'function') {
             callback();
         }
     });
@@ -897,13 +978,13 @@ app.getGames = function(callback) {
         app.autoHideScrollbar(app.$gameItems);
     }).fail(app.loadingErrorHandler).always(function() {
         app.$loading.hide();
-    	if (typeof callback == 'function') {
+        if (typeof callback == 'function') {
             callback();
         }
     });
 };
 app.getGamesSearch = function(query, callback) {
-	return $.ajax($.extend({}, app.twitchApiOptions, {
+    return $.ajax($.extend({}, app.twitchApiOptions, {
         url: 'https://api.twitch.tv/kraken/search/games/?query=' + encodeURIComponent(query)
     })).done(function(response) {
         console.log(response);
@@ -931,49 +1012,45 @@ app.getGamesSearch = function(query, callback) {
                 }
             }
         } else {
-        	app.$gameItemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
+            app.$gameItemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
         }
         app.$gameItems.mCustomScrollbar('update');
         app.autoHideScrollbar(app.$gameItems);
     }).fail(app.loadingErrorHandler).always(function() {
         app.$loading.hide();
-    	if (typeof callback == 'function') {
+        if (typeof callback == 'function') {
             callback();
         }
     });
 };
 app.showStreamItem = function($element) {
     app.$selectBox.find('.stream-channel-name').html($element.data('channel-name'));
-    app.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + 
-            $element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+    app.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + $element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
     app.$selectBox.find('.game-name').html($element.data('game'));
     app.$selectBox.find('.channel-status').html($element.data('status'));
     app.showItem($element, app.$items, app.$itemsContainer, app.$selectBox);
 };
-app.showGameItem = function ($element) {
-	var data;
-	if ((data = $element.data('viewers')) !== undefined) {
-	    app.$gameSelectBox.find('.game-viewers').html('<i class="fa fa-eye"></i> ' + 
-	            data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
-	} else {
-		app.$gameSelectBox.find('.game-viewers').html('');
-	}
-	if ((data = $element.data('channels')) !== undefined) {
-	    app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-video-camera"></i> ' + 
-	            data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
-	} else {
-		app.$gameSelectBox.find('.game-channels').html('');
-	}
-	if ((data = $element.data('popularity')) !== undefined) {
-	    app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-fire"></i> ' + 
-	            data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
-	} else {
-		app.$gameSelectBox.find('.game-popularity').html('');
-	}
+app.showGameItem = function($element) {
+    var data;
+    if ((data = $element.data('viewers')) !== undefined) {
+        app.$gameSelectBox.find('.game-viewers').html('<i class="fa fa-eye"></i> ' + data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+    } else {
+        app.$gameSelectBox.find('.game-viewers').html('');
+    }
+    if ((data = $element.data('channels')) !== undefined) {
+        app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-video-camera"></i> ' + data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+    } else {
+        app.$gameSelectBox.find('.game-channels').html('');
+    }
+    if ((data = $element.data('popularity')) !== undefined) {
+        app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-fire"></i> ' + data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+    } else {
+        app.$gameSelectBox.find('.game-popularity').html('');
+    }
     app.$gameSelectBox.find('.game-name').html($element.data('name'));
     app.showItem($element, app.$gameItems, app.$gameItemsContainer, app.$gameSelectBox);
 };
-app.showItem = function ($element, $items, $itemsContainer, $selectBox) {
+app.showItem = function($element, $items, $itemsContainer, $selectBox) {
     var vh = $(window).height() / 100;
     var scrollLeft = $itemsContainer.position().left;
     var left = -scrollLeft;
@@ -1036,7 +1113,7 @@ app.selectPage = function(page) {
         app.areas[constants.AREA_FILTERS] = app.areas[constants.AREA_VIDEO_FILTERS];
     }
     if (app.activeArea === constants.AREA_FILTERS) {
-    	app.showCurrentFilter();
+        app.showCurrentFilter();
     }
     app.updateHints();
     app.refresh(true);
@@ -1096,14 +1173,15 @@ app.showCurrentFilter = function() {
 }
 app.loadingGames = null;
 app.searchGameTimeout = null;
+app.loadingChannels = null;
+app.searchChannelTimeout = null;
 app.selectCurrentFilter = function() {
-    var x = app.areas[constants.AREA_FILTERS].x,
-        type = app.$filters.find('.filter.selected').data('type');
+    var x = app.areas[constants.AREA_FILTERS].x, type = app.$filters.find('.filter.selected').data('type');
     switch (type) {
         case 'game':
             app.$selectGame.show();
             app.setState(constants.STATE_SELECT_GAME, function() {
-                if (app.searchGameTimeout) { 
+                if (app.searchGameTimeout) {
                     clearTimeout(searchGameTimeout);
                     app.searchGameTimeout = null;
                 }
@@ -1129,18 +1207,37 @@ app.selectCurrentFilter = function() {
                 app.loadingGames = null;
             });
             break;
+        case 'channels':
+            app.$selectChannels.show();
+            app.setState(constants.STATE_SELECT_CHANNELS, function() {
+                if (app.refreshChannelsInterval) {
+                    clearInterval(app.refreshChannelsInterval);
+                    app.refreshChannelsInterval = null;
+                }
+                app.$selectChannels.hide();
+                app.$loading.hide();
+            });
+            app.activateChannelsSearchArea();
+            app.$channelsSearchInput.val('');
+            if (!app.$selectChannels.hasClass('init')) {
+                app.$selectChannels.addClass('init');
+                app.$channelsItems.mCustomScrollbar(app.customScrollbarOptions);
+                app.$channelsItemsContainer = app.$channelsItems.find('.mCSB_container');
+            }
+            app.clearItems(app.$channelsItems, app.$channelsItemsContainer);
+            break;
         case 'languages':
-        	app.$selectLanguage.show();
-        	app.setState(constants.STATE_SELECT_LANGUAGE, function() {
+            app.$selectLanguage.show();
+            app.setState(constants.STATE_SELECT_LANGUAGE, function() {
                 app.$selectLanguage.hide();
             });
-        	break;
+            break;
         case 'stream-type':
-        	app.$selectStreamType.show();
-        	app.setState(constants.STATE_SELECT_STREAM_TYPE, function() {
+            app.$selectStreamType.show();
+            app.setState(constants.STATE_SELECT_STREAM_TYPE, function() {
                 app.$selectStreamType.hide();
             });
-        	break;
+            break;
     }
 };
 app.toggleLanguage = function($selectedItem) {
@@ -1167,23 +1264,22 @@ app.toggleLanguage = function($selectedItem) {
         }
     }
     if (app.filters.languages.length > 0) {
-        $('.filter-languages').addClass('chosen').find('.text').text('(' + app.filters.languages.length + ') ' + 
-                messages.FILTER_STREAM_LANGUAGES);
+        $('.filter-languages').addClass('chosen').find('.text').text('(' + app.filters.languages.length + ') ' + messages.FILTER_STREAM_LANGUAGES);
     } else {
         $('.filter-languages').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_LANGUAGES);
     }
 };
 app.selectStreamType = function($selectedItem) {
-	var type = $selectedItem.data('type');
-	app.$selectStreamType.find('.active').removeClass('active');
-	$selectedItem.addClass('active');
-	if (type === 'live') {
-		app.filters.streamType = null;
-		$('#stream-filter-type').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_TYPE);
-	} else {
-		app.filters.streamType = type;
-		$('#stream-filter-type').addClass('chosen').find('.text').text($selectedItem.text());
-	}
+    var type = $selectedItem.data('type');
+    app.$selectStreamType.find('.active').removeClass('active');
+    $selectedItem.addClass('active');
+    if (type === 'live') {
+        app.filters.streamType = null;
+        $('#stream-filter-type').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_TYPE);
+    } else {
+        app.filters.streamType = type;
+        $('#stream-filter-type').addClass('chosen').find('.text').text($selectedItem.text());
+    }
 };
 app.selectGame = function(game) {
     app.filters.game = game;
@@ -1196,8 +1292,8 @@ app.clearGame = function() {
     app.$gameClear.hide();
 };
 app.prepareGamesSearch = function() {
-	app.showLoading(messages.LOADING);
-	app.clearItems(app.$gameItems, app.$gameItemsContainer);
+    app.showLoading(messages.LOADING);
+    app.clearItems(app.$gameItems, app.$gameItemsContainer);
     app.areas[constants.AREA_GAME_RESULTS].columns = 0;
     app.areas[constants.AREA_GAME_RESULTS].x = 0;
     app.areas[constants.AREA_GAME_RESULTS].y = 0;
@@ -1223,6 +1319,11 @@ app.activateGameClearArea = function() {
     app.activeArea = constants.AREA_GAME_CLEAR;
     app.clearSelection(app.$selectGame);
     app.$gameClear.addClass('selected');
+};
+app.activateChannelsSearchArea = function() {
+    app.activeArea = constants.AREA_CHANNELS_SEARCH;
+    app.clearSelection(app.$selectChannels);
+    app.$channelsSearchInput.addClass('selected');
 };
 app.clearSelection = function($parent) {
     $('.selected', $parent).removeClass('selected');
@@ -1283,7 +1384,6 @@ function extractQualities(input) {
 }
 
 if (window.tizen) {
-    tizen.tvinputdevice.registerKey("Tools");
     tizen.tvinputdevice.registerKey("MediaPlayPause");
     tizen.tvinputdevice.registerKey("MediaPlay");
     tizen.tvinputdevice.registerKey("MediaPause");

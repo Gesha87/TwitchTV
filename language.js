@@ -22,10 +22,14 @@ var messages = {
 	HINT_SEARCH: "Search",
 	
 	GAME_SELECT: "Select game",
-	GAME_SEARCH: "Search game",
+	GAME_SEARCH: "Search",
 	
-	LANGUAGE_SELECT: "Select language",
-	LANGUAGE_CLEAR: "Clear",
+	CHANNELS_SELECT: "Select channels",
+	CHANNELS_SEARCH: "Search",
+	CHANNELS_CLEAR: "Clear all",
+	
+	LANGUAGE_SELECT: "Select languages",
+	LANGUAGE_CLEAR: "Clear all",
 	
 	STREAM_TYPE_SELECT: "Select type",
 	STREAM_TYPE_LIVE: "Live (default)",

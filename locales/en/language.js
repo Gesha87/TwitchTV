@@ -21,8 +21,23 @@ var messages = {
 	HINT_PRESETS: "Presets",
 	HINT_SEARCH: "Search",
 	
-	LOADING: "Loading",
-    BUFFERING: "Buffering",
+	GAME_SELECT: "Select game",
+	GAME_SEARCH: "Search",
+	
+	CHANNELS_SELECT: "Select channels",
+	CHANNELS_SEARCH: "Search",
+	CHANNELS_CLEAR: "Clear all",
+	
+	LANGUAGE_SELECT: "Select languages",
+	LANGUAGE_CLEAR: "Clear all",
+	
+	STREAM_TYPE_SELECT: "Select type",
+	STREAM_TYPE_LIVE: "Live (default)",
+	STREAM_TYPE_PLAYLIST: "Playlist",
+	STREAM_TYPE_ALL: "All",
+	
+	LOADING: "Loading...",
+    BUFFERING: "Buffering...",
     
     BUTTON_CLOSE: "Close",
     BUTTON_EXIT: "Exit",
@@ -32,9 +47,9 @@ var messages = {
 
     EMPTY_RESULTS: "Nothing found",
     
-    ERROR_LOADING_STREAM_FAILED: 'An error occurred while loading',
-    ERROR_STREAM_IS_OFFLINE: 'Stream is offline',
-    
+    ERROR_LOADING_FAILED: 'An error occurred while loading.<br>Please, try again later',
+    ERROR_STREAM_IS_OFFLINE: 'Channel is offline',
+    ERROR_CONNECTION_FAILED: 'Connection failed',
     
 	
 	OPEN: "Open",
@@ -46,8 +61,6 @@ var messages = {
 	
 	RETRYING: "Retrying",
 	VIEWER: "Viewers",
-	BUFFERING: "Buffering",
-	
 	
 	ERROR_RENDER_SOURCE: "Format not supported :(",
 	ERROR_RENDER_FIXED: "Sorry but it seems like stream\nqualities High/Medium/Low are not supported\non your TV. Try Source quality on various streams.",

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="https://github.com/Gesha87/TwitchTV" version="0.8.0" viewmodes="maximized">
     <access origin="*" subdomains="true"></access>
-    <tizen:application id="my4aMf8CyM.TwitchTV" package="my4aMf8CyM" required_version="1.0"/>
+    <tizen:application id="my4aMf8CyM.TwitchTV" package="my4aMf8CyM" required_version="2.3"/>
     <content src="index.html"/>
     <feature name="http://tizen.org/feature/screen.size.all"/>
     <feature name="http://tizen.org/feature/tv.inputdevice"/>

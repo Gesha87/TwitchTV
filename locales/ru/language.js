@@ -21,9 +21,35 @@ var messages = {
 	HINT_PRESETS: "Фильтры",
 	HINT_SEARCH: "Поиск",
 	
-	LOADING: "Загрузка",
+	GAME_SELECT: "Выберите игру",
+    GAME_SEARCH: "Поиск",
+    
+    CHANNELS_SELECT: "Выберите каналы",
+    CHANNELS_SEARCH: "Поиск",
+    CHANNELS_CLEAR: "Очистить все",
+    
+    LANGUAGE_SELECT: "Выберите языки",
+    LANGUAGE_CLEAR: "Очистить все",
+    
+    STREAM_TYPE_SELECT: "Выберите тип",
+    STREAM_TYPE_LIVE: "Прямая трансляция (по умолчанию)",
+    STREAM_TYPE_PLAYLIST: "Список воспроизведения",
+    STREAM_TYPE_ALL: "Все",
+    
+    LOADING: "Загрузка...",
+    BUFFERING: "Буферизация...",
+    
+    BUTTON_CLOSE: "Закрыть",
+    BUTTON_EXIT: "Выход",
+    BUTTON_CANCEL: "Отмена",
+
+    CONFIRM_EXIT: "Вы действительно хотите выйти?",
 
     EMPTY_RESULTS: "Ничего не найдено",
+    
+    ERROR_LOADING_FAILED: "Во время загрузки произошла ошибка.<br>Пожалуйста, попробуйте ещё раз позже",
+    ERROR_STREAM_IS_OFFLINE: "Канал находится не в сети",
+    ERROR_CONNECTION_FAILED: "Не удалось соединиться",
     
     
 	

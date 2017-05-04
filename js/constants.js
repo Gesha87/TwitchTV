@@ -2,6 +2,7 @@ var constants = {
     STATE_BROWSE: 'browse',
     STATE_WATCH: 'watch',
     STATE_SELECT_GAME: 'select-game',
+    STATE_SELECT_CHANNELS: 'select-channels',
     STATE_SELECT_LANGUAGE: 'select-language',
     STATE_SELECT_STREAM_TYPE: 'select-stream-type',
     STATE_ERROR: 'error',
@@ -18,6 +19,10 @@ var constants = {
     AREA_GAME_RESULTS: 'game-results',
     AREA_GAME_SEARCH: 'game-search',
     AREA_GAME_CLEAR: 'game-clear',
+    AREA_CHANNELS_RESULTS: 'channels-results',
+    AREA_CHANNELS_SEARCH: 'channels-search',
+    AREA_CHANNELS_CLEAR: 'channels-clear',
+    AREA_CHANNELS_LIST: 'channels-list',
     AREA_LANGUAGES: 'languages',
     AREA_STREAM_TYPE: 'stream-type',
 

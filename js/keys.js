@@ -37,5 +37,8 @@ var keys = {
     "KEY_MENU": 18,
     
     "KEY_RETURN": 10009,
-    "KEY_TOOLS": 10135
+    "KEY_TOOLS": 10135,
+    
+    "KEY_DONE": 65376,
+    "KEY_CANCEL": 65385,
 }
