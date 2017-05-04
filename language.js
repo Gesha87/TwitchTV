@@ -27,6 +27,11 @@ var messages = {
 	LANGUAGE_SELECT: "Select language",
 	LANGUAGE_CLEAR: "Clear",
 	
+	STREAM_TYPE_SELECT: "Select type",
+	STREAM_TYPE_LIVE: "Live (default)",
+	STREAM_TYPE_PLAYLIST: "Playlist",
+	STREAM_TYPE_ALL: "All",
+	
 	LOADING: "Loading...",
     BUFFERING: "Buffering...",
     

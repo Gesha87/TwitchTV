@@ -126,6 +126,11 @@ app.translateLayout = function() {
     // select game
     app.$selectGame.find('.caption > .text').text(messages.GAME_SELECT);
     $('#game-search-input').attr('placeholder', messages.GAME_SEARCH);
+    // select stream type
+    app.$selectStreamType.find('.caption > .text').text(messages.STREAM_TYPE_SELECT);
+    $('#stream-type-item-0-0').text(messages.STREAM_TYPE_LIVE);
+    $('#stream-type-item-0-1').text(messages.STREAM_TYPE_PLAYLIST);
+    $('#stream-type-item-0-2').text(messages.STREAM_TYPE_ALL);
     // select language
     app.$selectLanguage.find('.caption > .text').text(messages.LANGUAGE_SELECT);
     // others
@@ -407,7 +412,7 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
                 	var $selectedItem = $('#stream-type-item-' + app.areas[constants.AREA_STREAM_TYPE].x + '-' + app.areas[constants.AREA_STREAM_TYPE].y);
                 	if ($selectedItem.length > 0) {
-                		app.selectStreamType($selectedItem.data('type'));
+                		app.selectStreamType($selectedItem);
                 		app.returnState();
                 		app.refresh(true);
                 	}
@@ -1030,6 +1035,9 @@ app.selectPage = function(page) {
         app.$videoFilters.show();
         app.areas[constants.AREA_FILTERS] = app.areas[constants.AREA_VIDEO_FILTERS];
     }
+    if (app.activeArea === constants.AREA_FILTERS) {
+    	app.showCurrentFilter();
+    }
     app.updateHints();
     app.refresh(true);
 };
@@ -1165,13 +1173,16 @@ app.toggleLanguage = function($selectedItem) {
         $('.filter-languages').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_LANGUAGES);
     }
 };
-app.selectStreamType = function(type) {
+app.selectStreamType = function($selectedItem) {
+	var type = $selectedItem.data('type');
+	app.$selectStreamType.find('.active').removeClass('active');
+	$selectedItem.addClass('active');
 	if (type === 'live') {
 		app.filters.streamType = null;
 		$('#stream-filter-type').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_TYPE);
 	} else {
 		app.filters.streamType = type;
-		$('#stream-filter-type').addClass('chosen').find('.text').text(type);
+		$('#stream-filter-type').addClass('chosen').find('.text').text($selectedItem.text());
 	}
 };
 app.selectGame = function(game) {
