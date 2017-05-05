@@ -496,6 +496,8 @@ app.init = function() {
             case keys.KEY_CANCEL:
                 if (app.activeArea == constants.AREA_GAME_SEARCH) {
                     app.$gameSearchInput.blur();
+                }
+                if (app.activeArea == constants.AREA_CHANNELS_SEARCH) {
                     app.$channelsSearchInput.blur();
                 }
                 break;
