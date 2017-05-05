@@ -27,6 +27,7 @@ var messages = {
     CHANNELS_SELECT: "Выберите каналы",
     CHANNELS_SEARCH: "Поиск",
     CHANNELS_CLEAR: "Очистить все",
+    CHANNELS_TYPE_TO_SEARCH: "Для поиска каналов начните печатать",
     
     LANGUAGE_SELECT: "Выберите языки",
     LANGUAGE_CLEAR: "Очистить все",

@@ -27,6 +27,7 @@ var messages = {
 	CHANNELS_SELECT: "Select channels",
 	CHANNELS_SEARCH: "Search",
 	CHANNELS_CLEAR: "Clear all",
+	CHANNELS_TYPE_TO_SEARCH: "Start typing to search channels",
 	
 	LANGUAGE_SELECT: "Select languages",
 	LANGUAGE_CLEAR: "Clear all",
@@ -48,7 +49,7 @@ var messages = {
     EMPTY_RESULTS: "Nothing found",
     
     ERROR_LOADING_FAILED: 'An error occurred while loading.<br>Please, try again later',
-    ERROR_STREAM_IS_OFFLINE: 'Channel is offline',
+    ERROR_STREAM_IS_OFFLINE: 'Stream is offline',
     ERROR_CONNECTION_FAILED: 'Connection failed',
     
 	

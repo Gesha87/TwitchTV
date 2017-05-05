@@ -27,6 +27,7 @@ var messages = {
 	CHANNELS_SELECT: "Select channels",
 	CHANNELS_SEARCH: "Search",
 	CHANNELS_CLEAR: "Clear all",
+	CHANNELS_TYPE_TO_SEARCH: "Start typing to search channels",
 	
 	LANGUAGE_SELECT: "Select languages",
 	LANGUAGE_CLEAR: "Clear all",

@@ -33,6 +33,12 @@ app.areas[constants.AREA_GAME_RESULTS] = {
     x: 0,
     y: 0
 };
+app.areas[constants.AREA_GAME_RESULTS] = {
+    columns: 0,
+    rows: 3,
+    x: 0,
+    y: 0
+};
 app.areas[constants.AREA_LANGUAGES] = {
     columns: 0,
     rows: 13,
@@ -47,7 +53,7 @@ app.areas[constants.AREA_STREAM_TYPE] = {
 };
 app.filters = {
     game: null,
-    channels: null,
+    channels: [],
     languages: [],
     streamType: null,
     period: null,
@@ -286,6 +292,12 @@ app.init = function() {
         var query = $.trim(app.$channelsSearchInput.val());
         if (query == lastChannelQuery) return;
         lastChannelQuery = query;
+        if (query) {
+        	
+        } else {
+        	app.clearItems(app.$channelsItems, app.$channelsItemsContainer);
+            app.$channelsItemsContainer.append($('<div class="column text"/>').text(messages.CHANNELS_TYPE_TO_SEARCH));
+        }
         /*return $.ajax($.extend({}, app.twitchApiOptions, {
             url: 'https://api.twitch.tv/kraken/search/channels?limit=100&query=' + encodeURIComponent(query)
         })).done(function(response) {
@@ -525,7 +537,8 @@ app.init = function() {
     $.ajaxSetup({
         beforeSend: function(xhr) {
             xhr.setRequestHeader('Client-ID', 'q5ix3v5d0ot12koqr7paerntdo5gz9');
-        }
+        },
+        timeout: 10000,
     });
     app.refresh();
     $(window).resize(function() {
@@ -1024,6 +1037,46 @@ app.getGamesSearch = function(query, callback) {
         }
     });
 };
+app.getChannelsSearch = function(query, callback) {
+    return $.ajax($.extend({}, app.twitchApiOptions, {
+        url: 'https://api.twitch.tv/kraken/search/channels/?query=' + encodeURIComponent(query)
+    })).done(function(response) {
+        console.log(response);
+        if (response.channels) {
+            var i, x, y, game, $newCell, $newColumn;
+            var countRows = app.areas[constants.AREA_GAME_RESULTS].rows;
+            for (i = 0; i < response.games.length; i++) {
+                if ((y = i % countRows) == 0) {
+                    $newColumn = $('<div class="column"/>');
+                    app.$gameItemsContainer.append($newColumn);
+                    app.areas[constants.AREA_GAME_RESULTS].columns++;
+                }
+                x = (i - y) / countRows;
+                game = response.games[i];
+                $newCell = $('<div class="cell game-cell" id="game-item-' + x + '-' + y + '">\
+                    <i class="fa fa-fw fa-twitch"></i>\
+                    <img src="' + game.box.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+                    <div class="game-name ellipsed">' + game.name + '</div>\
+                </div>');
+                $newCell.data('popularity', game.popularity);
+                $newCell.data('name', game.name);
+                $newColumn.append($newCell);
+                if (i == 0 && app.activeArea == constants.AREA_GAME_RESULTS) {
+                    app.showGameItem($newCell);
+                }
+            }
+        } else {
+            app.$gameItemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
+        }
+        app.$gameItems.mCustomScrollbar('update');
+        app.autoHideScrollbar(app.$gameItems);
+    }).fail(app.loadingErrorHandler).always(function() {
+        app.$loading.hide();
+        if (typeof callback == 'function') {
+            callback();
+        }
+    });
+};
 app.showStreamItem = function($element) {
     app.$selectBox.find('.stream-channel-name').html($element.data('channel-name'));
     app.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + $element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
@@ -1226,6 +1279,7 @@ app.selectCurrentFilter = function() {
                 app.$channelsItemsContainer = app.$channelsItems.find('.mCSB_container');
             }
             app.clearItems(app.$channelsItems, app.$channelsItemsContainer);
+            app.$channelsItemsContainer.append($('<div class="column text"/>').text(messages.CHANNELS_TYPE_TO_SEARCH));
             break;
         case 'languages':
             app.$selectLanguage.show();
@@ -1298,6 +1352,13 @@ app.prepareGamesSearch = function() {
     app.areas[constants.AREA_GAME_RESULTS].columns = 0;
     app.areas[constants.AREA_GAME_RESULTS].x = 0;
     app.areas[constants.AREA_GAME_RESULTS].y = 0;
+};
+app.prepareChannelsSearch = function() {
+    app.showLoading(messages.LOADING);
+    app.clearItems(app.$channelsItems, app.$channelsItemsContainer);
+    app.areas[constants.AREA_CHANNELS_RESULTS].columns = 0;
+    app.areas[constants.AREA_CHANNELS_RESULTS].x = 0;
+    app.areas[constants.AREA_CHANNELS_RESULTS].y = 0;
 };
 app.activateItemsArea = function() {
     app.activeArea = constants.AREA_RESULTS;
