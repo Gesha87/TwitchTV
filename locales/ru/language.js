@@ -5,7 +5,7 @@ var messages = {
 
 	FILTER_STREAM_GAME: "Игра",
 	FILTER_STREAM_CHANNELS: "Каналы",
-	FILTER_STREAM_LANGUAGE: "Язык",
+	FILTER_STREAM_LANGUAGES: "Языки",
 	FILTER_STREAM_TYPE: "Тип",
 	FILTER_VIDEO_GAME: "Игра",
 	FILTER_VIDEO_PERIOD: "За период",
