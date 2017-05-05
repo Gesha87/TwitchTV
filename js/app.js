@@ -535,9 +535,8 @@ app.init = function() {
         } else if (app.state === constants.STATE_SELECT_CHANNELS) {
             app.$selectChannels.css('z-index', 500);
             app.$channelsItems.mCustomScrollbar('update');
-        } else if (app.state === constants.STATE_BROWSE) {
-            app.$items.mCustomScrollbar('update');
         }
+        app.$items.mCustomScrollbar('update');
     });
 };
 app.getNewActiveCell = function(prefix, area, keyCode, initUpperArea) {
@@ -1028,8 +1027,8 @@ app.getGamesSearch = function(query, callback) {
 app.showStreamItem = function($element) {
     app.$selectBox.find('.stream-channel-name').html($element.data('channel-name'));
     app.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + $element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
-    app.$selectBox.find('.game-name').html($element.data('game'));
-    app.$selectBox.find('.channel-status').html($element.data('status'));
+    app.$selectBox.find('.game-name').html($element.data('game') || '&nbsp;');
+    app.$selectBox.find('.channel-status').html($element.data('status') || '&nbsp;');
     app.showItem($element, app.$items, app.$itemsContainer, app.$selectBox);
 };
 app.showGameItem = function($element) {

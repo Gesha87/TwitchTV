@@ -462,7 +462,7 @@ img.loaded {
 }
 
 .filter-list-item .text {
-	margin-left: 3vh;
+	padding-left: 3vh;
 }
 
 .player {
