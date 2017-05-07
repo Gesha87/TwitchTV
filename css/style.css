@@ -33,12 +33,8 @@ body.init {
 	clear: both;
 }
 
-.selected {
-    outline: 3px solid #ffffff;
-}
-
 .column {
-	display: inline-table;
+	display: inline-grid;
 	margin: 3vh 0 0 0;
 	line-height: 0;
 }
@@ -57,17 +53,21 @@ body.init {
 .cell {
 	position: relative;
 }
-.cell.selected {
-	outline: none;
-}
 
-.cell i {
+.cell > i {
 	position: absolute;
 	top: 50%;
 	left: 50%;
 	margin: -3.0vh 0 0 -3.85714287vh;
 	line-height: 1em;
 	font-size: 6vh;
+}
+
+.channel-cell > i {
+    position: absolute;
+    top: 4.865vh;
+    left: 4vh;
+    margin: 0;
 }
 
 .cell img {
@@ -78,8 +78,56 @@ body.init {
 }
 
 .game-cell img {
-	height: 40vh;
-	width: 28.631579vh;
+	height: 39.4vh;
+	width: 28.2vh;
+}
+
+.channel-cell {
+	background-color: #201c2b;
+	box-shadow: #392e5c 0 1px 0px 0px inset;
+}
+
+.channel-cell .checkbox {
+	background-color: rgba(0, 0, 0, 0.7);
+	padding: 1vh;
+	display: inline-block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	line-height: 1;
+}
+
+.channel-cell img {
+	float: left;
+    height: 15.73vh;
+    width: 15.73vh;
+}
+
+.channel-info {
+	float: left;
+	line-height: 1.3;
+	padding: 1vh 0;
+}
+.channel-select-box .channel-info {
+	margin-left: 15.73vh;
+}
+
+.channel-name {
+	padding: 0 1vh;
+    color: #bbb8c0;
+}
+.active.channel-cell .channel-name {
+    color: #6441a4;
+}
+.selected.channel-cell .channel-name {
+    opacity: 0;
+}
+.channel-cell .channel-counter {
+	opacity: 0;
+}
+
+.channel-counter {
+	padding: 0 1vh;
 }
 
 .game-cell .game-name {
@@ -88,14 +136,18 @@ body.init {
 	position: absolute;
     top: 0;
     left: 0;
-    max-width: 28.631579vh;
+    max-width: 28.2vh;
     line-height: 1.3em;
     overflow-x: hidden;
 }
 
 .game-select-box .game-name {
     color: #ffffff;
-    max-width: 28.631579vh;
+    max-width: 28.2vh;
+}
+
+.channel-select-box .channel-name {
+    color: #ffffff;
 }
 
 img.loaded {
@@ -357,6 +409,7 @@ img.loaded {
 .select-wrapper .caption {
 	font-size: 3.4vh;
 	padding: 2vh 1vh;
+	line-height: 1.3;
 }
 .select-wrapper .selected-game {
     display: inline-block;
@@ -501,6 +554,13 @@ img.loaded {
 .spinner-three-bounce .bounce2 {
 	-webkit-animation-delay: -0.16s;
 	animation-delay: -0.16s;
+}
+
+.selected {
+    outline: 3px solid #ffffff;
+}
+.cell.selected {
+    outline: none;
 }
 
 @-webkit-keyframes bouncedelay {

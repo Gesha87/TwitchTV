@@ -126,15 +126,22 @@
             </div>
         </div>
     </div>
-    <div id="select-channels" class="select-wrapper">
+    <div id="select-channels" class="select-wrapper select-channels-wrapper">
         <div class="caption">
             <div class="text">Выбор каналов</div>
-            <div id="channels-clear" class="selected-channel" style="display: none;">
+            <div id="channels-clear" class="selected-game" style="display: none;">
                 <span class="text">Очистить</span> <i class="fa fa-times"></i>
             </div>
         </div>
         <div class="clear"><input class="search-input selected" id="channels-search-input" placeholder="Поиск канала"></div>
         <div id="channels-items" class="items"></div>
+        <div id="select-channel-box" class="select-box channel-select-box">
+            <div class="channel-info">
+                <div class="channel-name"></div>
+                <div class="channel-followers channel-counter"></div>
+                <div class="channel-views channel-counter"></div>
+            </div>
+        </div>
     </div>
 	<div id="select-language" class="select-wrapper select-language-wrapper text-center">
 		<div class="caption">
@@ -147,13 +154,13 @@
             <div class="text">Выбор типа</div>
         </div>
         <div class="filter-list">
-            <div class="filter-list-item active selected" id="stream-type-item-0-0" data-type="live">
+            <div class="filter-list-item stream-type-live active selected" id="stream-type-item-0-0" data-type="live">
                 <div>Прямая трансляция (по умолчанию)</div>
             </div>
-            <div class="filter-list-item" id="stream-type-item-0-1" data-type="playlist">
+            <div class="filter-list-item stream-type-playlist" id="stream-type-item-0-1" data-type="playlist">
                 <div>Список воспроизведения</div>
             </div>
-            <div class="filter-list-item" id="stream-type-item-0-2" data-type="all">
+            <div class="filter-list-item stream-type-all" id="stream-type-item-0-2" data-type="all">
                 <div>Все</div>
             </div>
         </div>

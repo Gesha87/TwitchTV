@@ -33,9 +33,9 @@ app.areas[constants.AREA_GAME_RESULTS] = {
     x: 0,
     y: 0
 };
-app.areas[constants.AREA_GAME_RESULTS] = {
+app.areas[constants.AREA_CHANNELS_RESULTS] = {
     columns: 0,
-    rows: 3,
+    rows: 5,
     x: 0,
     y: 0
 };
@@ -53,7 +53,8 @@ app.areas[constants.AREA_STREAM_TYPE] = {
 };
 app.filters = {
     game: null,
-    channels: [],
+    channels: {},
+    channel: null,
     languages: [],
     streamType: null,
     period: null,
@@ -104,8 +105,11 @@ app.initLangugesFilter = function() {
                 <div class="text">' + text + '</div>\
             </div>');
         } else {
-            $newCell = $('<div class="filter-list-item" id="language-item-' + x + '-' + y + '">\
-                <input type="checkbox">\
+            var index = app.filters.languages.indexOf(code);
+            var divClass = index === -1 ? '' : 'active';
+            var checked = index === -1 ? '' : 'checked="checked"';
+            $newCell = $('<div class="filter-list-item ' + divClass + '" id="language-item-' + x + '-' + y + '">\
+                <input type="checkbox" ' + checked + '>\
                 <div class="text">' + text + '</div>\
             </div>');
         }
@@ -115,6 +119,33 @@ app.initLangugesFilter = function() {
         }
         $newColumn.append($newCell);
         i++;
+    }
+    if (app.filters.languages.length > 0) {
+        $('.filter-languages').addClass('chosen').find('.text').text('(' + app.filters.languages.length + ') ' + messages.FILTER_STREAM_LANGUAGES);
+    }
+};
+app.initGameFiler = function() {
+    if (app.filters.game) {
+        $('.filter-game').addClass('chosen').find('.text').text(app.filters.game);
+    }
+};
+app.initChannelsFiler = function() {
+    var count = Object.keys(app.filters.channels).length;
+    if (count > 0) {
+        $('#stream-filter-channels').addClass('chosen').find('.text').text('(' + count + ') ' + messages.FILTER_STREAM_CHANNELS);
+    }
+};
+app.initStreamTypeFilter = function() {
+    if (app.filters.streamType) {
+        var text = messages.FILTER_STREAM_TYPE;
+        if (app.filters.streamType === 'playlist') {
+            text = messages.STREAM_TYPE_PLAYLIST;
+        } else if (app.filters.streamType === 'all') {
+            text = messages.STREAM_TYPE_ALL;
+        }
+        $('#stream-filter-type').addClass('chosen').find('.text').text(text);
+        app.$selectStreamType.find('.active').removeClass('active');
+        app.$selectStreamType.find('.stream-type-' + app.filters.streamType).addClass('active');
     }
 };
 app.customScrollbarOptions = {
@@ -217,6 +248,8 @@ app.$selectChannels = null;
 app.$channelsItems = null;
 app.$channelsItemsContainer = null;
 app.$channelsSearchInput = null;
+app.$channelsSelectBox = null;
+app.$channelsClear = null;
 app.init = function() {
     app.$main = $('#main');
     app.$loading = $('#loading-wrapper');
@@ -246,14 +279,20 @@ app.init = function() {
     app.$selectChannels = $('#select-channels');
     app.$channelsItems = $('#channels-items');
     app.$channelsSearchInput = $('#channels-search-input');
+    app.$channelsSelectBox = $('#select-channel-box');
+    app.$channelsClear = $('#channels-clear');
+    app.restoreFilters();
     app.translateLayout();
+    app.initGameFiler();
+    app.initChannelsFiler();
+    app.initLangugesFilter();
+    app.initStreamTypeFilter();
     app.setUnderscore();
     app.areas[constants.AREA_PAGES].columns = app.$pages.find('.page').length;
     app.areas[constants.AREA_STREAM_FILTERS].columns = app.$streamFilters.find('.filter').length;
     app.areas[constants.AREA_VIDEO_FILTERS].columns = app.$videoFilters.find('.filter').length;
     app.areas[constants.AREA_FILTERS] = app.areas[constants.AREA_STREAM_FILTERS];
     $('body').addClass('init');
-    app.initLangugesFilter();
     app.$items.mCustomScrollbar($.extend({}, app.customScrollbarOptions, {
         callbacks: {
             onTotalScroll: app.loadMore,
@@ -293,16 +332,25 @@ app.init = function() {
         if (query == lastChannelQuery) return;
         lastChannelQuery = query;
         if (query) {
-        	
+            if (app.searchChannelTimeout) {
+                clearTimeout(app.searchChannelTimeout);
+            }
+            if (app.loadingChannels) {
+                app.loadingChannels.abort();
+                app.loadingChannels = null;
+            }
+            app.searchChannelTimeout = setTimeout(function() {
+                app.searchChannelTimeout = null;
+                app.prepareChannelsSearch();
+                app.showLoading(messages.LOADING);
+                app.loadingChannels = app.getChannelsSearch(query, function() {
+                    app.loadingChannels = null;
+                });
+            }, 500);
         } else {
         	app.clearItems(app.$channelsItems, app.$channelsItemsContainer);
             app.$channelsItemsContainer.append($('<div class="column text"/>').text(messages.CHANNELS_TYPE_TO_SEARCH));
         }
-        /*return $.ajax($.extend({}, app.twitchApiOptions, {
-            url: 'https://api.twitch.tv/kraken/search/channels?limit=100&query=' + encodeURIComponent(query)
-        })).done(function(response) {
-            console.log(response);
-        });*/
     });
     document.addEventListener('visibilitychange', function() {
         if (window.webapis && app.state == constants.STATE_WATCH) {
@@ -333,6 +381,10 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_GAME) {
                     if (app.activeArea == constants.AREA_GAME_RESULTS) {
                         app.navigateGameItems(keys.KEY_LEFT);
+                    }
+                } else if (app.state === constants.STATE_SELECT_CHANNELS) {
+                    if (app.activeArea == constants.AREA_CHANNELS_RESULTS) {
+                        app.navigateChannelItems(keys.KEY_LEFT);
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_LEFT);
@@ -366,6 +418,15 @@ app.init = function() {
                         app.$gameSearchInput.blur();
                         app.activateGameClearArea();
                     }
+                } else if (app.state === constants.STATE_SELECT_CHANNELS) {
+                    if (app.activeArea == constants.AREA_CHANNELS_RESULTS) {
+                        app.navigateChannelItems(keys.KEY_UP, function() {
+                            app.activateChannelsSearchArea();
+                        });
+                    } else if (app.activeArea == constants.AREA_CHANNELS_SEARCH && app.filters.channel) {
+                        app.$channelsSearchInput.blur();
+                        app.activateChannelsClearArea();
+                    }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_UP);
                 } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
@@ -390,6 +451,10 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_GAME) {
                     if (app.activeArea == constants.AREA_GAME_RESULTS) {
                         app.navigateGameItems(keys.KEY_RIGHT);
+                    }
+                } else if (app.state === constants.STATE_SELECT_CHANNELS) {
+                    if (app.activeArea == constants.AREA_CHANNELS_RESULTS) {
+                        app.navigateChannelItems(keys.KEY_RIGHT);
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_RIGHT);
@@ -426,6 +491,17 @@ app.init = function() {
                         }
                     } else if (app.activeArea == constants.AREA_GAME_CLEAR) {
                         app.activateGameSearchArea();
+                    }
+                } else if (app.state === constants.STATE_SELECT_CHANNELS) {
+                    if (app.activeArea == constants.AREA_CHANNELS_RESULTS) {
+                        app.navigateChannelItems(keys.KEY_DOWN);
+                    } else if (app.activeArea == constants.AREA_CHANNELS_SEARCH) {
+                        if (app.areas[constants.AREA_CHANNELS_RESULTS].columns > 0) {
+                            app.$channelsSearchInput.blur();
+                            app.activateChannelItemsArea();
+                        }
+                    } else if (app.activeArea == constants.AREA_CHANNELS_CLEAR) {
+                        app.activateChannelsSearchArea();
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_DOWN);
@@ -467,6 +543,22 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_CHANNELS) {
                     if (app.activeArea == constants.AREA_CHANNELS_SEARCH) {
                         app.$channelsSearchInput.focus();
+                    } else if (app.activeArea == constants.AREA_CHANNELS_RESULTS) {
+                        var $selectedItem = $('#channel-item-' + app.areas[constants.AREA_CHANNELS_RESULTS].x + '-' + app.areas[constants.AREA_CHANNELS_RESULTS].y);
+                        if ($selectedItem.length > 0) {
+                            app.toggleChannel($selectedItem);
+                            if (app.timeoutRefresh) {
+                                clearTimeout(app.timeoutRefresh);
+                            }
+                            app.timeoutRefresh = setTimeout(function() {
+                                app.timeoutRefresh = null;
+                                app.refresh(true);
+                            }, 500);
+                        }
+                    } else if (app.activeArea == constants.AREA_CHANNELS_CLEAR) {
+                        app.clearChannels();
+                        app.activateChannelsSearchArea();
+                        app.refresh(true);
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     var $selectedItem = $('#language-item-' + app.areas[constants.AREA_LANGUAGES].x + '-' + app.areas[constants.AREA_LANGUAGES].y);
@@ -612,6 +704,12 @@ app.navigateGameItems = function(keyCode, initUpperArea) {
         app.showGameItem($newActiveCell);
     }
 };
+app.navigateChannelItems = function(keyCode, initUpperArea) {
+    var $newActiveCell = app.getNewActiveCell('channel-item', constants.AREA_CHANNELS_RESULTS, keyCode, initUpperArea);
+    if ($newActiveCell) {
+        app.showChannelItem($newActiveCell);
+    }
+};
 app.navigateLanguageItems = function(keyCode, initUpperArea) {
     var $newActiveCell = app.getNewActiveCell('language-item', constants.AREA_LANGUAGES, keyCode, initUpperArea);
     if ($newActiveCell) {
@@ -648,6 +746,12 @@ app.returnState = function() {
     }
 };
 app.loadingStream = null;
+app.loadingStreamErrorHandler = function(xhr, textStatus, errorThrown) {
+    if (errorThrown !== 'abort') {
+        app.returnState();
+        app.loadingErrorHandler(xhr, textStatus, errorThrown);
+    }
+};
 app.loadingErrorHandler = function(xhr, textStatus, errorThrown) {
     if (errorThrown !== 'abort') {
         var message = messages.ERROR_LOADING_FAILED;
@@ -662,8 +766,6 @@ app.loadingErrorHandler = function(xhr, textStatus, errorThrown) {
     }
 }
 app.showLoadingError = function(message) {
-    app.returnState();
-    app.$player.hide();
     app.$loading.hide();
     app.showError(message);
 };
@@ -686,10 +788,10 @@ app.playStream = function(channelName) {
                     app.$loading.hide();
                     var qualities = extractQualities(data);
                     app.play(qualities[0].url);
-                }).fail(app.loadingErrorHandler);
-            }).fail(app.loadingErrorHandler);
+                }).fail(app.loadingStreamErrorHandler);
+            }).fail(app.loadingStreamErrorHandler);
         }
-    }).fail(app.loadingErrorHandler);
+    }).fail(app.loadingStreamErrorHandler);
 };
 app.playVideo = function(id) {
     app.setState(constants.STATE_WATCH, app.stop);
@@ -704,8 +806,8 @@ app.playVideo = function(id) {
             app.$loading.hide();
             var qualities = extractQualities(data);
             app.play(qualities[0].url);
-        }).fail(app.loadingErrorHandler);
-    }).fail(app.loadingErrorHandler);
+        }).fail(app.loadingStreamErrorHandler);
+    }).fail(app.loadingStreamErrorHandler);
 };
 app.play = function(url) {
     if (window.webapis) {
@@ -732,7 +834,7 @@ app.play = function(url) {
             onerror: function(error) {
                 var message = messages.ERROR_LOADING_FAILED;
                 if (error === 'PLAYER_ERROR_CONNECTION_FAILED') {
-                    message = messages.ERROR_CONNECTION_FAIL;
+                    message = messages.ERROR_CONNECTION_FAILED;
                 }
                 app.returnState();
                 app.showError(message);
@@ -839,8 +941,8 @@ app.getLiveChannels = function(limit, offset, callback) {
     if (app.filters.game) {
         url += '&game=' + encodeURIComponent(app.filters.game);
     }
-    if (app.filters.channels) {
-        url += '&channels=' + encodeURIComponent(app.filters.channels);
+    if (app.filters.channel) {
+        url += '&channel=' + encodeURIComponent(app.filters.channel);
     }
     if (app.filters.languages.length > 0) {
         url += '&language=' + encodeURIComponent(app.filters.languages.join(','));
@@ -1039,37 +1141,16 @@ app.getGamesSearch = function(query, callback) {
 };
 app.getChannelsSearch = function(query, callback) {
     return $.ajax($.extend({}, app.twitchApiOptions, {
-        url: 'https://api.twitch.tv/kraken/search/channels/?query=' + encodeURIComponent(query)
+        url: 'https://api.twitch.tv/kraken/search/channels/?limit=100&query=' + encodeURIComponent(query)
     })).done(function(response) {
         console.log(response);
-        if (response.channels) {
-            var i, x, y, game, $newCell, $newColumn;
-            var countRows = app.areas[constants.AREA_GAME_RESULTS].rows;
-            for (i = 0; i < response.games.length; i++) {
-                if ((y = i % countRows) == 0) {
-                    $newColumn = $('<div class="column"/>');
-                    app.$gameItemsContainer.append($newColumn);
-                    app.areas[constants.AREA_GAME_RESULTS].columns++;
-                }
-                x = (i - y) / countRows;
-                game = response.games[i];
-                $newCell = $('<div class="cell game-cell" id="game-item-' + x + '-' + y + '">\
-                    <i class="fa fa-fw fa-twitch"></i>\
-                    <img src="' + game.box.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
-                    <div class="game-name ellipsed">' + game.name + '</div>\
-                </div>');
-                $newCell.data('popularity', game.popularity);
-                $newCell.data('name', game.name);
-                $newColumn.append($newCell);
-                if (i == 0 && app.activeArea == constants.AREA_GAME_RESULTS) {
-                    app.showGameItem($newCell);
-                }
-            }
+        if (response.channels.length > 0) {
+            app.fillChannelsContainer(response.channels);
         } else {
-            app.$gameItemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
+            app.$channelsItemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
         }
-        app.$gameItems.mCustomScrollbar('update');
-        app.autoHideScrollbar(app.$gameItems);
+        app.$channelsItems.mCustomScrollbar('update');
+        app.autoHideScrollbar(app.$channelsItems);
     }).fail(app.loadingErrorHandler).always(function() {
         app.$loading.hide();
         if (typeof callback == 'function') {
@@ -1077,27 +1158,69 @@ app.getChannelsSearch = function(query, callback) {
         }
     });
 };
+app.fillChannelsContainer = function(channels) {
+    var i, x, y, game, $newCell, $newColumn;
+    var countRows = app.areas[constants.AREA_CHANNELS_RESULTS].rows;
+    for (i = 0; i < channels.length; i++) {
+        if ((y = i % countRows) == 0) {
+            $newColumn = $('<div class="column"/>');
+            app.$channelsItemsContainer.append($newColumn);
+            app.areas[constants.AREA_CHANNELS_RESULTS].columns++;
+        }
+        x = (i - y) / countRows;
+        channel = channels[i];
+        var src = channel.logo ? channel.logo : '';
+        var onError = channel.logo ? 'onerror="imageFailed(this)' : '';
+        var checked = app.filters.channels[channel.name] !== undefined;
+        var checkboxClass = checked ? 'fa-check-square-o' : 'fa-square-o';
+        var divClass = checked ? 'active' : '';
+        $newCell = $('<div class="cell channel-cell ' + divClass + '" id="channel-item-' + x + '-' + y + '">\
+            <i class="fa fa-fw fa-twitch"></i>\
+            <img src="' + src + '" onload="imageLoaded(this)" ' + onError + '">\
+            <div class="checkbox"><i class="fa ' + checkboxClass + '"></i></div>\
+            <div class="channel-info">\
+                <div class="channel-name">' + channel.display_name + '</div>\
+                <div class="channel-counter"><i class="fa fa-fw fa-user"></i> ' + app.numberFormat(channel.followers) + '</div>\
+                <div class="channel-counter"><i class="fa fa-fw fa-eye"></i> ' + app.numberFormat(channel.views) + '</div>\
+            </div>\
+            <div class="clear"/>\
+        </div>');
+        $newCell.data('id', channel._id);
+        $newCell.data('display-name', channel.display_name);
+        $newCell.data('name', channel.name);
+        $newCell.data('views', channel.views);
+        $newCell.data('followers', channel.followers);
+        $newCell.data('avatar', channel.logo);
+        $newColumn.append($newCell);
+    }
+};
 app.showStreamItem = function($element) {
     app.$selectBox.find('.stream-channel-name').html($element.data('channel-name'));
-    app.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + $element.data('viewers').toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+    app.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + app.numberFormat($element.data('viewers')));
     app.$selectBox.find('.game-name').html($element.data('game') || '&nbsp;');
     app.$selectBox.find('.channel-status').html($element.data('status') || '&nbsp;');
     app.showItem($element, app.$items, app.$itemsContainer, app.$selectBox);
 };
+app.showChannelItem = function($element) {
+    app.$channelsSelectBox.find('.channel-name').html($element.data('display-name'));
+    app.$channelsSelectBox.find('.channel-followers').html('<i class="fa fa-fw fa-user"></i> ' + app.numberFormat($element.data('followers')));
+    app.$channelsSelectBox.find('.channel-views').html('<i class="fa fa-fw fa-eye"></i> ' + app.numberFormat($element.data('views')));
+    app.showItem($element, app.$channelsItems, app.$channelsItemsContainer, app.$channelsSelectBox);
+};
 app.showGameItem = function($element) {
     var data;
     if ((data = $element.data('viewers')) !== undefined) {
-        app.$gameSelectBox.find('.game-viewers').html('<i class="fa fa-eye"></i> ' + data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+        app.$gameSelectBox.find('.game-viewers').html('<i class="fa fa-eye"></i> ' + app.numberFormat(data));
     } else {
         app.$gameSelectBox.find('.game-viewers').html('');
     }
     if ((data = $element.data('channels')) !== undefined) {
-        app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-video-camera"></i> ' + data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+        app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-video-camera"></i> ' + app.numberFormat(data));
     } else {
         app.$gameSelectBox.find('.game-channels').html('');
     }
     if ((data = $element.data('popularity')) !== undefined) {
-        app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-fire"></i> ' + data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator));
+        app.$gameSelectBox.find('.game-channels').html('<i class="fa fa-fire"></i> ' + app.numberFormat(data));
     } else {
         app.$gameSelectBox.find('.game-popularity').html('');
     }
@@ -1115,20 +1238,22 @@ app.showItem = function($element, $items, $itemsContainer, $selectBox) {
     }
     left = Math.max(0, left);
     var change = Math.abs(left + scrollLeft);
-    var selectPosition = $selectBox.offset();
     if (change > 0) {
+        console.log(left);
         $items.mCustomScrollbar('scrollTo', left, {
             scrollInertia: 0,
             timeout: 0
         });
     }
-    $selectBox.addClass('selected');
-    $selectBox.width($element.width());
-    $selectBox.height($element.height());
-    var newOffset = $element.offset();
-    newOffset.left -= left + scrollLeft;
-    newOffset.top = Math.round(newOffset.top);
-    $selectBox.offset(newOffset);
+    if ($selectBox) {
+        $selectBox.addClass('selected');
+        $selectBox.width($element.width());
+        $selectBox.height($element.height());
+        var newOffset = $element.offset();
+        newOffset.left -= left + scrollLeft;
+        newOffset.top = Math.round(newOffset.top);
+        $selectBox.offset(newOffset);
+    }
     app.autoHideScrollbar($items);
     app.clearSelection($items);
     $element.addClass('selected');
@@ -1234,6 +1359,11 @@ app.selectCurrentFilter = function() {
     switch (type) {
         case 'game':
             app.$selectGame.show();
+            if (app.filters.game) {
+                app.$gameClear.show().find('.text').text(app.filters.game);
+            } else {
+                app.$gameClear.hide();
+            }
             app.setState(constants.STATE_SELECT_GAME, function() {
                 if (app.searchGameTimeout) {
                     clearTimeout(searchGameTimeout);
@@ -1278,8 +1408,15 @@ app.selectCurrentFilter = function() {
                 app.$channelsItems.mCustomScrollbar(app.customScrollbarOptions);
                 app.$channelsItemsContainer = app.$channelsItems.find('.mCSB_container');
             }
-            app.clearItems(app.$channelsItems, app.$channelsItemsContainer);
-            app.$channelsItemsContainer.append($('<div class="column text"/>').text(messages.CHANNELS_TYPE_TO_SEARCH));
+            app.prepareChannelsSearch();
+            if (Object.keys(app.filters.channels).length > 0) {
+                app.fillChannelsContainer(Object.values(app.filters.channels));
+                app.$channelsClear.show();
+            } else {
+                app.$channelsItemsContainer.append($('<div class="column text"/>').text(messages.CHANNELS_TYPE_TO_SEARCH));
+                app.$channelsClear.hide();
+            }
+            app.$channelsItems.mCustomScrollbar('update');
             break;
         case 'languages':
             app.$selectLanguage.show();
@@ -1296,7 +1433,7 @@ app.selectCurrentFilter = function() {
     }
 };
 app.toggleLanguage = function($selectedItem) {
-    var code = $selectedItem.data('code');
+    var code = $selectedItem.data('code'), x;
     if (code === 'clear') {
         app.filters.languages = [];
         var $active = app.$selectLanguage.find('.active').each(function() {
@@ -1323,6 +1460,54 @@ app.toggleLanguage = function($selectedItem) {
     } else {
         $('.filter-languages').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_LANGUAGES);
     }
+    app.storeFilters();
+};
+app.toggleChannel = function($selectedItem) {
+    var name = $selectedItem.data('name');
+    var $checkbox = $selectedItem.find('.checkbox > i');
+    if ($selectedItem.hasClass('active')) {
+        $selectedItem.removeClass('active');
+        $checkbox.removeClass('fa-check-square-o').addClass('fa-square-o');
+        delete app.filters.channels[name];
+    } else {
+        $selectedItem.addClass('active');
+        $checkbox.removeClass('fa-square-o').addClass('fa-check-square-o');
+        app.filters.channels[name] = {
+            _id: $selectedItem.data('id'),
+            display_name: $selectedItem.data('display-name'),
+            name: $selectedItem.data('name'),
+            logo: $selectedItem.data('avatar'),
+            followers: $selectedItem.data('followers'),
+            views: $selectedItem.data('views')
+        };
+    }
+    var count = Object.keys(app.filters.channels).length;
+    if (count > 0) {
+        $('#stream-filter-channels').addClass('chosen').find('.text').text('(' + count + ') ' + messages.FILTER_STREAM_CHANNELS);
+        var ids = [];
+        for (i in app.filters.channels) {
+            ids.push(app.filters.channels[i]._id);
+        }
+        app.filters.channel = ids.join(',');
+        app.$channelsClear.show();
+    } else {
+        $('#stream-filter-channels').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_CHANNELS);
+        app.filters.channel = null;
+        app.$channelsClear.hide();
+    }
+    app.storeFilters();
+};
+app.clearChannels = function() {
+    app.filters.channels = {};
+    app.filters.channel = null;
+    $('#stream-filter-channels').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_CHANNELS);
+    app.$channelsItemsContainer.find('.active').each(function() {
+        var $checkbox = $(this).find('.checkbox > i');
+        $(this).removeClass('active');
+        $checkbox.removeClass('fa-check-square-o').addClass('fa-square-o');
+    });
+    app.$channelsClear.hide();
+    app.storeFilters();
 };
 app.selectStreamType = function($selectedItem) {
     var type = $selectedItem.data('type');
@@ -1335,16 +1520,19 @@ app.selectStreamType = function($selectedItem) {
         app.filters.streamType = type;
         $('#stream-filter-type').addClass('chosen').find('.text').text($selectedItem.text());
     }
+    app.storeFilters();
 };
 app.selectGame = function(game) {
     app.filters.game = game;
     $('.filter-game').addClass('chosen').find('.text').text(game);
     app.$gameClear.show().find('.text').text(game);
+    app.storeFilters();
 };
 app.clearGame = function() {
     app.filters.game = null;
     $('.filter-game').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_GAME);
     app.$gameClear.hide();
+    app.storeFilters();
 };
 app.prepareGamesSearch = function() {
     app.showLoading(messages.LOADING);
@@ -1354,7 +1542,6 @@ app.prepareGamesSearch = function() {
     app.areas[constants.AREA_GAME_RESULTS].y = 0;
 };
 app.prepareChannelsSearch = function() {
-    app.showLoading(messages.LOADING);
     app.clearItems(app.$channelsItems, app.$channelsItemsContainer);
     app.areas[constants.AREA_CHANNELS_RESULTS].columns = 0;
     app.areas[constants.AREA_CHANNELS_RESULTS].x = 0;
@@ -1372,6 +1559,12 @@ app.activateGameItemsArea = function() {
     var $activeCell = $('#game-item-' + app.areas[constants.AREA_GAME_RESULTS].x + '-' + app.areas[constants.AREA_GAME_RESULTS].y);
     app.showGameItem($activeCell);
 };
+app.activateChannelItemsArea = function() {
+    app.activeArea = constants.AREA_CHANNELS_RESULTS;
+    app.clearSelection(app.$selectChannels);
+    var $activeCell = $('#channel-item-' + app.areas[constants.AREA_CHANNELS_RESULTS].x + '-' + app.areas[constants.AREA_CHANNELS_RESULTS].y);
+    app.showChannelItem($activeCell);
+};
 app.activateGameSearchArea = function() {
     app.activeArea = constants.AREA_GAME_SEARCH;
     app.clearSelection(app.$selectGame);
@@ -1387,12 +1580,29 @@ app.activateChannelsSearchArea = function() {
     app.clearSelection(app.$selectChannels);
     app.$channelsSearchInput.addClass('selected');
 };
+app.activateChannelsClearArea = function() {
+    app.activeArea = constants.AREA_CHANNELS_CLEAR;
+    app.clearSelection(app.$selectChannels);
+    app.$channelsClear.addClass('selected');
+};
 app.clearSelection = function($parent) {
     $('.selected', $parent).removeClass('selected');
+};
+app.numberFormat = function(number) {
+    return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator);
+};
+app.storeFilters = function() {
+    localStorage['filters'] = JSON.stringify(app.filters);
+};
+app.restoreFilters = function() {
+    if (localStorage['filters'] !== undefined) {
+        app.filters = JSON.parse(localStorage['filters']);
+    }
 };
 
 function imageLoaded(img) {
     img.classList.add('loaded');
+    $(img).siblings('i').hide();
 }
 
 function imageFailed(img) {
