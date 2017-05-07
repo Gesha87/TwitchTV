@@ -53,7 +53,7 @@
 	                </div><div class="filter filter-languages" id="video-filter-languages" data-type="languages">
 	                    <i class="fa fa-globe"></i> <span class="text">Языки</span>
 	                </div><div class="filter" id="video-filter-type" data-type="video-type">
-	                    <i class="fa fa-play"></i> <span class="text">Тип</span>
+	                    <i class="fa fa-backward"></i> <span class="text">Тип</span>
 	                </div><div class="filter" id="video-filter-sort" data-type="sort">
 	                    <i class="fa fa-sort"></i> <span class="text">Сортировка</span>
 	                </div><!-- <div class="filter-divider">
@@ -162,6 +162,57 @@
             </div>
             <div class="filter-list-item stream-type-all" id="stream-type-item-0-2" data-type="all">
                 <div>Все</div>
+            </div>
+        </div>
+    </div>
+    <div id="select-video-type" class="select-wrapper text-center">
+        <div class="caption">
+            <div class="text">Выбор типов</div>
+        </div>
+        <div class="filter-list">
+        <div class="filter-list-item stream-type-live" id="video-type-item-0-0" data-type="clear">
+                <div class="text">Очистить</div>
+            </div>
+            <div class="filter-list-item video-type-upload selected" id="video-type-item-0-1" data-type="upload">
+                <input type="checkbox">
+                <div class="text">Загрузки</div>
+            </div>
+            <div class="filter-list-item video-type-archive" id="video-type-item-0-2" data-type="archive">
+                <input type="checkbox">
+                <div class="text">Архив</div>
+            </div>
+            <div class="filter-list-item video-type-highlight" id="video-type-item-0-3" data-type="highlight">
+                <input type="checkbox">
+                <div class="text">Лучшие моменты</div>
+            </div>
+        </div>
+    </div>
+    <div id="select-period" class="select-wrapper text-center">
+        <div class="caption">
+            <div class="text">Выбор периода</div>
+        </div>
+        <div class="filter-list">
+            <div class="filter-list-item period-week active selected" id="period-item-0-0" data-period="week">
+                <div>Неделя (по умолчанию)</div>
+            </div>
+            <div class="filter-list-item period-month" id="period-item-0-1" data-period="month">
+                <div>Месяц</div>
+            </div>
+            <div class="filter-list-item period-all" id="period-item-0-2" data-period="all">
+                <div>Все</div>
+            </div>
+        </div>
+    </div>
+    <div id="select-sort" class="select-wrapper text-center">
+        <div class="caption">
+            <div class="text">Выбор порядка</div>
+        </div>
+        <div class="filter-list">
+            <div class="filter-list-item sort-views active selected" id="sort-item-0-0" data-sort="views">
+                <div>Популярные (по умолчанию)</div>
+            </div>
+            <div class="filter-list-item sort-time" id="sort-item-0-1" data-sort="time">
+                <div>Последние</div>
             </div>
         </div>
     </div>

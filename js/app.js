@@ -51,6 +51,24 @@ app.areas[constants.AREA_STREAM_TYPE] = {
     x: 0,
     y: 0
 };
+app.areas[constants.AREA_VIDEO_TYPE] = {
+    columns: 1,
+    rows: 4,
+    x: 0,
+    y: 1
+};
+app.areas[constants.AREA_PERIOD] = {
+    columns: 1,
+    rows: 3,
+    x: 0,
+    y: 0
+};
+app.areas[constants.AREA_SORT] = {
+    columns: 1,
+    rows: 2,
+    x: 0,
+    y: 0
+};
 app.filters = {
     game: null,
     channels: {},
@@ -58,7 +76,7 @@ app.filters = {
     languages: [],
     streamType: null,
     period: null,
-    videoType: null,
+    videoTypes: [],
     sort: null
 };
 app.laguagesFilter = {
@@ -148,6 +166,39 @@ app.initStreamTypeFilter = function() {
         app.$selectStreamType.find('.stream-type-' + app.filters.streamType).addClass('active');
     }
 };
+app.initPeriodFilter = function() {
+    if (app.filters.period) {
+        var text = messages.FILTER_VIDEO_PERIOD;
+        if (app.filters.period === 'month') {
+            text = messages.PERIOD_MONTH;
+        } else if (app.filters.period === 'all') {
+            text = messages.PERIOD_ALL;
+        }
+        $('#video-filter-period').addClass('chosen').find('.text').text(text);
+        app.$selectPeriod.find('.active').removeClass('active');
+        app.$selectPeriod.find('.period-' + app.filters.period).addClass('active');
+    }
+};
+app.initSortFilter = function() {
+    if (app.filters.sort) {
+        var text = messages.SORT_VIEWS;
+        if (app.filters.sort === 'time') {
+            text = messages.SORT_TIME;
+        }
+        $('#video-filter-sort').addClass('chosen').find('.text').text(text);
+        app.$selectSort.find('.active').removeClass('active');
+        app.$selectSort.find('.period-' + app.filters.sort).addClass('active');
+    }
+};
+app.initVideoTypeFilter = function() {
+    if (app.filters.videoTypes.length > 0) {
+        $('#video-filter-type').addClass('chosen').find('.text').text('(' + app.filters.videoTypes.length + ') ' + messages.FILTER_VIDEO_TYPE);
+        for (i in app.filters.videoTypes) {
+            var type = app.filters.videoTypes[i];
+            app.$selectVideoType.find('.video-type-' + type).addClass('active').find('input').prop('checked', true);
+        }
+    }
+};
 app.customScrollbarOptions = {
     scrollInertia: 0,
     axis: "x",
@@ -205,6 +256,21 @@ app.translateLayout = function() {
     $('#stream-type-item-0-0').text(messages.STREAM_TYPE_LIVE);
     $('#stream-type-item-0-1').text(messages.STREAM_TYPE_PLAYLIST);
     $('#stream-type-item-0-2').text(messages.STREAM_TYPE_ALL);
+    // select video type
+    app.$selectVideoType.find('.caption > .text').text(messages.VIDEO_TYPE_SELECT);
+    $('#video-type-item-0-0').find('.text').text(messages.VIDEO_TYPE_CLEAR);
+    $('#video-type-item-0-1').find('.text').text(messages.VIDEO_TYPE_UPLOAD);
+    $('#video-type-item-0-2').find('.text').text(messages.VIDEO_TYPE_ARCHIVE);
+    $('#video-type-item-0-3').find('.text').text(messages.VIDEO_TYPE_HIGHLIGHT);
+    // select period
+    app.$selectPeriod.find('.caption > .text').text(messages.PERIOD_SELECT);
+    $('#period-item-0-0').text(messages.PERIOD_WEEK);
+    $('#period-item-0-1').text(messages.PERIOD_MONTH);
+    $('#period-item-0-2').text(messages.PERIOD_ALL);
+    // select sort
+    app.$selectSort.find('.caption > .text').text(messages.SORT_SELECT);
+    $('#sort-item-0-0').text(messages.SORT_VIEWS);
+    $('#sort-item-0-1').text(messages.SORT_TIME);
     // select language
     app.$selectLanguage.find('.caption > .text').text(messages.LANGUAGE_SELECT);
     // others
@@ -250,6 +316,9 @@ app.$channelsItemsContainer = null;
 app.$channelsSearchInput = null;
 app.$channelsSelectBox = null;
 app.$channelsClear = null;
+app.$selectVideoType = null;
+app.$selectPeriod = null;
+app.$selectSort = null;
 app.init = function() {
     app.$main = $('#main');
     app.$loading = $('#loading-wrapper');
@@ -281,12 +350,18 @@ app.init = function() {
     app.$channelsSearchInput = $('#channels-search-input');
     app.$channelsSelectBox = $('#select-channel-box');
     app.$channelsClear = $('#channels-clear');
+    app.$selectVideoType = $('#select-video-type');
+    app.$selectPeriod = $('#select-period');
+    app.$selectSort = $('#select-sort');
     app.restoreFilters();
     app.translateLayout();
     app.initGameFiler();
     app.initChannelsFiler();
     app.initLangugesFilter();
     app.initStreamTypeFilter();
+    app.initVideoTypeFilter();
+    app.initPeriodFilter();
+    app.initSortFilter();
     app.setUnderscore();
     app.areas[constants.AREA_PAGES].columns = app.$pages.find('.page').length;
     app.areas[constants.AREA_STREAM_FILTERS].columns = app.$streamFilters.find('.filter').length;
@@ -431,6 +506,12 @@ app.init = function() {
                     app.navigateLanguageItems(keys.KEY_UP);
                 } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
                     app.navigateStreamTypeItems(keys.KEY_UP);
+                } else if (app.state === constants.STATE_SELECT_VIDEO_TYPE) {
+                    app.navigateVideoTypeItems(keys.KEY_UP);
+                } else if (app.state === constants.STATE_SELECT_PERIOD) {
+                    app.navigatePeriodItems(keys.KEY_UP);
+                } else if (app.state === constants.STATE_SELECT_SORT) {
+                    app.navigateSortItems(keys.KEY_UP);
                 }
                 break;
             case keys.KEY_RIGHT:
@@ -507,6 +588,12 @@ app.init = function() {
                     app.navigateLanguageItems(keys.KEY_DOWN);
                 } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
                     app.navigateStreamTypeItems(keys.KEY_DOWN);
+                } else if (app.state === constants.STATE_SELECT_VIDEO_TYPE) {
+                    app.navigateVideoTypeItems(keys.KEY_DOWN);
+                } else if (app.state === constants.STATE_SELECT_PERIOD) {
+                    app.navigatePeriodItems(keys.KEY_DOWN);
+                } else if (app.state === constants.STATE_SELECT_SORT) {
+                    app.navigateSortItems(keys.KEY_DOWN);
                 }
                 break;
             case keys.KEY_ENTER:
@@ -546,14 +633,15 @@ app.init = function() {
                     } else if (app.activeArea == constants.AREA_CHANNELS_RESULTS) {
                         var $selectedItem = $('#channel-item-' + app.areas[constants.AREA_CHANNELS_RESULTS].x + '-' + app.areas[constants.AREA_CHANNELS_RESULTS].y);
                         if ($selectedItem.length > 0) {
-                            app.toggleChannel($selectedItem);
-                            if (app.timeoutRefresh) {
-                                clearTimeout(app.timeoutRefresh);
+                            if (app.toggleChannel($selectedItem)) {
+                                if (app.timeoutRefresh) {
+                                    clearTimeout(app.timeoutRefresh);
+                                }
+                                app.timeoutRefresh = setTimeout(function() {
+                                    app.timeoutRefresh = null;
+                                    app.refresh(true);
+                                }, 500);
                             }
-                            app.timeoutRefresh = setTimeout(function() {
-                                app.timeoutRefresh = null;
-                                app.refresh(true);
-                            }, 500);
                         }
                     } else if (app.activeArea == constants.AREA_CHANNELS_CLEAR) {
                         app.clearChannels();
@@ -572,10 +660,36 @@ app.init = function() {
                             app.refresh(true);
                         }, 500);
                     }
+                } else if (app.state === constants.STATE_SELECT_VIDEO_TYPE) {
+                    var $selectedItem = $('#video-type-item-' + app.areas[constants.AREA_VIDEO_TYPE].x + '-' + app.areas[constants.AREA_VIDEO_TYPE].y);
+                    if ($selectedItem.length > 0) {
+                        app.toggleVideoType($selectedItem);
+                        if (app.timeoutRefresh) {
+                            clearTimeout(app.timeoutRefresh);
+                        }
+                        app.timeoutRefresh = setTimeout(function() {
+                            app.timeoutRefresh = null;
+                            app.refresh(true);
+                        }, 500);
+                    }
                 } else if (app.state === constants.STATE_SELECT_STREAM_TYPE) {
                     var $selectedItem = $('#stream-type-item-' + app.areas[constants.AREA_STREAM_TYPE].x + '-' + app.areas[constants.AREA_STREAM_TYPE].y);
                     if ($selectedItem.length > 0) {
                         app.selectStreamType($selectedItem);
+                        app.returnState();
+                        app.refresh(true);
+                    }
+                } else if (app.state === constants.STATE_SELECT_PERIOD) {
+                    var $selectedItem = $('#period-item-' + app.areas[constants.AREA_PERIOD].x + '-' + app.areas[constants.AREA_PERIOD].y);
+                    if ($selectedItem.length > 0) {
+                        app.selectPeriod($selectedItem);
+                        app.returnState();
+                        app.refresh(true);
+                    }
+                } else if (app.state === constants.STATE_SELECT_SORT) {
+                    var $selectedItem = $('#sort-item-' + app.areas[constants.AREA_SORT].x + '-' + app.areas[constants.AREA_SORT].y);
+                    if ($selectedItem.length > 0) {
+                        app.selectSort($selectedItem);
                         app.returnState();
                         app.refresh(true);
                     }
@@ -717,10 +831,31 @@ app.navigateLanguageItems = function(keyCode, initUpperArea) {
         $newActiveCell.addClass('selected');
     }
 };
+app.navigateVideoTypeItems = function(keyCode, initUpperArea) {
+    var $newActiveCell = app.getNewActiveCell('video-type-item', constants.AREA_VIDEO_TYPE, keyCode, initUpperArea);
+    if ($newActiveCell) {
+        app.clearSelection(app.$selectVideoType);
+        $newActiveCell.addClass('selected');
+    }
+};
 app.navigateStreamTypeItems = function(keyCode, initUpperArea) {
     var $newActiveCell = app.getNewActiveCell('stream-type-item', constants.AREA_STREAM_TYPE, keyCode, initUpperArea);
     if ($newActiveCell) {
         app.clearSelection(app.$selectStreamType);
+        $newActiveCell.addClass('selected');
+    }
+};
+app.navigatePeriodItems = function(keyCode, initUpperArea) {
+    var $newActiveCell = app.getNewActiveCell('period-item', constants.AREA_PERIOD, keyCode, initUpperArea);
+    if ($newActiveCell) {
+        app.clearSelection(app.$selectPeriod);
+        $newActiveCell.addClass('selected');
+    }
+};
+app.navigateSortItems = function(keyCode, initUpperArea) {
+    var $newActiveCell = app.getNewActiveCell('sort-item', constants.AREA_SORT, keyCode, initUpperArea);
+    if ($newActiveCell) {
+        app.clearSelection(app.$selectSort);
         $newActiveCell.addClass('selected');
     }
 };
@@ -1008,8 +1143,8 @@ app.getVideos = function(limit, offset, callback) {
     if (app.filters.languages.length > 0) {
         url += '&language=' + encodeURIComponent(app.filters.languages.join(','));
     }
-    if (app.filters.videoType) {
-        url += '&type=' + encodeURIComponent(app.filters.videoType);
+    if (app.filters.videoTypes.length > 0) {
+        url += '&broadcast_type=' + encodeURIComponent(app.filters.videoTypes.join(','));
     }
     if (app.filters.sort) {
         url += '&sort=' + encodeURIComponent(app.filters.sort);
@@ -1183,7 +1318,7 @@ app.fillChannelsContainer = function(channels) {
                 <div class="channel-counter"><i class="fa fa-fw fa-user"></i> ' + app.numberFormat(channel.followers) + '</div>\
                 <div class="channel-counter"><i class="fa fa-fw fa-eye"></i> ' + app.numberFormat(channel.views) + '</div>\
             </div>\
-            <div class="clear"/>\
+            <div class="clear">&nbsp;</div>\
         </div>');
         $newCell.data('id', channel._id);
         $newCell.data('display-name', channel.display_name);
@@ -1239,7 +1374,6 @@ app.showItem = function($element, $items, $itemsContainer, $selectBox) {
     left = Math.max(0, left);
     var change = Math.abs(left + scrollLeft);
     if (change > 0) {
-        console.log(left);
         $items.mCustomScrollbar('scrollTo', left, {
             scrollInertia: 0,
             timeout: 0
@@ -1410,7 +1544,9 @@ app.selectCurrentFilter = function() {
             }
             app.prepareChannelsSearch();
             if (Object.keys(app.filters.channels).length > 0) {
-                app.fillChannelsContainer(Object.values(app.filters.channels));
+                app.fillChannelsContainer(Object.keys(app.filters.channels).map(function(key) {
+                    return app.filters.channels[key];
+                }));
                 app.$channelsClear.show();
             } else {
                 app.$channelsItemsContainer.append($('<div class="column text"/>').text(messages.CHANNELS_TYPE_TO_SEARCH));
@@ -1430,6 +1566,24 @@ app.selectCurrentFilter = function() {
                 app.$selectStreamType.hide();
             });
             break;
+        case 'video-type':
+            app.$selectVideoType.show();
+            app.setState(constants.STATE_SELECT_VIDEO_TYPE, function() {
+                app.$selectVideoType.hide();
+            });
+            break;
+        case 'period':
+            app.$selectPeriod.show();
+            app.setState(constants.STATE_SELECT_PERIOD, function() {
+                app.$selectPeriod.hide();
+            });
+            break;
+        case 'sort':
+            app.$selectSort.show();
+            app.setState(constants.STATE_SELECT_SORT, function() {
+                app.$selectSort.hide();
+            });
+            break;
     }
 };
 app.toggleLanguage = function($selectedItem) {
@@ -1440,7 +1594,6 @@ app.toggleLanguage = function($selectedItem) {
             $(this).removeClass('active');
             $(this).find('input').prop('checked', false);
         });
-        $('.filter-languages').removeClass('chosen').find('.text').text(messages.FILTER_STREAM_LANGUAGES);
     } else {
         var $input = $selectedItem.find('input');
         if ($selectedItem.hasClass('active')) {
@@ -1462,14 +1615,47 @@ app.toggleLanguage = function($selectedItem) {
     }
     app.storeFilters();
 };
+app.toggleVideoType = function($selectedItem) {
+    var type = $selectedItem.data('type'), x;
+    if (type === 'clear') {
+        app.filters.videoTypes = [];
+        var $active = app.$selectVideoType.find('.active').each(function() {
+            $(this).removeClass('active');
+            $(this).find('input').prop('checked', false);
+        });
+    } else {
+        var $input = $selectedItem.find('input');
+        if ($selectedItem.hasClass('active')) {
+            $selectedItem.removeClass('active');
+            $input.prop('checked', false);
+            while ((x = app.filters.videoTypes.indexOf(type)) !== -1) {
+                app.filters.videoTypes.splice(x, 1);
+            }
+        } else {
+            $selectedItem.addClass('active');
+            $input.prop('checked', true);
+            app.filters.videoTypes.push(type);
+        }
+    }
+    if (app.filters.videoTypes.length > 0) {
+        $('#video-filter-type').addClass('chosen').find('.text').text('(' + app.filters.videoTypes.length + ') ' + messages.FILTER_VIDEO_TYPE);
+    } else {
+        $('#video-filter-type').removeClass('chosen').find('.text').text(messages.FILTER_VIDEO_TYPE);
+    }
+    app.storeFilters();
+};
 app.toggleChannel = function($selectedItem) {
     var name = $selectedItem.data('name');
     var $checkbox = $selectedItem.find('.checkbox > i');
+    var count = Object.keys(app.filters.channels).length;
     if ($selectedItem.hasClass('active')) {
         $selectedItem.removeClass('active');
         $checkbox.removeClass('fa-check-square-o').addClass('fa-square-o');
         delete app.filters.channels[name];
     } else {
+        if (count >= 50) {
+            return false;
+        }
         $selectedItem.addClass('active');
         $checkbox.removeClass('fa-square-o').addClass('fa-check-square-o');
         app.filters.channels[name] = {
@@ -1481,7 +1667,7 @@ app.toggleChannel = function($selectedItem) {
             views: $selectedItem.data('views')
         };
     }
-    var count = Object.keys(app.filters.channels).length;
+    count = Object.keys(app.filters.channels).length;
     if (count > 0) {
         $('#stream-filter-channels').addClass('chosen').find('.text').text('(' + count + ') ' + messages.FILTER_STREAM_CHANNELS);
         var ids = [];
@@ -1496,6 +1682,7 @@ app.toggleChannel = function($selectedItem) {
         app.$channelsClear.hide();
     }
     app.storeFilters();
+    return true;
 };
 app.clearChannels = function() {
     app.filters.channels = {};
@@ -1519,6 +1706,32 @@ app.selectStreamType = function($selectedItem) {
     } else {
         app.filters.streamType = type;
         $('#stream-filter-type').addClass('chosen').find('.text').text($selectedItem.text());
+    }
+    app.storeFilters();
+};
+app.selectPeriod = function($selectedItem) {
+    var period = $selectedItem.data('period');
+    app.$selectPeriod.find('.active').removeClass('active');
+    $selectedItem.addClass('active');
+    if (period === 'week') {
+        app.filters.period = null;
+        $('#video-filter-period').removeClass('chosen').find('.text').text(messages.FILTER_VIDEO_PERIOD);
+    } else {
+        app.filters.period = period;
+        $('#video-filter-period').addClass('chosen').find('.text').text($selectedItem.text());
+    }
+    app.storeFilters();
+};
+app.selectSort = function($selectedItem) {
+    var sort = $selectedItem.data('sort');
+    app.$selectSort.find('.active').removeClass('active');
+    $selectedItem.addClass('active');
+    if (sort === 'views') {
+        app.filters.sort = null;
+        $('#video-filter-sort').removeClass('chosen').find('.text').text(messages.FILTER_VIDEO_SORT);
+    } else {
+        app.filters.sort = sort;
+        $('#video-filter-sort').addClass('chosen').find('.text').text($selectedItem.text());
     }
     app.storeFilters();
 };

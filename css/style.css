@@ -34,7 +34,7 @@ body.init {
 }
 
 .column {
-	display: inline-grid;
+	display: inline-table;
 	margin: 3vh 0 0 0;
 	line-height: 0;
 }
@@ -85,6 +85,9 @@ body.init {
 .channel-cell {
 	background-color: #201c2b;
 	box-shadow: #392e5c 0 1px 0px 0px inset;
+}
+.channel-cell:first-child {
+    box-shadow: inherit;
 }
 
 .channel-cell .checkbox {

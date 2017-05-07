@@ -10,8 +10,8 @@ var messages = {
 	FILTER_VIDEO_GAME: "Игра",
 	FILTER_VIDEO_PERIOD: "За период",
 	FILTER_VIDEO_LANGUAGES: "Языки",
-	FILTER_VIDEO_TYPE: "Тип",
-	FILTER_VIDEO_SORT: "Сортировка",
+	FILTER_VIDEO_TYPE: "Типы",
+	FILTER_VIDEO_SORT: "Порядок",
 	FILTER_PRESETS: "Фильтры",
     FILTER_SEARCH: "Поиск",
 	
@@ -24,7 +24,7 @@ var messages = {
 	GAME_SELECT: "Выберите игру",
     GAME_SEARCH: "Поиск",
     
-    CHANNELS_SELECT: "Выберите каналы",
+    CHANNELS_SELECT: "Выберите каналы (макс. 50)",
     CHANNELS_SEARCH: "Поиск",
     CHANNELS_CLEAR: "Очистить все",
     CHANNELS_TYPE_TO_SEARCH: "Для поиска каналов начните печатать",
@@ -36,6 +36,21 @@ var messages = {
     STREAM_TYPE_LIVE: "Прямая трансляция (по умолчанию)",
     STREAM_TYPE_PLAYLIST: "Список воспроизведения",
     STREAM_TYPE_ALL: "Все",
+    
+    VIDEO_TYPE_SELECT: "Выберите типы",
+    VIDEO_TYPE_CLEAR: "Очистить все",
+    VIDEO_TYPE_ARCHIVE: "Последние трансляции",
+    VIDEO_TYPE_HIGHLIGHT: "Яркие моменты",
+    VIDEO_TYPE_UPLOAD: "Загрузки",
+    
+    PERIOD_SELECT: "Выберите период",
+    PERIOD_WEEK: "Неделя (по умолчанию)",
+    PERIOD_MONTH: "Месяц",
+    PERIOD_ALL: "Все",
+    
+    SORT_SELECT: "Выберите порядок",
+    SORT_TIME: "Последние",
+    SORT_VIEWS: "Популярные (по умолчанию)",
     
     LOADING: "Загрузка...",
     BUFFERING: "Буферизация...",

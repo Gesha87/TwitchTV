@@ -10,8 +10,8 @@ var messages = {
 	FILTER_VIDEO_GAME: "Game",
 	FILTER_VIDEO_PERIOD: "Period",
 	FILTER_VIDEO_LANGUAGES: "Languages",
-	FILTER_VIDEO_TYPE: "Type",
-	FILTER_VIDEO_SORT: "Sort",
+	FILTER_VIDEO_TYPE: "Types",
+	FILTER_VIDEO_SORT: "Order",
 	FILTER_PRESETS: "Presets",
     FILTER_SEARCH: "Search",
 	
@@ -24,7 +24,7 @@ var messages = {
 	GAME_SELECT: "Select game",
 	GAME_SEARCH: "Search",
 	
-	CHANNELS_SELECT: "Select channels",
+	CHANNELS_SELECT: "Select channels (max. 50)",
 	CHANNELS_SEARCH: "Search",
 	CHANNELS_CLEAR: "Clear all",
 	CHANNELS_TYPE_TO_SEARCH: "Start typing to search channels",
@@ -36,6 +36,21 @@ var messages = {
 	STREAM_TYPE_LIVE: "Live (default)",
 	STREAM_TYPE_PLAYLIST: "Playlist",
 	STREAM_TYPE_ALL: "All",
+	
+	VIDEO_TYPE_SELECT: "Select types",
+	VIDEO_TYPE_CLEAR: "Clear all",
+    VIDEO_TYPE_ARCHIVE: "Past broadcasts",
+    VIDEO_TYPE_HIGHLIGHT: "Highlights",
+    VIDEO_TYPE_UPLOAD: "Uploads",
+    
+    PERIOD_SELECT: "Select period",
+    PERIOD_WEEK: "Week (default)",
+    PERIOD_MONTH: "Month",
+    PERIOD_ALL: "All",
+    
+    SORT_SELECT: "Select order",
+    SORT_TIME: "Recent",
+    SORT_VIEWS: "Popular (default)",
 	
 	LOADING: "Loading...",
     BUFFERING: "Buffering...",

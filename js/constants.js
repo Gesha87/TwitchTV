@@ -5,6 +5,9 @@ var constants = {
     STATE_SELECT_CHANNELS: 'select-channels',
     STATE_SELECT_LANGUAGE: 'select-language',
     STATE_SELECT_STREAM_TYPE: 'select-stream-type',
+    STATE_SELECT_PERIOD: 'select-period',
+    STATE_SELECT_VIDEO_TYPE: 'select-video-type',
+    STATE_SELECT_SORT: 'select-sort',
     STATE_ERROR: 'error',
     STATE_EXIT: 'exit',
     
@@ -25,6 +28,9 @@ var constants = {
     AREA_CHANNELS_LIST: 'channels-list',
     AREA_LANGUAGES: 'languages',
     AREA_STREAM_TYPE: 'stream-type',
+    AREA_VIDEO_TYPE: 'video-type',
+    AREA_PERIOD: 'period',
+    AREA_SORT: 'sort',
 
     BUTTON_TYPE_EXIT: 'exit',
     BUTTON_TYPE_CANCEL: 'cancel',
