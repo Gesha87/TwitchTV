@@ -327,9 +327,37 @@ img.loaded {
 	box-shadow: inherit;
 	color: #ffffff;
 }
+.page.active .bottom-triangle {
+	display: block;
+}
 .page.selected {
 	box-shadow: inherit;
 	color: #ffffff;
+}
+
+.bottom-triangle {
+	position: absolute;
+    bottom: 0;
+    left: 50%;
+    margin-bottom: -1.4vh;
+    margin-left: -0.6vh;
+    width: 0;
+    height: 0;
+    border-top: 1.2vh solid #ffffff;
+    border-left: 1.2vh solid transparent;
+    border-right: 1.2vh solid transparent;
+    display: none;
+}
+.bottom-triangle:after {
+	content: '';
+    position: absolute;
+    top: -1.4vh;
+    left: -0.8vh;
+    width: 0;
+    height: 0;
+    border-top: 0.8vh solid #6441a4;
+    border-left: 0.8vh solid transparent;
+    border-right: 0.8vh solid transparent;
 }
 
 .badge {
@@ -522,19 +550,79 @@ img.loaded {
 }
 
 .player {
-	display: none;
+	/* display: none; */
 	background-color: #000000;
 	position: absolute;
-	left: 0px;
-	top: 0px;
+	left: 0;
+	top: 0;
 	width: 100vw;
 	height: 100vh;
 	z-index: 10;
 }
 
 .player object {
-	width: 100vw;
+    width: 100vw;
     height: 100vh;
+}
+
+.player-info {
+	position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+    padding: 2vh;
+}
+
+.player-stream-logo {
+	float: left;
+	width: 10vh;
+	height: 10vh;
+}
+
+.player-stream-info {
+	float: left;
+	margin-left: 2vh;
+	line-height: 1.3;
+}
+
+.player-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+    padding: 2vh;
+    text-align: center;
+}
+
+.player-controls-container {
+	margin-top: 7vh;
+}
+
+.player-control {
+	display: inline-block;
+	padding: 1vh;
+	color: #bbb8c0;
+}
+.player-control.selected {
+	color: #ffffff;
+}
+
+.player-control i {
+    width: 4vh;
+}
+
+.player-control-time {
+	color: #ffffff;
+	float: left;
+}
+
+.player-control-options {
+	float: right;
+	white-space: nowrap;
 }
 
 .spinner-three-bounce > div {

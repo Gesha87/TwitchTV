@@ -32,23 +32,23 @@ var messages = {
 	LANGUAGE_SELECT: "Select languages",
 	LANGUAGE_CLEAR: "Clear all",
 	
-	STREAM_TYPE_SELECT: "Select type",
+	STREAM_TYPE_SELECT: "Select type of stream",
 	STREAM_TYPE_LIVE: "Live (default)",
 	STREAM_TYPE_PLAYLIST: "Playlist",
 	STREAM_TYPE_ALL: "All",
 	
-	VIDEO_TYPE_SELECT: "Select types",
+	VIDEO_TYPE_SELECT: "Select types of videos",
 	VIDEO_TYPE_CLEAR: "Clear all",
     VIDEO_TYPE_ARCHIVE: "Past broadcasts",
     VIDEO_TYPE_HIGHLIGHT: "Highlights",
     VIDEO_TYPE_UPLOAD: "Uploads",
     
-    PERIOD_SELECT: "Select period",
+    PERIOD_SELECT: "Select period of videos",
     PERIOD_WEEK: "Week (default)",
     PERIOD_MONTH: "Month",
     PERIOD_ALL: "All",
     
-    SORT_SELECT: "Select order",
+    SORT_SELECT: "Select order of videos",
     SORT_TIME: "Recent",
     SORT_VIEWS: "Popular (default)",
 	

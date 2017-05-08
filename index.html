@@ -24,8 +24,10 @@
 	            <div id="pages" class="pages">
 	                <div class="active page selected" id="page-live-channels" data-page="live-channels">
 	                    <i class="fa fa-video-camera"></i> <span class="text">Активные каналы</span>
+	                    <!-- <div class="bottom-triangle"></div> -->
 	                </div><div class="page" id="page-videos" data-page="videos">
 	                    <i class="fa fa-youtube-play"></i> <span class="text">Видеоматериалы</span>
+	                    <!-- <div class="bottom-triangle"></div> -->
 	                </div>
 	            </div>
 	            <div id="stream-filters" class="filters">
@@ -107,6 +109,34 @@
     </div>
     <div id="av-player" class="player">
         <object type="application/avplayer"></object>
+        <div class="player-info" id="player-info">
+            <img class="player-stream-logo" src="https://static-cdn.jtvnw.net/jtv_user_pictures/dota2ruhub-profile_image-18d1556f93e292cb-300x300.png"/>
+            <div class="player-stream-info">
+               <div class="player-stream-name">Dota2ruhub</div>
+               <div class="player-stream-status">Dota2ruhub</div>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="player-controls" id="player-controls">
+	        <div class="player-controls-container">
+	            <div id="player-time" class="player-control player-control-time">00:00</div>
+	            <!-- <div class="player-control" data-type="stop" id="control-item-0-0">
+	               <i class="fa fa-stop"></i>
+	            </div> -->
+	            <div class="player-control" data-type="backward" id="control-item-0-0">
+	               <i class="fa fa-backward"></i>
+	            </div>
+	            <div class="player-control selected" data-type="play-pause" id="control-item-1-0">
+	               <i class="fa fa-pause"></i>
+	            </div>
+	            <div class="player-control" data-type="forward" id="control-item-2-0">
+	               <i class="fa fa-forward"></i>
+	            </div>
+	            <div class="player-control player-control-options" data-type="options" id="control-item-3-0">
+	               720p <i class="fa fa-gear"></i>
+	            </div>
+            </div>
+        </div>
     </div>
     <div id="select-game" class="select-wrapper">
         <div class="caption">

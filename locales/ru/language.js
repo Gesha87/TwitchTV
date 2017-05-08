@@ -8,7 +8,7 @@ var messages = {
 	FILTER_STREAM_LANGUAGES: "Языки",
 	FILTER_STREAM_TYPE: "Тип",
 	FILTER_VIDEO_GAME: "Игра",
-	FILTER_VIDEO_PERIOD: "За период",
+	FILTER_VIDEO_PERIOD: "Период",
 	FILTER_VIDEO_LANGUAGES: "Языки",
 	FILTER_VIDEO_TYPE: "Типы",
 	FILTER_VIDEO_SORT: "Порядок",
@@ -32,23 +32,23 @@ var messages = {
     LANGUAGE_SELECT: "Выберите языки",
     LANGUAGE_CLEAR: "Очистить все",
     
-    STREAM_TYPE_SELECT: "Выберите тип",
+    STREAM_TYPE_SELECT: "Выберите тип трансляции",
     STREAM_TYPE_LIVE: "Прямая трансляция (по умолчанию)",
     STREAM_TYPE_PLAYLIST: "Список воспроизведения",
     STREAM_TYPE_ALL: "Все",
     
-    VIDEO_TYPE_SELECT: "Выберите типы",
+    VIDEO_TYPE_SELECT: "Выберите типы видеоматериалов",
     VIDEO_TYPE_CLEAR: "Очистить все",
     VIDEO_TYPE_ARCHIVE: "Последние трансляции",
     VIDEO_TYPE_HIGHLIGHT: "Яркие моменты",
     VIDEO_TYPE_UPLOAD: "Загрузки",
     
-    PERIOD_SELECT: "Выберите период",
+    PERIOD_SELECT: "Выберите период видеоматериалов",
     PERIOD_WEEK: "Неделя (по умолчанию)",
     PERIOD_MONTH: "Месяц",
     PERIOD_ALL: "Все",
     
-    SORT_SELECT: "Выберите порядок",
+    SORT_SELECT: "Выберите порядок видеоматериалов",
     SORT_TIME: "Последние",
     SORT_VIEWS: "Популярные (по умолчанию)",
     

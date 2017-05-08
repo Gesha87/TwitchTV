@@ -733,8 +733,55 @@ app.init = function() {
                 break;
             case keys.KEY_3:
             case keys.KEY_YELLOW:
+                break;
             case keys.KEY_4:
             case keys.KEY_BLUE:
+                break;
+            case keys.KEY_STOP:
+                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
+                    app.returnState();
+                }
+                break;
+            case keys.KEY_PAUSE:
+                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
+                    if (window.webapis) {
+                        webapis.avplay.pause();
+                    }
+                }
+                break;
+            case keys.KEY_PLAY:
+                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
+                    if (window.webapis) {
+                        webapis.avplay.play();
+                    }
+                }
+                break;
+            case keys.KEY_PLAY_PAUSE:
+                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
+                    if (window.webapis) {
+                        var state = webapis.avplay.getState();
+                        if (state === 'PLAYING') {
+                            webapis.avplay.pause();
+                        } else {
+                            webapis.avplay.play();
+                        }
+                    }
+                }
+                break;
+            case keys.KEY_PREVIOUS:
+                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
+                    if (window.webapis) {
+                        webapis.avplay.jumpBackward(30000);
+                    }
+                }
+                break;
+            case keys.KEY_NEXT:
+                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
+                    if (window.webapis) {
+                        webapis.avplay.jumpForward(30000);
+                    }
+                }
+                break;
             default:
                 console.log("Key code : " + e.keyCode);
                 break;
@@ -757,6 +804,7 @@ app.init = function() {
         }
         app.$items.mCustomScrollbar('update');
     });
+    console.log(navigator.userAgent);
 };
 app.getNewActiveCell = function(prefix, area, keyCode, initUpperArea) {
     switch (keyCode) {
@@ -959,24 +1007,23 @@ app.play = function(url) {
                 app.$loading.hide();
             },
             oncurrentplaytime: function(currentTime) {
+                var seconds = currentTime / 1000,
+                    hh = Math.floor(currentTime / 3600),
+                    mm = Math.floor(currentTime / 60) % 60,
+                    ss = Math.floor(currentTime) % 60;
+              
+                $('#player-time').text((hh ? (hh < 10 ? "0" : "") + hh + ":" : "") + 
+                   ((mm < 10) ? "0" : "") + mm + ":" + 
+                   ((ss < 10) ? "0" : "") + ss);
             },
-            onevent: function(eventType, eventData) {
-                console.log("event type: " + eventType + ", data: " + eventData);
-                if (eventType == 'PLAYER_MSG_RESOLUTION_CHANGED') {
-                    console.log("Mudou de Qualidade");
-                }
-            },
-            onerror: function(error) {
+            onevent: function(eventType, eventData) {},
+            onerror: function(errorType) {
                 var message = messages.ERROR_LOADING_FAILED;
-                if (error === 'PLAYER_ERROR_CONNECTION_FAILED') {
+                if (errorType === 'PLAYER_ERROR_CONNECTION_FAILED') {
                     message = messages.ERROR_CONNECTION_FAILED;
                 }
                 app.returnState();
                 app.showError(message);
-            },
-            onsubtitlechange: function(duration, text) {
-            },
-            ondrmevent: function(drmEvent, drmData) {
             },
             onstreamcompleted: function() {
                 webapis.avplay.stop();
@@ -1873,6 +1920,8 @@ if (window.tizen) {
     tizen.tvinputdevice.registerKey("MediaPlay");
     tizen.tvinputdevice.registerKey("MediaPause");
     tizen.tvinputdevice.registerKey("MediaStop");
+    tizen.tvinputdevice.registerKey("MediaFastForward");
+    tizen.tvinputdevice.registerKey("MediaRewind");
     tizen.tvinputdevice.registerKey("ColorF0Red");
     tizen.tvinputdevice.registerKey("ColorF1Green");
     tizen.tvinputdevice.registerKey("ColorF2Yellow");
