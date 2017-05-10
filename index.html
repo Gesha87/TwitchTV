@@ -110,10 +110,11 @@
     <div id="av-player" class="player">
         <object type="application/avplayer"></object>
         <div class="player-info" id="player-info">
-            <img class="player-stream-logo" src="https://static-cdn.jtvnw.net/jtv_user_pictures/dota2ruhub-profile_image-18d1556f93e292cb-300x300.png"/>
+            <img class="player-stream-logo" id="player-stream-logo" src=""/>
             <div class="player-stream-info">
-               <div class="player-stream-name">Dota2ruhub</div>
-               <div class="player-stream-status">Dota2ruhub</div>
+               <div id="player-stream-name"></div>
+               <div id="player-stream-game"></div>
+               <div id="player-stream-status"></div>
             </div>
             <div class="clear"></div>
         </div>
@@ -136,7 +137,7 @@
 	               <i class="fa fa-forward"></i>
 	            </div>
 	            <div class="player-control player-control-options" data-type="options" id="control-item-3-0">
-	               720p <i class="fa fa-gear"></i>
+	               <span id="stream-quality"></span> <i class="fa fa-gear"></i>
 	            </div>
             </div>
         </div>

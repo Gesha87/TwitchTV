@@ -293,6 +293,7 @@ app.$buttonCloseError = null;
 app.$exitDialog = null;
 app.$selectBox = null;
 app.$player = null;
+app.$playerTime = null;
 app.$items = null;
 app.$itemsContainer = null;
 app.$filters = null;
@@ -330,6 +331,7 @@ app.init = function() {
     app.$loadingText = app.$loading.find('.text');
     app.$selectBox = $('#select-box');
     app.$player = $('#av-player');
+    app.$playerTime = $('#player-time');
     app.$items = $('#items');
     app.$pages = $('#pages');
     app.$liveChannelsPage = $('#page-live-channels');
@@ -602,8 +604,22 @@ app.init = function() {
                         var $selectedItem = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
                         if ($selectedItem.length > 0) {
                             if (app.page == constants.PAGE_LIVE_CHANNELS) {
+                            	if ($selectedItem.data('channel-logo')) {
+                            		$('#player-stream-logo').attr('src', $selectedItem.data('channel-logo'));
+                            	} else {
+                            		$('#player-stream-logo').hide();
+                            	}
+                                $('#player-stream-name').text($selectedItem.data('channel-name'));
+                                $('#player-stream-status').text($selectedItem.data('status'));
+                                $('#player-stream-game').text($selectedItem.data('game'));
+                                $('#player-length').hide();
                                 app.playStream($selectedItem.data('channel'));
                             } else if (app.page == constants.PAGE_VIDEOS) {
+                            	$('#player-stream-logo').hide();
+                            	$('#player-stream-name').text($selectedItem.data('channel-name'));
+                                $('#player-stream-status').text($selectedItem.data('status'));
+                                $('#player-stream-game').text($selectedItem.data('game'));
+                                $('#player-length').show();
                                 app.playVideo($selectedItem.data('vod-id'));
                             }
                         }
@@ -931,7 +947,7 @@ app.returnState = function() {
 app.loadingStream = null;
 app.loadingStreamErrorHandler = function(xhr, textStatus, errorThrown) {
     if (errorThrown !== 'abort') {
-        app.returnState();
+        //app.returnState();
         app.loadingErrorHandler(xhr, textStatus, errorThrown);
     }
 };
@@ -955,6 +971,7 @@ app.showLoadingError = function(message) {
 app.playStream = function(channelName) {
     app.setState(constants.STATE_WATCH, app.stop);
     app.$player.show();
+    
     app.showLoading(messages.LOADING);
     app.loadingStream = $.get('https://api.twitch.tv/kraken/streams/?channel=' + channelName + '&stream_type=all', 'json').always(function() {
         app.loadingStream = null;
@@ -1007,7 +1024,7 @@ app.play = function(url) {
                 app.$loading.hide();
             },
             oncurrentplaytime: function(currentTime) {
-                $('#player-time').text(app.timeFormat(currentTime / 1000));
+                app.$playerTime.text(app.timeFormat(currentTime / 1000));
             },
             onevent: function(eventType, eventData) {},
             onerror: function(errorType) {
@@ -1150,6 +1167,7 @@ app.getLiveChannels = function(limit, offset, callback) {
 	            </div>');
                 $newCell.data('channel', stream.channel.name);
                 $newCell.data('channel-name', stream.channel.display_name);
+                $newCell.data('channel-logo', stream.channel.logo);
                 $newCell.data('viewers', stream.viewers);
                 $newCell.data('game', stream.game);
                 $newCell.data('status', stream.channel.status);
