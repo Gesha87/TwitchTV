@@ -1007,14 +1007,7 @@ app.play = function(url) {
                 app.$loading.hide();
             },
             oncurrentplaytime: function(currentTime) {
-                var seconds = currentTime / 1000,
-                    hh = Math.floor(currentTime / 3600),
-                    mm = Math.floor(currentTime / 60) % 60,
-                    ss = Math.floor(currentTime) % 60;
-              
-                $('#player-time').text((hh ? (hh < 10 ? "0" : "") + hh + ":" : "") + 
-                   ((mm < 10) ? "0" : "") + mm + ":" + 
-                   ((ss < 10) ? "0" : "") + ss);
+                $('#player-time').text(app.timeFormat(currentTime / 1000));
             },
             onevent: function(eventType, eventData) {},
             onerror: function(errorType) {
@@ -1222,6 +1215,7 @@ app.getVideos = function(limit, offset, callback) {
                 $newCell.data('channel', vod.channel.name);
                 $newCell.data('channel-name', vod.channel.display_name);
                 $newCell.data('viewers', vod.views);
+                $newCell.data('length', vod.length);
                 $newCell.data('game', vod.game);
                 $newCell.data('status', vod.title);
                 $newCell.data('vod-id', vod._id.toString().replace(/[^0-9]/g, ''));
@@ -1378,7 +1372,11 @@ app.fillChannelsContainer = function(channels) {
 };
 app.showStreamItem = function($element) {
     app.$selectBox.find('.stream-channel-name').html($element.data('channel-name'));
-    app.$selectBox.find('.stream-viewers').html('<i class="fa fa-eye"></i> ' + app.numberFormat($element.data('viewers')));
+    var viewers = '<i class="fa fa-fw fa-eye"></i> ' + app.numberFormat($element.data('viewers'));
+    if ($element.data('length') !== undefined) {
+        viewers += '<br><i class="fa fa-fw fa-clock-o"></i> ' + app.timeFormat($element.data('length'));
+    }
+    app.$selectBox.find('.stream-viewers').html(viewers);
     app.$selectBox.find('.game-name').html($element.data('game') || '&nbsp;');
     app.$selectBox.find('.channel-status').html($element.data('status') || '&nbsp;');
     app.showItem($element, app.$items, app.$itemsContainer, app.$selectBox);
@@ -1850,6 +1848,15 @@ app.clearSelection = function($parent) {
 };
 app.numberFormat = function(number) {
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, app.thousandsSeparator);
+};
+app.timeFormat = function(seconds) {
+    var hh = Math.floor(seconds / 3600),
+        mm = Math.floor(seconds / 60) % 60,
+        ss = Math.floor(seconds) % 60;
+
+    return (hh < 10 ? '0' : '') + hh + ':' + 
+        ((mm < 10) ? '0' : '') + mm + ':' + 
+        ((ss < 10) ? '0' : '') + ss;
 };
 app.storeFilters = function() {
     localStorage['filters'] = JSON.stringify(app.filters);

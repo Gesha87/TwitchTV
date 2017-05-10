@@ -1,6 +1,8 @@
 var constants = {
     STATE_BROWSE: 'browse',
     STATE_WATCH: 'watch',
+    STATE_WATCH_CONTROLS: 'watch-controls',
+    STATE_SELECT_QUALITY: 'select-quality',
     STATE_SELECT_GAME: 'select-game',
     STATE_SELECT_CHANNELS: 'select-channels',
     STATE_SELECT_LANGUAGE: 'select-language',
