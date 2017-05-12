@@ -69,6 +69,12 @@ app.areas[constants.AREA_SORT] = {
     x: 0,
     y: 0
 };
+app.areas[constants.AREA_PLAYER_CONTROLS] = {
+    columns: 4,
+    rows: 1,
+    x: 1,
+    y: 0
+};
 app.filters = {
     game: null,
     channels: {},
@@ -619,7 +625,7 @@ app.init = function() {
                             	$('#player-stream-name').text($selectedItem.data('channel-name'));
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
-                                $('#player-length').show();
+                                $('#player-length').show().text('/ ' + app.timeFormat($selectedItem.data('length')));
                                 app.playVideo($selectedItem.data('vod-id'));
                             }
                         }
@@ -709,6 +715,13 @@ app.init = function() {
                         app.returnState();
                         app.refresh(true);
                     }
+                } else if (app.state === constants.STATE_WATCH) {
+                    app.setState(constants.STATE_WATCH_CONTROLS, function() {
+                    	$('#player-controls').show();
+                    	$('#player-info').show();
+                    });
+                } else if (app.state === constants.STATE_WATCH_CONTROLS) {
+                    
                 } else if (app.state === constants.STATE_ERROR) {
                     app.returnState();
                 } else if (app.state === constants.STATE_EXIT) {
@@ -754,26 +767,26 @@ app.init = function() {
             case keys.KEY_BLUE:
                 break;
             case keys.KEY_STOP:
-                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
+                if (app.state == constants.STATE_WATCH) {
                     app.returnState();
                 }
                 break;
             case keys.KEY_PAUSE:
-                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
+                if (app.state == constants.STATE_WATCH) {
                     if (window.webapis) {
                         webapis.avplay.pause();
                     }
                 }
                 break;
             case keys.KEY_PLAY:
-                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
+                if (app.state == constants.STATE_WATCH) {
                     if (window.webapis) {
                         webapis.avplay.play();
                     }
                 }
                 break;
             case keys.KEY_PLAY_PAUSE:
-                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
+                if (app.state == constants.STATE_WATCH) {
                     if (window.webapis) {
                         var state = webapis.avplay.getState();
                         if (state === 'PLAYING') {
@@ -820,7 +833,6 @@ app.init = function() {
         }
         app.$items.mCustomScrollbar('update');
     });
-    console.log(navigator.userAgent);
 };
 app.getNewActiveCell = function(prefix, area, keyCode, initUpperArea) {
     switch (keyCode) {
@@ -969,9 +981,8 @@ app.showLoadingError = function(message) {
     app.showError(message);
 };
 app.playStream = function(channelName) {
-    app.setState(constants.STATE_WATCH, app.stop);
+	app.setState(constants.STATE_LOADING, app.stopLoading);
     app.$player.show();
-    
     app.showLoading(messages.LOADING);
     app.loadingStream = $.get('https://api.twitch.tv/kraken/streams/?channel=' + channelName + '&stream_type=all', 'json').always(function() {
         app.loadingStream = null;
@@ -985,6 +996,7 @@ app.playStream = function(channelName) {
                 app.loadingStream = $.get('http://usher.twitch.tv/api/channel/hls/' + channelName + '.m3u8?player_backend=html5&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_spectre=true&allow_audio_only=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
                     app.loadingStream = null;
                 }).done(function(data) {
+                	app.setState(constants.STATE_WATCH, app.stop);
                     app.$loading.hide();
                     var qualities = extractQualities(data);
                     app.play(qualities[0].url);
@@ -994,7 +1006,7 @@ app.playStream = function(channelName) {
     }).fail(app.loadingStreamErrorHandler);
 };
 app.playVideo = function(id) {
-    app.setState(constants.STATE_WATCH, app.stop);
+    app.setState(constants.STATE_LOADING, app.stopLoading);
     app.$player.show();
     app.showLoading(messages.LOADING);
     app.loadingStream = $.get('https://api.twitch.tv/api/vods/' + id + '/access_token', 'json').always(function() {
@@ -1003,6 +1015,7 @@ app.playVideo = function(id) {
         app.loadingStream = $.get('http://usher.ttvnw.net/vod/' + id + '.m3u8?player_backend=html5&nauthsig=' + data.sig + '&nauth=' + encodeURIComponent(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
             app.loadingStream = null;
         }).done(function(data) {
+        	app.setState(constants.STATE_WATCH, app.stop);
             app.$loading.hide();
             var qualities = extractQualities(data);
             app.play(qualities[0].url);
@@ -1044,16 +1057,19 @@ app.play = function(url) {
         webapis.avplay.play();
     }
 };
-app.stop = function() {
-    if (window.webapis) {
-        webapis.avplay.stop();
-    }
+app.stopLoading = function() {
     app.$player.hide();
     app.$loading.hide();
     if (app.loadingStream) {
         app.loadingStream.abort();
         app.loadingStream = null;
     }
+};
+app.stop = function() {
+    if (window.webapis) {
+        webapis.avplay.stop();
+    }
+    app.returnState();
 };
 app.showLoading = function(text) {
     app.$loadingText.text(text);

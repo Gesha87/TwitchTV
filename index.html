@@ -110,13 +110,15 @@
     <div id="av-player" class="player">
         <object type="application/avplayer"></object>
         <div class="player-info" id="player-info">
-            <img class="player-stream-logo" id="player-stream-logo" src=""/>
-            <div class="player-stream-info">
-               <div id="player-stream-name"></div>
-               <div id="player-stream-game"></div>
-               <div id="player-stream-status"></div>
+	        <div class="player-info-container">
+	            <img class="player-stream-logo" id="player-stream-logo" src=""/>
+	            <div class="player-stream-info">
+	               <div id="player-stream-name"></div>
+	               <div id="player-stream-game" class="player-stream-game"></div>
+	               <div id="player-stream-status" class="player-stream-status ellipsed"></div>
+	            </div>
+	            <div class="clear"></div>
             </div>
-            <div class="clear"></div>
         </div>
         <div class="player-controls" id="player-controls">
 	        <div class="player-controls-container">

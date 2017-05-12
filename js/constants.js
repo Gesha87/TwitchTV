@@ -1,5 +1,6 @@
 var constants = {
     STATE_BROWSE: 'browse',
+    STATE_LOADING: 'loading',
     STATE_WATCH: 'watch',
     STATE_WATCH_CONTROLS: 'watch-controls',
     STATE_SELECT_QUALITY: 'select-quality',
@@ -33,6 +34,9 @@ var constants = {
     AREA_VIDEO_TYPE: 'video-type',
     AREA_PERIOD: 'period',
     AREA_SORT: 'sort',
+    AREA_PLAYER_CONTROLS: 'player-controls',
+    AREA_PLAYER_PROGRESS: 'player-progress',
+    AREA_PLAYER_QUALITY: 'player-quality',
 
     BUTTON_TYPE_EXIT: 'exit',
     BUTTON_TYPE_CANCEL: 'cancel',
