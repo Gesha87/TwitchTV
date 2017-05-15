@@ -75,6 +75,12 @@ app.areas[constants.AREA_PLAYER_CONTROLS] = {
     x: 1,
     y: 0
 };
+app.areas[constants.AREA_PLAYER_QUALITY] = {
+    columns: 1,
+    rows: 0,
+    x: 0,
+    y: 0
+};
 app.filters = {
     game: null,
     channels: {},
@@ -622,6 +628,14 @@ app.init = function() {
                                 app.playStream($selectedItem.data('channel'));
                             } else if (app.page == constants.PAGE_VIDEOS) {
                             	$('#player-stream-logo').hide();
+                            	$.ajax($.extend({}, app.twitchApiOptions, {
+                                    url: 'https://api.twitch.tv/kraken/channels/' + $selectedItem.data('channel')
+                                })).done(function(response) {
+                                    console.log(response);
+                                    if (response) {
+                                    	$('#player-stream-logo').attr('src', response.logo).show();
+                                    }
+                                });
                             	$('#player-stream-name').text($selectedItem.data('channel-name'));
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
@@ -715,13 +729,17 @@ app.init = function() {
                         app.returnState();
                         app.refresh(true);
                     }
-                } else if (app.state === constants.STATE_WATCH) {
+                } else if (app.state === constants.STATE_LOADING) {
+                	$('#player-controls').show();
+                	$('#player-info').show();
                     app.setState(constants.STATE_WATCH_CONTROLS, function() {
-                    	$('#player-controls').show();
-                    	$('#player-info').show();
+                    	$('#player-controls').hide();
+                    	$('#player-info').hide();
                     });
                 } else if (app.state === constants.STATE_WATCH_CONTROLS) {
-                    
+                    if (app.activeArea == constants.AREA_PLAYER_CONTROLS) {
+                    	
+                    }
                 } else if (app.state === constants.STATE_ERROR) {
                     app.returnState();
                 } else if (app.state === constants.STATE_EXIT) {
@@ -1247,6 +1265,7 @@ app.getVideos = function(limit, offset, callback) {
 	                <div class="stream-channel-name">' + vod.channel.display_name + '</div>\
 	            </div>');
                 $newCell.data('channel', vod.channel.name);
+                $newCell.data('channel-id', vod.channel._id);
                 $newCell.data('channel-name', vod.channel.display_name);
                 $newCell.data('viewers', vod.views);
                 $newCell.data('length', vod.length);

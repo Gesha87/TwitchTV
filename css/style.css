@@ -568,7 +568,7 @@ img.loaded {
 }
 
 .player-info {
-	/* display: none; */
+	display: none;
 	position: absolute;
     top: 0;
     left: 0;
@@ -605,7 +605,7 @@ img.loaded {
 }
 
 .player-controls {
-	/* display: none; */
+	display: none;
     position: absolute;
     bottom: 0;
     left: 0;
@@ -630,7 +630,7 @@ img.loaded {
 }
 
 .player-control i {
-    width: 4vh;
+    /* width: 4vh; */
 }
 
 .player-control-time {
