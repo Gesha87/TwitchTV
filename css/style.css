@@ -575,7 +575,7 @@ img.loaded {
     right: 0;
     background: rgba(0, 0, 0, 0.7);
     background: linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
-    padding: 2vh;
+    padding: 4vh;
     font-size: 3.4vh;
 }
 
@@ -597,7 +597,7 @@ img.loaded {
 
 .player-stream-status {
 	font-size: 3.0vh;
-	max-width: 150vh;
+	max-width: 140vh;
 }
 
 .player-stream-game {
@@ -612,7 +612,7 @@ img.loaded {
     right: 0;
     background: rgba(0, 0, 0, 0.7);
     background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
-    padding: 2vh;
+    padding: 4vh;
     text-align: center;
 }
 
@@ -637,14 +637,14 @@ img.loaded {
 	color: #ffffff;
 	position: absolute;
 	left: 0;
-	margin-left: 2vh;
+	margin-left: 4vh;
 }
 
 .player-control-options {
 	position: absolute;
 	right: 0;
 	white-space: nowrap;
-	margin-right: 2vh;
+	margin-right: 4vh;
 }
 
 .spinner-three-bounce > div {
