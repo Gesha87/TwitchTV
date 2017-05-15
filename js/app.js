@@ -332,6 +332,9 @@ app.$channelsClear = null;
 app.$selectVideoType = null;
 app.$selectPeriod = null;
 app.$selectSort = null;
+app.$controlBackward = null;
+app.$controlPlayPause = null;
+app.$controlForward = null;
 app.init = function() {
     app.$main = $('#main');
     app.$loading = $('#loading-wrapper');
@@ -367,6 +370,9 @@ app.init = function() {
     app.$selectVideoType = $('#select-video-type');
     app.$selectPeriod = $('#select-period');
     app.$selectSort = $('#select-sort');
+    app.$controlBackward = $('#control-item-0-0');
+    app.$controlPlayPause = $('#control-item-1-0');
+    app.$controlForward = $('#control-item-2-0');
     app.restoreFilters();
     app.translateLayout();
     app.initGameFiler();
@@ -625,6 +631,29 @@ app.init = function() {
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
                                 $('#player-length').hide();
+                                app.$controlBackward.hide();
+                                app.$controlForward.hide();
+                                if (app.refreshStreamInfoInterval) {
+                                	clearInterval(app.refreshStreamInfoInterval);
+                                	app.refreshStreamInfoInterval = null;
+                                }
+                                app.refreshStreamInfoInterval = setInterval(function() {
+                                	$.ajax($.extend({}, app.twitchApiOptions, {
+                                        url: 'https://api.twitch.tv/kraken/channels/' + $selectedItem.data('channel')
+                                    })).done(function(response) {
+                                    	console.log(response);
+                                        if (response) {
+                                        	if (response.logo) {
+                                        		$('#player-stream-logo').attr('src', response.logo);
+                                        	} else {
+                                        		$('#player-stream-logo').hide();
+                                        	}
+                                            $('#player-stream-name').text(response.display_name);
+                                            $('#player-stream-status').text(response.status);
+                                            $('#player-stream-game').text(response.game);
+                                        }
+                                    });
+                                }, 30000);
                                 app.playStream($selectedItem.data('channel'));
                             } else if (app.page == constants.PAGE_VIDEOS) {
                             	$('#player-stream-logo').hide();
@@ -640,6 +669,8 @@ app.init = function() {
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
                                 $('#player-length').show().text('/ ' + app.timeFormat($selectedItem.data('length')));
+                                app.$controlBackward.show();
+                                app.$controlForward.show();
                                 app.playVideo($selectedItem.data('vod-id'));
                             }
                         }
@@ -791,16 +822,12 @@ app.init = function() {
                 break;
             case keys.KEY_PAUSE:
                 if (app.state == constants.STATE_WATCH) {
-                    if (window.webapis) {
-                        webapis.avplay.pause();
-                    }
+                    app.controlPause();
                 }
                 break;
             case keys.KEY_PLAY:
                 if (app.state == constants.STATE_WATCH) {
-                    if (window.webapis) {
-                        webapis.avplay.play();
-                    }
+                	app.controlPlay();
                 }
                 break;
             case keys.KEY_PLAY_PAUSE:
@@ -808,25 +835,21 @@ app.init = function() {
                     if (window.webapis) {
                         var state = webapis.avplay.getState();
                         if (state === 'PLAYING') {
-                            webapis.avplay.pause();
+                        	app.controlPause();
                         } else {
-                            webapis.avplay.play();
+                        	app.controlPlay();
                         }
                     }
                 }
                 break;
             case keys.KEY_PREVIOUS:
-                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
-                    if (window.webapis) {
-                        webapis.avplay.jumpBackward(30000);
-                    }
+                if (app.state == constants.STATE_WATCH) {
+                	app.controlBackward();
                 }
                 break;
             case keys.KEY_NEXT:
-                if (app.state == constants.STATE_WATCH && !app.loadingStream) {
-                    if (window.webapis) {
-                        webapis.avplay.jumpForward(30000);
-                    }
+                if (app.state == constants.STATE_WATCH) {
+                    app.controlForward();
                 }
                 break;
             default:
@@ -851,6 +874,28 @@ app.init = function() {
         }
         app.$items.mCustomScrollbar('update');
     });
+};
+app.controlPlay = function() {
+	app.$controlPlayPause.removeClass('fa-play').addClass('fa-pause');
+	if (window.webapis) {
+        webapis.avplay.play();
+    }
+};
+app.controlPause = function() {
+	app.$controlPlayPause.removeClass('fa-pause').addClass('fa-play');
+	if (window.webapis) {
+		webapis.avplay.pause();
+    }
+};
+app.controlBackward = function() {
+	if (window.webapis) {
+		webapis.avplay.jumpBackward(30000);
+    }
+};
+app.controlForward = function() {
+	if (window.webapis) {
+		webapis.avplay.jumpForward(30000);
+    }
 };
 app.getNewActiveCell = function(prefix, area, keyCode, initUpperArea) {
     switch (keyCode) {
@@ -974,6 +1019,7 @@ app.returnState = function() {
         app.setState(constants.STATE_EXIT, app.hideExit);
     }
 };
+app.refreshStreamInfoInterval = null;
 app.loadingStream = null;
 app.loadingStreamErrorHandler = function(xhr, textStatus, errorThrown) {
     if (errorThrown !== 'abort') {
@@ -1081,6 +1127,10 @@ app.stopLoading = function() {
     if (app.loadingStream) {
         app.loadingStream.abort();
         app.loadingStream = null;
+    }
+    if (app.refreshStreamInfoInterval) {
+    	clearInterval(app.refreshStreamInfoInterval);
+    	app.refreshStreamInfoInterval = null;
     }
 };
 app.stop = function() {
@@ -1626,10 +1676,6 @@ app.selectCurrentFilter = function() {
         case 'channels':
             app.$selectChannels.show();
             app.setState(constants.STATE_SELECT_CHANNELS, function() {
-                if (app.refreshChannelsInterval) {
-                    clearInterval(app.refreshChannelsInterval);
-                    app.refreshChannelsInterval = null;
-                }
                 app.$selectChannels.hide();
                 app.$loading.hide();
             });
