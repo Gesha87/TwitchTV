@@ -965,9 +965,13 @@ app.getNewActiveCell = function(prefix, area, keyCode, initUpperArea) {
         case keys.KEY_RIGHT:
             var $newActiveCell, $activeCell = $('#' + prefix + '-' + app.areas[area].x + '-' + app.areas[area].y);
             if ($activeCell.length > 0 && app.areas[area].x < app.areas[area].columns - 1) {
-                $newActiveCell = $('#' + prefix + '-' + (app.areas[area].x + 1) + '-' + app.areas[area].y);
+                var plus = 1;
+                $newActiveCell = $('#' + prefix + '-' + (app.areas[area].x + plus) + '-' + app.areas[area].y);
+                while ($newActiveCell.length > 0 && $newActiveCell.hasClass('hidden')) {
+                    $newActiveCell = $('#' + prefix + '-' + (app.areas[area].x + ++plus) + '-' + app.areas[area].y);
+                }
                 if ($newActiveCell.length > 0) {
-                    app.areas[area].x++;
+                    app.areas[area].x += plus;
                     return $newActiveCell;
                 }
             }
