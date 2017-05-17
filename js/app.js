@@ -335,6 +335,7 @@ app.$selectSort = null;
 app.$controlBackward = null;
 app.$controlPlayPause = null;
 app.$controlForward = null;
+app.$selectQuality = null;
 app.init = function() {
     app.$main = $('#main');
     app.$loading = $('#loading-wrapper');
@@ -373,6 +374,7 @@ app.init = function() {
     app.$controlBackward = $('#control-item-0-0');
     app.$controlPlayPause = $('#control-item-1-0');
     app.$controlForward = $('#control-item-2-0');
+    app.$selectQuality  = $('#select-quality');
     app.restoreFilters();
     app.translateLayout();
     app.initGameFiler();
@@ -483,6 +485,8 @@ app.init = function() {
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_LEFT);
+                } else if (app.state === constants.STATE_WATCH_CONTROLS) {
+                    app.navigateControlItems(keys.KEY_LEFT);
                 } else if (app.state === constants.STATE_EXIT) {
                     var $exitButton = $('#button-exit');
                     if (!$exitButton.hasClass('selected')) {
@@ -559,6 +563,8 @@ app.init = function() {
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_RIGHT);
+                } else if (app.state === constants.STATE_WATCH_CONTROLS) {
+                    app.navigateControlItems(keys.KEY_RIGHT);
                 } else if (app.state === constants.STATE_EXIT) {
                     var $cancelButton = $('#button-cancel');
                     if (!$cancelButton.hasClass('selected')) {
@@ -631,8 +637,8 @@ app.init = function() {
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
                                 $('#player-length').hide();
-                                app.$controlBackward.hide();
-                                app.$controlForward.hide();
+                                app.$controlBackward.addClass('hidden');
+                                app.$controlForward.addClass('hidden');
                                 if (app.refreshStreamInfoInterval) {
                                 	clearInterval(app.refreshStreamInfoInterval);
                                 	app.refreshStreamInfoInterval = null;
@@ -669,8 +675,8 @@ app.init = function() {
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
                                 $('#player-length').show().text('/ ' + app.timeFormat($selectedItem.data('length')));
-                                app.$controlBackward.show();
-                                app.$controlForward.show();
+                                app.$controlBackward.removeClass('hidden');
+                                app.$controlForward.removeClass('hidden');
                                 app.playVideo($selectedItem.data('vod-id'));
                             }
                         }
@@ -763,13 +769,30 @@ app.init = function() {
                 } else if (app.state === constants.STATE_LOADING) {
                 	$('#player-controls').show();
                 	$('#player-info').show();
+                	app.activatePlayerControlsArea();
                     app.setState(constants.STATE_WATCH_CONTROLS, function() {
                     	$('#player-controls').hide();
                     	$('#player-info').hide();
                     });
                 } else if (app.state === constants.STATE_WATCH_CONTROLS) {
                     if (app.activeArea == constants.AREA_PLAYER_CONTROLS) {
-                    	
+                        var $selectedItem = $('#control-item-' + app.areas[constants.AREA_PLAYER_CONTROLS].x + '-' + app.areas[constants.AREA_PLAYER_CONTROLS].y);
+                        if ($selectedItem.length > 0) {
+                            switch ($selectedItem.data('type')) {
+                                case 'backward':
+                                    app.controlBackward();
+                                    break;
+                                case 'forward':
+                                    app.controlForward();
+                                    break;
+                                case 'play-pause':
+                                    app.controlPlayPause();
+                                    break;
+                                case 'options':
+                                    app.controlOptions();
+                                    break;
+                            }
+                        }
                     }
                 } else if (app.state === constants.STATE_ERROR) {
                     app.returnState();
@@ -832,14 +855,7 @@ app.init = function() {
                 break;
             case keys.KEY_PLAY_PAUSE:
                 if (app.state == constants.STATE_WATCH) {
-                    if (window.webapis) {
-                        var state = webapis.avplay.getState();
-                        if (state === 'PLAYING') {
-                        	app.controlPause();
-                        } else {
-                        	app.controlPlay();
-                        }
-                    }
+                    app.controlPlayPause();
                 }
                 break;
             case keys.KEY_PREVIOUS:
@@ -850,6 +866,11 @@ app.init = function() {
             case keys.KEY_NEXT:
                 if (app.state == constants.STATE_WATCH) {
                     app.controlForward();
+                }
+                break;
+            case keys.KEY_TOOLS:
+                if (app.state == constants.STATE_WATCH) {
+                    app.controlOptions();
                 }
                 break;
             default:
@@ -875,6 +896,16 @@ app.init = function() {
         app.$items.mCustomScrollbar('update');
     });
 };
+app.controlPlayPause = function() {
+    if (window.webapis) {
+        var state = webapis.avplay.getState();
+        if (state === 'PLAYING') {
+            app.controlPause();
+        } else {
+            app.controlPlay();
+        }
+    }
+};
 app.controlPlay = function() {
 	app.$controlPlayPause.removeClass('fa-play').addClass('fa-pause');
 	if (window.webapis) {
@@ -897,14 +928,24 @@ app.controlForward = function() {
 		webapis.avplay.jumpForward(30000);
     }
 };
+app.controlOptions = function() {
+    app.$selectQuality.show();
+    app.setState(constants.STATE_SELECT_QUALITY, function() {
+        app.$selectQuality.hide();
+    });
+};
 app.getNewActiveCell = function(prefix, area, keyCode, initUpperArea) {
     switch (keyCode) {
         case keys.KEY_LEFT:
             var $newActiveCell, $activeCell = $('#' + prefix + '-' + app.areas[area].x + '-' + app.areas[area].y);
             if ($activeCell.length > 0 && app.areas[area].x > 0) {
-                $newActiveCell = $('#' + prefix + '-' + (app.areas[area].x - 1) + '-' + app.areas[area].y);
+                var minus = 1;
+                $newActiveCell = $('#' + prefix + '-' + (app.areas[area].x - minus) + '-' + app.areas[area].y);
+                while ($newActiveCell.length > 0 && $newActiveCell.hasClass('hidden')) {
+                    $newActiveCell = $('#' + prefix + '-' + (app.areas[area].x - ++minus) + '-' + app.areas[area].y);
+                }
                 if ($newActiveCell.length > 0) {
-                    app.areas[area].x--;
+                    app.areas[area].x -= minus;
                     return $newActiveCell;
                 }
             }
@@ -995,6 +1036,20 @@ app.navigateSortItems = function(keyCode, initUpperArea) {
     var $newActiveCell = app.getNewActiveCell('sort-item', constants.AREA_SORT, keyCode, initUpperArea);
     if ($newActiveCell) {
         app.clearSelection(app.$selectSort);
+        $newActiveCell.addClass('selected');
+    }
+};
+app.navigateControlItems = function(keyCode, initUpperArea) {
+    var $newActiveCell = app.getNewActiveCell('control-item', constants.AREA_PLAYER_CONTROLS, keyCode, initUpperArea);
+    if ($newActiveCell) {
+        app.clearSelection($('#player-controls'));
+        $newActiveCell.addClass('selected');
+    }
+};
+app.navigateQualityItems = function(keyCode, initUpperArea) {
+    var $newActiveCell = app.getNewActiveCell('quality-item', constants.AREA_PLAYER_QUALITY, keyCode, initUpperArea);
+    if ($newActiveCell) {
+        app.clearSelection(app.$selectQuality);
         $newActiveCell.addClass('selected');
     }
 };
@@ -1599,6 +1654,9 @@ app.activatePagesArea = function() {
     app.activeArea = constants.AREA_PAGES;
     app.showCurrentPage();
 };
+app.activatePlayerControlsArea = function() {
+    app.activeArea = constants.AREA_PLAYER_CONTROLS;
+};
 app.showPage = function($page, select) {
     app.$pages.find('.active').removeClass('active');
     $page.addClass('active');
@@ -2022,6 +2080,7 @@ function extractQualities(input) {
 }
 
 if (window.tizen) {
+    tizen.tvinputdevice.registerKey("Tools");
     tizen.tvinputdevice.registerKey("MediaPlayPause");
     tizen.tvinputdevice.registerKey("MediaPlay");
     tizen.tvinputdevice.registerKey("MediaPause");
