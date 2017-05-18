@@ -1123,7 +1123,7 @@ app.playStream = function(channelName) {
                 }).done(function(data) {
                 	app.setState(constants.STATE_WATCH, app.stop);
                     app.$loading.hide();
-                    console.log(m3u8.read(data));
+                    console.log(m3u8.getStreamList(data));
                     var qualities = extractQualities(data);
                     app.play(qualities[0].url);
                 }).fail(app.loadingStreamErrorHandler);

@@ -2,6 +2,25 @@ var m3u8 = {
     NON_QUOTED_COMMA: /,(?=(?:[^"]|"[^"]*")*$)/,
     KV_SPLITTER: /="?([^"]*)/,
     KEY_PREFIX: '#EXT-X-',
+    TAG_STREAM: 'STREAM-INF',
+    getStreamList : function(playlist) {
+        var lines = m3u8.read(playlist);
+        lines.reduce(function(streams, url, i, pl) {
+            if (m3u8.isUrl(url)) {
+                var stream = pl[i - 1];
+                if (typeof stream === 'object' && stream[m3u8.TAG_STREAM] && typeof stream[m3u8.TAG_STREAM] === 'object') {
+                    streams.push(Object.assign({
+                        url: url
+                    }, stream[m3u8.TAG_STREAM]));
+                }
+            }
+
+            return streams;
+        }, []);
+    },
+    isUrl : function(url) {
+        return m3u8.startsWith(url, 'http://') || m3u8.startsWith(url, 'https://');
+    },
     read: function(playlist) {
         var lines = playlist.toString().split('\n');
         if (!lines.length || !m3u8.startsWith(lines[0], '#EXTM3U')) {
