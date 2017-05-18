@@ -538,6 +538,8 @@ app.init = function() {
                     app.navigatePeriodItems(keys.KEY_UP);
                 } else if (app.state === constants.STATE_SELECT_SORT) {
                     app.navigateSortItems(keys.KEY_UP);
+                } else if (app.state === constants.STATE_SELECT_QUALITY) {
+                    app.navigateQualityItems(keys.KEY_UP);
                 }
                 break;
             case keys.KEY_RIGHT:
@@ -622,6 +624,8 @@ app.init = function() {
                     app.navigatePeriodItems(keys.KEY_DOWN);
                 } else if (app.state === constants.STATE_SELECT_SORT) {
                     app.navigateSortItems(keys.KEY_DOWN);
+                } else if (app.state === constants.STATE_SELECT_QUALITY) {
+                    app.navigateQualityItems(keys.KEY_DOWN);
                 }
                 break;
             case keys.KEY_ENTER:
@@ -635,7 +639,7 @@ app.init = function() {
                             	} else {
                             		$('#player-stream-logo').hide();
                             	}
-                                $('#player-stream-name').text($selectedItem.data('channel-name'));
+                                $('#player-stream-name').text($selectedItem.data('channel-name') + ' test');
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
                                 $('#player-length').hide();
@@ -768,6 +772,15 @@ app.init = function() {
                         app.returnState();
                         app.refresh(true);
                     }
+                } else if (app.state === constants.STATE_SELECT_QUALITY) {
+                    var $selectedItem = $('#quality-item-' + app.areas[constants.AREA_PLAYER_QUALITY].x + '-' + app.areas[constants.AREA_PLAYER_QUALITY].y);
+                    if ($selectedItem.length > 0) {
+                        app.returnState();
+                        if (app.state === constants.STATE_WATCH_CONTROLS) {
+                            app.returnState();
+                        }
+                        app.selectQuality($selectedItem);
+                    }
                 } else if (app.state === constants.STATE_WATCH) {
                 	$('#player-controls').show();
                 	$('#player-info').show();
@@ -841,37 +854,32 @@ app.init = function() {
             case keys.KEY_BLUE:
                 break;
             case keys.KEY_STOP:
+                if (app.state == constants.STATE_WATCH_CONTROLS) {
+                    app.returnState();
+                }
                 if (app.state == constants.STATE_WATCH) {
                     app.returnState();
                 }
                 break;
             case keys.KEY_PAUSE:
-                if (app.state == constants.STATE_WATCH) {
-                    app.controlPause();
-                }
-                break;
             case keys.KEY_PLAY:
-                if (app.state == constants.STATE_WATCH) {
-                	app.controlPlay();
-                }
-                break;
             case keys.KEY_PLAY_PAUSE:
-                if (app.state == constants.STATE_WATCH) {
+                if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                     app.controlPlayPause();
                 }
                 break;
             case keys.KEY_PREVIOUS:
-                if (app.state == constants.STATE_WATCH) {
+                if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                 	app.controlBackward();
                 }
                 break;
             case keys.KEY_NEXT:
-                if (app.state == constants.STATE_WATCH) {
+                if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                     app.controlForward();
                 }
                 break;
             case keys.KEY_TOOLS:
-                if (app.state == constants.STATE_WATCH) {
+                if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                     app.controlOptions();
                 }
                 break;
@@ -902,22 +910,12 @@ app.controlPlayPause = function() {
     if (window.webapis) {
         var state = webapis.avplay.getState();
         if (state === 'PLAYING') {
-            app.controlPause();
+            app.$controlPlayPause.find('i').removeClass('fa-pause').addClass('fa-play');
+            webapis.avplay.pause();
         } else {
-            app.controlPlay();
+            app.$controlPlayPause.find('i').removeClass('fa-play').addClass('fa-pause');
+            webapis.avplay.play();
         }
-    }
-};
-app.controlPlay = function() {
-	app.$controlPlayPause.removeClass('fa-play').addClass('fa-pause');
-	if (window.webapis) {
-        webapis.avplay.play();
-    }
-};
-app.controlPause = function() {
-	app.$controlPlayPause.removeClass('fa-pause').addClass('fa-play');
-	if (window.webapis) {
-		webapis.avplay.pause();
     }
 };
 app.controlBackward = function() {
@@ -1105,6 +1103,31 @@ app.showLoadingError = function(message) {
     app.$loading.hide();
     app.showError(message);
 };
+app.qualityList = [];
+app.initQualities = function() {
+    var $items = $('#quality-items');
+    $items.empty();
+    app.areas[constants.AREA_PLAYER_QUALITY].y = 0;
+    app.areas[constants.AREA_PLAYER_QUALITY].rows = app.qualityList.length;
+    if (app.qualityList.length > 0) {
+        var selected = 0;
+        for (var i = 0; i < app.qualityList.length; i++) {
+            var item = app.qualityList[i];
+            var $item = $('<div class="filter-list-item" id="quality-item-0-' + i + '">' + item.name + '</div>');
+            $item.data('url', item.url);
+            $item.data('quality', item.name);
+            if (i == selected) {
+                $item.addClass('selected active');
+                app.selectQuality($item);
+            }
+            $items.append($item);
+        }
+        app.areas[constants.AREA_PLAYER_QUALITY].y = selected;
+    } else {
+        app.returnState();
+        app.showLoadingError(messages.ERROR_QUALITY_LIST_IS_EMPTY);
+    }
+};
 app.playStream = function(channelName) {
 	app.setState(constants.STATE_LOADING, app.stopLoading);
     app.$player.show();
@@ -1123,9 +1146,8 @@ app.playStream = function(channelName) {
                 }).done(function(data) {
                 	app.setState(constants.STATE_WATCH, app.stop);
                     app.$loading.hide();
-                    console.log(m3u8.getStreamList(data));
-                    var qualities = extractQualities(data);
-                    app.play(qualities[0].url);
+                    app.qualityList = m3u8.getStreamList(data);
+                    app.initQualities();
                 }).fail(app.loadingStreamErrorHandler);
             }).fail(app.loadingStreamErrorHandler);
         }
@@ -1143,8 +1165,8 @@ app.playVideo = function(id) {
         }).done(function(data) {
         	app.setState(constants.STATE_WATCH, app.stop);
             app.$loading.hide();
-            var qualities = extractQualities(data);
-            app.play(qualities[0].url);
+            app.qualityList = m3u8.getStreamList(data);
+            app.initQualities();
         }).fail(app.loadingStreamErrorHandler);
     }).fail(app.loadingStreamErrorHandler);
 };
@@ -1308,7 +1330,7 @@ app.getLiveChannels = function(limit, offset, callback) {
                 stream = response.streams[i];
                 $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
 	                <i class="fa fa-fw fa-twitch"></i>\
-	                <img src="' + stream.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+	                <img src="' + stream.preview.large + '" onload="img.imageLoaded(this)" onerror="img.imageFailed(this)">\
 	                <div class="stream-channel-name">' + stream.channel.display_name + '</div>\
 	            </div>');
                 $newCell.data('channel', stream.channel.name);
@@ -1373,7 +1395,7 @@ app.getVideos = function(limit, offset, callback) {
                 vod = response.vods[i];
                 $newCell = $('<div class="cell" id="item-' + x + '-' + y + '">\
 	                <i class="fa fa-fw fa-twitch"></i>\
-	                <img src="' + vod.preview.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+	                <img src="' + vod.preview.large + '" onload="img.imageLoaded(this)" onerror="img.imageFailed(this)">\
 	                <div class="stream-channel-name">' + vod.channel.display_name + '</div>\
 	            </div>');
                 $newCell.data('channel', vod.channel.name);
@@ -1420,7 +1442,7 @@ app.getGames = function(callback) {
             game = response.top[i];
             $newCell = $('<div class="cell game-cell" id="game-item-' + x + '-' + y + '">\
                 <i class="fa fa-fw fa-twitch"></i>\
-                <img src="' + game.game.box.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+                <img src="' + game.game.box.large + '" onload="img.imageLoaded(this)" onerror="img.imageFailed(this)">\
                 <div class="game-name ellipsed">' + game.game.name + '</div>\
             </div>');
             $newCell.data('viewers', game.viewers);
@@ -1458,7 +1480,7 @@ app.getGamesSearch = function(query, callback) {
                 game = response.games[i];
                 $newCell = $('<div class="cell game-cell" id="game-item-' + x + '-' + y + '">\
                     <i class="fa fa-fw fa-twitch"></i>\
-                    <img src="' + game.box.large + '" onload="imageLoaded(this)" onerror="imageFailed(this)">\
+                    <img src="' + game.box.large + '" onload="img.imageLoaded(this)" onerror="img.imageFailed(this)">\
                     <div class="game-name ellipsed">' + game.name + '</div>\
                 </div>');
                 $newCell.data('popularity', game.popularity);
@@ -1511,13 +1533,13 @@ app.fillChannelsContainer = function(channels) {
         x = (i - y) / countRows;
         channel = channels[i];
         var src = channel.logo ? channel.logo : '';
-        var onError = channel.logo ? 'onerror="imageFailed(this)' : '';
+        var onError = channel.logo ? 'onerror="img.imageFailed(this)' : '';
         var checked = app.filters.channels[channel.name] !== undefined;
         var checkboxClass = checked ? 'fa-check-square-o' : 'fa-square-o';
         var divClass = checked ? 'active' : '';
         $newCell = $('<div class="cell channel-cell ' + divClass + '" id="channel-item-' + x + '-' + y + '">\
             <i class="fa fa-fw fa-twitch"></i>\
-            <img src="' + src + '" onload="imageLoaded(this)" ' + onError + '">\
+            <img src="' + src + '" onload="img.imageLoaded(this)" ' + onError + '">\
             <div class="checkbox"><i class="fa ' + checkboxClass + '"></i></div>\
             <div class="channel-info">\
                 <div class="channel-name">' + channel.display_name + '</div>\
@@ -1944,6 +1966,13 @@ app.selectSort = function($selectedItem) {
     }
     app.storeFilters();
 };
+app.selectQuality = function($selectedItem) {
+    var url = $selectedItem.data('url');
+    app.$selectQuality.find('.active').removeClass('active');
+    $selectedItem.addClass('active');
+    $('#stream-quality').text($selectedItem.data('quality'));
+    app.play(url);
+};
 app.selectGame = function(game) {
     app.filters.game = game;
     $('.filter-game').addClass('chosen').find('.text').text(game);
@@ -2030,61 +2059,15 @@ app.restoreFilters = function() {
         app.filters = JSON.parse(localStorage['filters']);
     }
 };
-
-function imageLoaded(img) {
-    img.classList.add('loaded');
-    $(img).siblings('i').hide();
-}
-
-function imageFailed(img) {
-    $(img).siblings('i').addClass('danger');
-}
-
-function extractStreamDeclarations(input) {
-    var result = [];
-    var myRegexp = /#EXT-X-MEDIA:(.)*\n#EXT-X-STREAM-INF:(.)*\n(.)*/g;
-    var match;
-    while (match = myRegexp.exec(input)) {
-        result.push(match[0]);
+img = {
+    imageLoaded: function(img) {
+        img.classList.add('loaded');
+        $(img).siblings('i').hide();
+    },
+    imageFailed: function(img) {
+        $(img).siblings('i').addClass('danger');
     }
-    
-    return result;
-}
-function extractQualityFromStream(input) {
-    var myRegexp = /#EXT-X-MEDIA:.*NAME=\"(\w+)\".*/g;
-    var match = myRegexp.exec(input);
-    var quality;
-    if (match !== null) {
-        quality = match[1];
-    } else {
-        var values = input.split("\n");
-        values = values[0].split(":");
-        values = values[1].split(",");
-        
-        var set = {};
-        for (var i = 0; i < values.length; i++) {
-            var value = values[i].split("=");
-            set[value[0]] = value[1].replace(/"/g, '');
-        }
-        quality = set.NAME;
-    }
-    return quality;
-}
-function extractUrlFromStream(input) {
-    return input.split("\n")[2];
-}
-function extractQualities(input) {
-    var result = [];
-    var streams = extractStreamDeclarations(input);
-    for (var i = 0; i < streams.length; i++) {
-        result.push({
-            'id': extractQualityFromStream(streams[i]),
-            'url': extractUrlFromStream(streams[i])
-        });
-    }
-    
-    return result;
-}
+};
 
 if (window.tizen) {
     tizen.tvinputdevice.registerKey("Tools");

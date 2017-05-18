@@ -3,15 +3,21 @@ var m3u8 = {
     KV_SPLITTER: /="?([^"]*)/,
     KEY_PREFIX: '#EXT-X-',
     TAG_STREAM: 'STREAM-INF',
+    TAG_MEDIA: 'MEDIA',
     getStreamList : function(playlist) {
         var lines = m3u8.read(playlist);
-        lines.reduce(function(streams, url, i, pl) {
+        return lines.reduce(function(streams, url, i, pl) {
             if (m3u8.isUrl(url)) {
                 var stream = pl[i - 1];
+                var media = pl[i - 2];
                 if (typeof stream === 'object' && stream[m3u8.TAG_STREAM] && typeof stream[m3u8.TAG_STREAM] === 'object') {
-                    streams.push(Object.assign({
-                        url: url
-                    }, stream[m3u8.TAG_STREAM]));
+                    if (typeof media === 'object' && media[m3u8.TAG_MEDIA] && typeof media[m3u8.TAG_MEDIA] === 'object') {
+                        streams.push({
+                            url: url,
+                            bandwidth: stream[m3u8.TAG_STREAM].BANDWIDTH,
+                            name: media[m3u8.TAG_MEDIA].NAME,
+                        });
+                    }
                 }
             }
 
