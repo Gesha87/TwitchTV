@@ -285,6 +285,8 @@ app.translateLayout = function() {
     $('#sort-item-0-1').text(messages.SORT_TIME);
     // select language
     app.$selectLanguage.find('.caption > .text').text(messages.LANGUAGE_SELECT);
+    // select quality
+    app.$selectQuality.find('.caption > .text').text(messages.QUALITY_SELECT);
     // others
     $('#loading').find('.text').text(messages.LOADING);
     $('#confirm-exit').text(messages.CONFIRM_EXIT);
@@ -766,7 +768,7 @@ app.init = function() {
                         app.returnState();
                         app.refresh(true);
                     }
-                } else if (app.state === constants.STATE_LOADING) {
+                } else if (app.state === constants.STATE_WATCH) {
                 	$('#player-controls').show();
                 	$('#player-info').show();
                 	app.activatePlayerControlsArea();
@@ -1116,11 +1118,12 @@ app.playStream = function(channelName) {
             app.loadingStream = $.get('https://api.twitch.tv/api/channels/' + channelName + '/access_token', 'json').always(function() {
                 app.loadingStream = null;
             }).done(function(data) {
-                app.loadingStream = $.get('http://usher.twitch.tv/api/channel/hls/' + channelName + '.m3u8?player_backend=html5&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_spectre=true&allow_audio_only=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
+                app.loadingStream = $.get('http://usher.twitch.tv/api/channel/hls/' + channelName + '.m3u8?player_backend=html5&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
                     app.loadingStream = null;
                 }).done(function(data) {
                 	app.setState(constants.STATE_WATCH, app.stop);
                     app.$loading.hide();
+                    console.log(m3u8.read(data));
                     var qualities = extractQualities(data);
                     app.play(qualities[0].url);
                 }).fail(app.loadingStreamErrorHandler);

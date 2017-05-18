@@ -51,6 +51,8 @@ var messages = {
     SORT_SELECT: "Select order of videos",
     SORT_TIME: "Recent",
     SORT_VIEWS: "Popular (default)",
+    
+    QUALITY_SELECT: "Select quality",
 	
 	LOADING: "Loading...",
     BUFFERING: "Buffering...",

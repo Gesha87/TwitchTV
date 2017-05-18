@@ -52,6 +52,8 @@ var messages = {
     SORT_TIME: "Последние",
     SORT_VIEWS: "Популярные (по умолчанию)",
     
+    QUALITY_SELECT: "Выберите качество",
+    
     LOADING: "Загрузка...",
     BUFFERING: "Буферизация...",
     

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>Приложение для сервиса Twitch</title>
+    <title>TwitchTV</title>
     <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.min.css" />
     <link rel="stylesheet" type="text/css" href="css/style.css" />
@@ -12,6 +12,7 @@
     <script src="language.js"></script>
     <script src="js/constants.js"></script>
     <script src="js/keys.js"></script>
+    <script src="js/m3u8.js"></script>
     <script src="js/app.js"></script>
 </head>
 <body>
@@ -256,9 +257,7 @@
         <div class="caption">
             <div class="text">Выбор качества</div>
         </div>
-        <div class="filter-list">
-            
-        </div>
+        <div id="quality-items"></div>
     </div>
 	<div id="error-dialog" class="dialog-wrapper">
         <div class="content">
