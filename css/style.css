@@ -435,7 +435,8 @@ img.loaded {
     background-color: rgba(0, 0, 0, 0.8);
     z-index: 500;
 }
-.select-language-wrapper {
+.select-language-wrapper, 
+.select-quality-wrapper {
 	z-index: 1100;
 }
 

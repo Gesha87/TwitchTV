@@ -487,6 +487,8 @@ app.init = function() {
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_LEFT);
+                } else if (app.state === constants.STATE_WATCH) {
+                    app.controlBackward();
                 } else if (app.state === constants.STATE_WATCH_CONTROLS) {
                     app.navigateControlItems(keys.KEY_LEFT);
                 } else if (app.state === constants.STATE_EXIT) {
@@ -567,6 +569,8 @@ app.init = function() {
                     }
                 } else if (app.state === constants.STATE_SELECT_LANGUAGE) {
                     app.navigateLanguageItems(keys.KEY_RIGHT);
+                } else if (app.state === constants.STATE_WATCH) {
+                    app.controlForward();
                 } else if (app.state === constants.STATE_WATCH_CONTROLS) {
                     app.navigateControlItems(keys.KEY_RIGHT);
                 } else if (app.state === constants.STATE_EXIT) {
@@ -779,12 +783,14 @@ app.init = function() {
                         if (app.state === constants.STATE_WATCH_CONTROLS) {
                             app.returnState();
                         }
-                        app.selectQuality($selectedItem);
+                        setTimeout(function() {
+                            app.selectQuality($selectedItem);
+                        }, 0);
                     }
                 } else if (app.state === constants.STATE_WATCH) {
                 	$('#player-controls').show();
                 	$('#player-info').show();
-                	app.activatePlayerControlsArea();
+                	app.activatePlayerControlsArea(true);
                     app.setState(constants.STATE_WATCH_CONTROLS, function() {
                     	$('#player-controls').hide();
                     	$('#player-info').hide();
@@ -1082,7 +1088,7 @@ app.refreshStreamInfoInterval = null;
 app.loadingStream = null;
 app.loadingStreamErrorHandler = function(xhr, textStatus, errorThrown) {
     if (errorThrown !== 'abort') {
-        //app.returnState();
+        app.returnState();
         app.loadingErrorHandler(xhr, textStatus, errorThrown);
     }
 };
@@ -1683,8 +1689,13 @@ app.activatePagesArea = function() {
     app.activeArea = constants.AREA_PAGES;
     app.showCurrentPage();
 };
-app.activatePlayerControlsArea = function() {
+app.activatePlayerControlsArea = function(reset) {
     app.activeArea = constants.AREA_PLAYER_CONTROLS;
+    if (reset) {
+        app.areas[constants.AREA_PLAYER_CONTROLS].x = 1;
+        app.clearSelection($('#player-controls'));
+        $('#control-item-1-0').addClass('selected');
+    }
 };
 app.showPage = function($page, select) {
     app.$pages.find('.active').removeClass('active');
