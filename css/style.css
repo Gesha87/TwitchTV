@@ -1,3 +1,8 @@
+@font-face {
+    font-family: OpenSans;
+    src: url(../fonts/OpenSansEmoji.ttf);
+}
+
 * {
 	box-sizing: border-box;
 	padding: 0px;
@@ -8,8 +13,9 @@ body {
 	opacity: 0;
 	background-color: #201c2b;
 	overflow: hidden;
-	font-family: Helvetica Neue, Helvetica, sans-serif;
+	font-family: OpenSans, sans-serif, arial;
 	font-size: 3.0vh;
+	font-weight: bold;
 	color: #ffffff;
 	line-height: 1em;
 }
@@ -581,7 +587,7 @@ img.loaded {
 }
 
 .player-info-container {
-	margin-bottom: 7vh;
+	margin-bottom: 8vh;
 }
 
 .player-stream-logo {
@@ -623,7 +629,7 @@ img.loaded {
 }
 
 .player-controls-container {
-	margin-top: 7vh;
+	margin-top: 8vh;
 }
 
 .player-control {
