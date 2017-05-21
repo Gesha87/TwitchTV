@@ -647,6 +647,7 @@ app.init = function() {
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
                                 $('#player-length').hide();
+                                $('#player-time').hide();
                                 app.$controlBackward.addClass('hidden');
                                 app.$controlForward.addClass('hidden');
                                 if (app.refreshStreamInfoInterval) {
@@ -684,6 +685,7 @@ app.init = function() {
                             	$('#player-stream-name').text($selectedItem.data('channel-name'));
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
+                                $('#player-time').show();
                                 $('#player-length').show().text('/ ' + app.timeFormat($selectedItem.data('length')));
                                 app.$controlBackward.removeClass('hidden');
                                 app.$controlForward.removeClass('hidden');
@@ -887,6 +889,8 @@ app.init = function() {
             case keys.KEY_TOOLS:
                 if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                     app.controlOptions();
+                } else if (app.state == constants.STATE_SELECT_QUALITY) {
+                    app.returnState();
                 }
                 break;
             default:
