@@ -338,6 +338,7 @@ app.$controlBackward = null;
 app.$controlPlayPause = null;
 app.$controlForward = null;
 app.$selectQuality = null;
+app.$playerProgress = null;
 app.init = function() {
     app.$main = $('#main');
     app.$loading = $('#loading-wrapper');
@@ -377,6 +378,7 @@ app.init = function() {
     app.$controlPlayPause = $('#control-item-1-0');
     app.$controlForward = $('#control-item-2-0');
     app.$selectQuality  = $('#select-quality');
+    app.$playerProgress = $('#player-progress');
     app.restoreFilters();
     app.translateLayout();
     app.initGameFiler();
@@ -542,6 +544,10 @@ app.init = function() {
                     app.navigateSortItems(keys.KEY_UP);
                 } else if (app.state === constants.STATE_SELECT_QUALITY) {
                     app.navigateQualityItems(keys.KEY_UP);
+                } else if (app.state === constants.STATE_WATCH_CONTROLS) {
+                    if (app.activeArea == constants.AREA_PLAYER_PROGRESS) {
+                        app.activatePlayerControlsArea(false);
+                    } 
                 }
                 break;
             case keys.KEY_RIGHT:
@@ -630,6 +636,22 @@ app.init = function() {
                     app.navigateSortItems(keys.KEY_DOWN);
                 } else if (app.state === constants.STATE_SELECT_QUALITY) {
                     app.navigateQualityItems(keys.KEY_DOWN);
+                } else if (app.state === constants.STATE_WATCH) {
+                    $('#player-controls').show();
+                    $('#player-info').show();
+                    if (app.$playerProgress.hasClass('hidden')) {
+                        app.activatePlayerControlsArea(true);
+                    } else {
+                        app.activatePlayerProgressArea();
+                    }
+                    app.setState(constants.STATE_WATCH_CONTROLS, function() {
+                        $('#player-controls').hide();
+                        $('#player-info').hide();
+                    });
+                } else if (app.state === constants.STATE_WATCH_CONTROLS) {
+                    if (app.activeArea == constants.AREA_PLAYER_CONTROLS && !app.$playerProgress.hasClass('hidden')) {
+                        app.activatePlayerProgressArea();
+                    } 
                 }
                 break;
             case keys.KEY_ENTER:
@@ -650,6 +672,7 @@ app.init = function() {
                                 $('#player-time').hide();
                                 app.$controlBackward.addClass('hidden');
                                 app.$controlForward.addClass('hidden');
+                                app.$playerProgress.addClass('hidden');
                                 if (app.refreshStreamInfoInterval) {
                                 	clearInterval(app.refreshStreamInfoInterval);
                                 	app.refreshStreamInfoInterval = null;
@@ -689,6 +712,7 @@ app.init = function() {
                                 $('#player-length').show().text('/ ' + app.timeFormat($selectedItem.data('length')));
                                 app.$controlBackward.removeClass('hidden');
                                 app.$controlForward.removeClass('hidden');
+                                app.$playerProgress.removeClass('hidden');
                                 app.playVideo($selectedItem.data('vod-id'));
                             }
                         }
@@ -1695,11 +1719,16 @@ app.activatePagesArea = function() {
 };
 app.activatePlayerControlsArea = function(reset) {
     app.activeArea = constants.AREA_PLAYER_CONTROLS;
+    app.clearSelection(app.$player);
     if (reset) {
         app.areas[constants.AREA_PLAYER_CONTROLS].x = 1;
-        app.clearSelection($('#player-controls'));
-        $('#control-item-1-0').addClass('selected');
     }
+    $('#control-item-' + app.areas[constants.AREA_PLAYER_CONTROLS].x + '-0').addClass('selected');
+};
+app.activatePlayerProgressArea = function() {
+    app.activeArea = constants.AREA_PLAYER_PROGRESS;
+    app.clearSelection(app.$player);
+    app.$playerProgress.addClass('selected');
 };
 app.showPage = function($page, select) {
     app.$pages.find('.active').removeClass('active');

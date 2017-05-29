@@ -573,14 +573,64 @@ img.loaded {
     height: 100vh;
 }
 
+.player-progress {
+	position: relative;
+	margin-top: 3vh;
+	height: 1vh;
+}
+
+.progress {
+    height: 0.5vh;
+    overflow: hidden;
+    background-color: #f5f5f5;
+}
+
+.progress-bar {
+    position: absolute;
+    width: 0;
+    height: 0.5vh;
+    background-color: #6441a4;
+}
+
+.progress-select {
+	display: none;
+	background-color: #392e5c;
+}
+
+.progress-slider {
+	display: none;
+	position: absolute;
+	background-color: #ffffff;
+	border-radius: 50%;
+	width: 3vh;
+	height: 3vh;
+	top: -1vh;
+}
+
+.player-progress.selected {
+    outline: none;
+}
+
+.player-progress.selected .progress-slider,
+.player-progress.selected .progress-select  {
+    display: block;
+}
+
+.player-progress.selected .progress,
+.player-progress.selected .progress-bar {
+    height: 1.0vh;
+}
+
+
+
 .player-info {
 	display: none;
 	position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    background: rgba(0, 0, 0, 0.7);
-    background: linear-gradient(to top, rgba(0, 0, 0, 0), rgba(0, 0, 0, 1));
+    background: rgba(0,0,0,0.7);
+    background: linear-gradient(to top, rgba(0,0,0,0), rgba(0,0,0,1));
     padding: 4vh;
     font-size: 3.4vh;
 }
@@ -638,10 +688,6 @@ img.loaded {
 }
 .player-control.selected {
 	color: #ffffff;
-}
-
-.player-control i {
-    /* width: 4vh; */
 }
 
 .player-control-time {
