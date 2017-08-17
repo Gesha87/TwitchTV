@@ -1196,6 +1196,7 @@ app.playStream = function(channelName) {
         app.loadingStream = null;
     }).done(function(data) {
         if (data._total === 0) {
+            app.returnState();
             app.showLoadingError(messages.ERROR_STREAM_IS_OFFLINE);
         } else {
             app.loadingStream = $.get('https://api.twitch.tv/api/channels/' + channelName + '/access_token', 'json').always(function() {
@@ -1236,25 +1237,39 @@ app.play = function(url) {
         webapis.avplay.open(url);
         webapis.avplay.setListener({
             onbufferingstart: function() {
-                app.showLoading(messages.BUFFERING + ' 0%');
+                if (app.state === constants.STATE_WATCH || app.state === constants.STATE_WATCH_CONTROLS) {
+                    app.showLoading(messages.BUFFERING + ' 0%');
+                }
             },
             onbufferingprogress: function(percent) {
-                app.showLoading(messages.BUFFERING + ' ' + percent + '%');
+                if (app.state === constants.STATE_WATCH || app.state === constants.STATE_WATCH_CONTROLS) {
+                    app.showLoading(messages.BUFFERING + ' ' + percent + '%');
+                }
             },
             onbufferingcomplete: function() {
-                app.$loading.hide();
+                if (app.state === constants.STATE_WATCH || app.state === constants.STATE_WATCH_CONTROLS) {
+                    app.$loading.hide();
+                }
             },
             oncurrentplaytime: function(currentTime) {
                 app.$playerTime.text(app.timeFormat(currentTime / 1000));
             },
             onevent: function(eventType, eventData) {},
             onerror: function(errorType) {
-                var message = messages.ERROR_LOADING_FAILED;
-                if (errorType === 'PLAYER_ERROR_CONNECTION_FAILED') {
-                    message = messages.ERROR_CONNECTION_FAILED;
+                if (app.state === constants.STATE_SELECT_QUALITY) {
+                    app.returnState();
                 }
-                app.returnState();
-                app.showError(message);
+                if (app.state === constants.STATE_WATCH_CONTROLS) {
+                    app.returnState();
+                }
+                if (app.state === constants.STATE_WATCH) {
+                    var message = messages.ERROR_LOADING_FAILED;
+                    if (errorType === 'PLAYER_ERROR_CONNECTION_FAILED') {
+                        message = messages.ERROR_CONNECTION_FAILED;
+                    }
+                    app.returnState();
+                    app.showError(message);
+                }
             },
             onstreamcompleted: function() {
                 webapis.avplay.stop();
