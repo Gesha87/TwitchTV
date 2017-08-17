@@ -493,6 +493,7 @@ app.init = function() {
                     app.controlBackward();
                 } else if (app.state === constants.STATE_WATCH_CONTROLS) {
                     app.navigateControlItems(keys.KEY_LEFT);
+                    app.autoHideControls();
                 } else if (app.state === constants.STATE_EXIT) {
                     var $exitButton = $('#button-exit');
                     if (!$exitButton.hasClass('selected')) {
@@ -547,7 +548,8 @@ app.init = function() {
                 } else if (app.state === constants.STATE_WATCH_CONTROLS) {
                     if (app.activeArea == constants.AREA_PLAYER_PROGRESS) {
                         app.activatePlayerControlsArea(false);
-                    } 
+                    }
+                    app.autoHideControls();
                 }
                 break;
             case keys.KEY_RIGHT:
@@ -579,6 +581,7 @@ app.init = function() {
                     app.controlForward();
                 } else if (app.state === constants.STATE_WATCH_CONTROLS) {
                     app.navigateControlItems(keys.KEY_RIGHT);
+                    app.autoHideControls();
                 } else if (app.state === constants.STATE_EXIT) {
                     var $cancelButton = $('#button-cancel');
                     if (!$cancelButton.hasClass('selected')) {
@@ -651,7 +654,8 @@ app.init = function() {
                 } else if (app.state === constants.STATE_WATCH_CONTROLS) {
                     if (app.activeArea == constants.AREA_PLAYER_CONTROLS && !app.$playerProgress.hasClass('hidden')) {
                         app.activatePlayerProgressArea();
-                    } 
+                    }
+                    app.autoHideControls();
                 }
                 break;
             case keys.KEY_ENTER:
@@ -679,7 +683,7 @@ app.init = function() {
                                 }
                                 app.refreshStreamInfoInterval = setInterval(function() {
                                 	$.ajax($.extend({}, app.twitchApiOptions, {
-                                        url: 'https://api.twitch.tv/kraken/channels/' + $selectedItem.data('channel')
+                                        url: 'https://api.twitch.tv/kraken/channels/' + $selectedItem.data('channel-id')
                                     })).done(function(response) {
                                     	console.log(response);
                                         if (response) {
@@ -814,13 +818,7 @@ app.init = function() {
                         }, 0);
                     }
                 } else if (app.state === constants.STATE_WATCH) {
-                	$('#player-controls').show();
-                	$('#player-info').show();
-                	app.activatePlayerControlsArea(true);
-                    app.setState(constants.STATE_WATCH_CONTROLS, function() {
-                    	$('#player-controls').hide();
-                    	$('#player-info').hide();
-                    });
+                    app.showControls();
                 } else if (app.state === constants.STATE_WATCH_CONTROLS) {
                     if (app.activeArea == constants.AREA_PLAYER_CONTROLS) {
                         var $selectedItem = $('#control-item-' + app.areas[constants.AREA_PLAYER_CONTROLS].x + '-' + app.areas[constants.AREA_PLAYER_CONTROLS].y);
@@ -841,6 +839,7 @@ app.init = function() {
                             }
                         }
                     }
+                    app.autoHideControls();
                 } else if (app.state === constants.STATE_ERROR) {
                     app.returnState();
                 } else if (app.state === constants.STATE_EXIT) {
@@ -896,26 +895,31 @@ app.init = function() {
             case keys.KEY_PAUSE:
                 if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                     app.controlPause();
+                    app.showControls();
                 }
                 break;
             case keys.KEY_PLAY:
                 if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                     app.controlPlay();
+                    app.showControls();
                 }
                 break;
             case keys.KEY_PLAY_PAUSE:
                 if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                     app.controlPlayPause();
+                    app.showControls();
                 }
                 break;
             case keys.KEY_PREVIOUS:
                 if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                 	app.controlBackward();
+                	app.showControls();
                 }
                 break;
             case keys.KEY_NEXT:
                 if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                     app.controlForward();
+                    app.showControls();
                 }
                 break;
             case keys.KEY_TOOLS:
@@ -947,6 +951,30 @@ app.init = function() {
         }
         app.$items.mCustomScrollbar('update');
     });
+};
+app.timeoutAutoHideControls = null;
+app.showControls = function() {
+    if (app.state === constants.STATE_WATCH) {
+        $('#player-controls').show();
+        $('#player-info').show();
+        app.activatePlayerControlsArea(true);
+        app.setState(constants.STATE_WATCH_CONTROLS, function() {
+            $('#player-controls').hide();
+            $('#player-info').hide();
+        });
+    }
+    app.autoHideControls();
+};
+app.autoHideControls = function() {
+    if (app.timeoutAutoHideControls) {
+        clearTimeout(app.timeoutAutoHideControls);
+        app.timeoutAutoHideControls = null;
+    }
+    app.timeoutAutoHideControls = setTimeout(function() {
+        if (app.state === constants.STATE_WATCH_CONTROLS) {
+            app.returnState();
+        }
+    }, 5000);
 };
 app.controlPlayPause = function() {
     if (window.webapis) {
@@ -989,6 +1017,9 @@ app.controlForward = function() {
     }
 };
 app.controlOptions = function() {
+    if (app.state === constants.STATE_WATCH_CONTROLS) {
+        app.returnState();
+    }
     app.$selectQuality.show();
     app.setState(constants.STATE_SELECT_QUALITY, function() {
         app.$selectQuality.hide();
@@ -1409,6 +1440,7 @@ app.getLiveChannels = function(limit, offset, callback) {
 	                <div class="stream-channel-name">' + stream.channel.display_name + '</div>\
 	            </div>');
                 $newCell.data('channel', stream.channel.name);
+                $newCell.data('channel-id', stream.channel._id);
                 $newCell.data('channel-name', stream.channel.display_name);
                 $newCell.data('channel-logo', stream.channel.logo);
                 $newCell.data('viewers', stream.viewers);
@@ -2166,6 +2198,16 @@ if (window.tizen) {
     tizen.tvinputdevice.registerKey("ColorF1Green");
     tizen.tvinputdevice.registerKey("ColorF2Yellow");
     tizen.tvinputdevice.registerKey("ColorF3Blue");
+}
+
+if (window.webapis) {
+    /*webapis.network.addNetworkStateChangeListener(function (value) {
+        if (value == webapis.network.NetworkState.GATEWAY_DISCONNECTED){
+            
+        } else if(value == webapis.network.NetworkState.GATEWAY_CONNECTED){
+            
+        }
+    });*/
 }
 
 window.onload = app.init;

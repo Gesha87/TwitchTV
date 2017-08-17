@@ -13,6 +13,7 @@
     <name>TwitchTV</name>
     <tizen:privilege name="http://developer.samsung.com/privilege/avplay"/>
     <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
+    <tizen:privilege name="http://developer.samsung.com/privilege/network.public"/>
     <tizen:profile name="tv-samsung-public"/>
     <tizen:setting pointing-device-support="disable" screen-orientation="landscape" context-menu="enable" background-support="disable" encryption="disable" install-location="auto" hwkey-event="enable"/>
 </widget>
