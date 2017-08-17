@@ -894,7 +894,15 @@ app.init = function() {
                 }
                 break;
             case keys.KEY_PAUSE:
+                if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
+                    app.controlPause();
+                }
+                break;
             case keys.KEY_PLAY:
+                if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
+                    app.controlPlay();
+                }
+                break;
             case keys.KEY_PLAY_PAUSE:
                 if (app.state == constants.STATE_WATCH || app.state == constants.STATE_WATCH_CONTROLS) {
                     app.controlPlayPause();
@@ -949,6 +957,24 @@ app.controlPlayPause = function() {
         } else {
             app.$controlPlayPause.find('i').removeClass('fa-play').addClass('fa-pause');
             webapis.avplay.play();
+        }
+    }
+};
+app.controlPlay = function() {
+    if (window.webapis) {
+        var state = webapis.avplay.getState();
+        if (state !== 'PLAYING') {
+            app.$controlPlayPause.find('i').removeClass('fa-play').addClass('fa-pause');
+            webapis.avplay.play();
+        }
+    }
+};
+app.controlPause = function() {
+    if (window.webapis) {
+        var state = webapis.avplay.getState();
+        if (state === 'PLAYING') {
+            app.$controlPlayPause.find('i').removeClass('fa-pause').addClass('fa-play');
+            webapis.avplay.pause();
         }
     }
 };

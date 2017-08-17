@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<widget xmlns:tizen="http://tizen.org/ns/widgets" xmlns="http://www.w3.org/ns/widgets" id="https://github.com/Gesha87/TwitchTV" version="0.8.0" viewmodes="maximized">
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="https://github.com/Gesha87/TwitchTV" version="0.9.0" viewmodes="maximized">
     <access origin="*" subdomains="true"></access>
     <tizen:application id="8m7wyPjHXD.TwitchTV" package="8m7wyPjHXD" required_version="2.3"/>
     <author href="https://my.mail.ru/mail/tizenapps/" email="tizenapps@mail.ru">Andrey Kulik</author>
@@ -14,6 +14,5 @@
     <tizen:privilege name="http://developer.samsung.com/privilege/avplay"/>
     <tizen:privilege name="http://tizen.org/privilege/tv.inputdevice"/>
     <tizen:profile name="tv-samsung-public"/>
-    <tizen:setting screen-orientation="landscape" context-menu="enable" background-support="disable" encryption="disable" install-location="auto" hwkey-event="enable"/>
-    <tizen:setting/>
+    <tizen:setting pointing-device-support="disable" screen-orientation="landscape" context-menu="enable" background-support="disable" encryption="disable" install-location="auto" hwkey-event="enable"/>
 </widget>
