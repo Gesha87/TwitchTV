@@ -69,6 +69,7 @@ var messages = {
     ERROR_STREAM_IS_OFFLINE: 'Stream is offline',
     ERROR_CONNECTION_FAILED: 'Connection failed',
     ERROR_QUALITY_LIST_IS_EMPTY: 'Playlist is empty',
+    ERROR_NETWORK_DISCONNECTED: 'Network is disconnected',
 };
 
 

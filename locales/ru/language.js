@@ -69,6 +69,7 @@ var messages = {
     ERROR_STREAM_IS_OFFLINE: 'Канал находится не в сети',
     ERROR_CONNECTION_FAILED: 'Не удалось соединиться',
     ERROR_QUALITY_LIST_IS_EMPTY: 'Не удалось получить список воспроизведения',
+    ERROR_NETWORK_DISCONNECTED: 'Сеть отключена',
 };
 
 

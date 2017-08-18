@@ -2200,14 +2200,24 @@ if (window.tizen) {
     tizen.tvinputdevice.registerKey("ColorF3Blue");
 }
 
-if (window.webapis) {
-    /*webapis.network.addNetworkStateChangeListener(function (value) {
-        if (value == webapis.network.NetworkState.GATEWAY_DISCONNECTED){
-            
-        } else if(value == webapis.network.NetworkState.GATEWAY_CONNECTED){
-            
+if (window.webapis && webapis.network) {
+    webapis.network.addNetworkStateChangeListener(function (value) {
+        if (value === webapis.network.NetworkState.GATEWAY_DISCONNECTED) {
+            if (app.state === constants.STATE_SELECT_QUALITY) {
+                app.returnState();
+            }
+            if (app.state === constants.STATE_WATCH_CONTROLS) {
+                app.returnState();
+            }
+            if (app.state === constants.STATE_WATCH) {
+                app.returnState();
+                app.showError(messages.ERROR_NETWORK_DISCONNECTED);
+                $('#logo').attr('src', 'images/TwitchAppDisconnected.png');
+            }
+        } else if (value === webapis.network.NetworkState.GATEWAY_CONNECTED){
+            $('#logo').attr('src', 'images/TwitchApp.png');
         }
-    });*/
+    });
 }
 
 window.onload = app.init;
