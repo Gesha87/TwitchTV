@@ -2288,7 +2288,7 @@ $(function() {
                 }
             });
         } 
-    }, 1000);
+    }, 2000);
 });
 
 window.onload = app.init;
