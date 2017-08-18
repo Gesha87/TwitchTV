@@ -605,6 +605,7 @@ img.loaded {
 	width: 3vh;
 	height: 3vh;
 	top: -1vh;
+	margin-left: -1.5vh;
 }
 
 .player-progress.selected {
@@ -620,8 +621,6 @@ img.loaded {
 .player-progress.selected .progress-bar {
     height: 1.0vh;
 }
-
-
 
 .player-info {
 	display: none;
@@ -778,4 +777,9 @@ img.loaded {
 .mCSB_scrollTools.mCSB_scrollTools_horizontal .mCSB_dragger .mCSB_dragger_bar {
 	height: 0.6vh;
 	margin: 1.2vh auto;
+}
+
+.popover-content {
+	font-size: 3.0vh;
+	color: #000000;
 }
