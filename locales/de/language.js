@@ -3,7 +3,7 @@ var messages = {
 	PAGE_LIVE_CHANNELS: 'Live-Kanäle',
 	PAGE_VIDEOS: 'Videos',
 
-	FILTER_STREAM_GAME: 'Game',
+	FILTER_STREAM_GAME: 'Spiel',
 	FILTER_STREAM_CHANNELS: 'Kanäle',
 	FILTER_STREAM_LANGUAGES: 'Sprachen',
 	FILTER_STREAM_TYPE: 'Typ',
