@@ -71,7 +71,7 @@ var messages = {
     ERROR_LOADING_FAILED: 'An error occurred while loading.<br>Please, try again later',
     ERROR_STREAM_IS_OFFLINE: 'Stream is offline',
     ERROR_CONNECTION_FAILED: 'Connection failed',
-    ERROR_QUALITY_LIST_IS_EMPTY: 'Playlist is empty',
+    ERROR_QUALITY_LIST_IS_EMPTY: 'Quality list is empty',
     ERROR_NETWORK_DISCONNECTED: 'Network is disconnected',
 };
 
