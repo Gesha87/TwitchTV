@@ -199,7 +199,7 @@ app.initSortFilter = function() {
         }
         $('#video-filter-sort').addClass('chosen').find('.text').text(text);
         app.$selectSort.find('.active').removeClass('active');
-        app.$selectSort.find('.period-' + app.filters.sort).addClass('active');
+        app.$selectSort.find('.sort-' + app.filters.sort).addClass('active');
     }
 };
 app.initVideoTypeFilter = function() {
@@ -252,10 +252,12 @@ app.translateLayout = function() {
     $('#hint-change-page').find('.text').text(messages.HINT_VIDEOS);
     $('#hint-presets').find('.text').text(messages.HINT_PRESETS);
     $('#hint-search').find('.text').text(messages.HINT_SEARCH);
+    $('#hint-support').find('.text').text(messages.HINT_SUPPORT);
     // buttons
     $('#button-exit').text(messages.BUTTON_EXIT);
     $('#button-cancel').text(messages.BUTTON_CANCEL);
     $('#button-close').text(messages.BUTTON_CLOSE);
+    $('#button-close-support').text(messages.BUTTON_CLOSE);
     // select game
     app.$selectGame.find('.caption > .text').text(messages.GAME_SELECT);
     app.$gameSearchInput.attr('placeholder', messages.GAME_SEARCH);
@@ -287,6 +289,8 @@ app.translateLayout = function() {
     app.$selectLanguage.find('.caption > .text').text(messages.LANGUAGE_SELECT);
     // select quality
     app.$selectQuality.find('.caption > .text').text(messages.QUALITY_SELECT);
+    // support
+    $('#support-dialog-text').html(messages.SUPPORT_TEXT);
     // others
     $('#loading').find('.text').text(messages.LOADING);
     $('#confirm-exit').text(messages.CONFIRM_EXIT);
@@ -304,6 +308,7 @@ app.$error = null;
 app.$errorContent = null;
 app.$errorText = null;
 app.$buttonCloseError = null;
+app.$buttonCloseSupport = null;
 app.$exitDialog = null;
 app.$selectBox = null;
 app.$player = null;
@@ -349,6 +354,7 @@ app.init = function() {
     app.$errorContent = $('#error-dialog').find('.content');
     app.$errorText = $('#error-dialog-text');
     app.$buttonCloseError = $('#button-close');
+    app.$buttonCloseSupport = $('#button-close-support');
     app.$exitDialog = $('#exit-dialog');
     app.$loadingText = app.$loading.find('.text');
     app.$selectBox = $('#select-box');
@@ -461,7 +467,11 @@ app.init = function() {
         }
     });
     document.addEventListener('visibilitychange', function() {
-        if (window.webapis && app.state == constants.STATE_WATCH) {
+        if (window.webapis && 
+                (app.state == constants.STATE_WATCH || 
+                 app.state == constants.STATE_SELECT_QUALITY || 
+                 app.state == constants.STATE_WATCH_CONTROLS)
+        ) {
             if (document.hidden) {
                 webapis.avplay.suspend();
             } else {
@@ -737,7 +747,7 @@ app.init = function() {
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
                                 $('#player-time').show();
-                                $('#player-length').show().text('/ ' + app.timeFormat($selectedItem.data('length')));
+                                $('#player-length').show().text('/ ' + ($selectedItem.data('length') > 0 ? app.timeFormat($selectedItem.data('length')) : '?'));
                                 app.$playerProgress.data('length', $selectedItem.data('length'));
                                 app.$controlBackward.removeClass('hidden');
                                 app.$controlForward.removeClass('hidden');
@@ -869,6 +879,8 @@ app.init = function() {
                     app.autoHideControls();
                 } else if (app.state === constants.STATE_ERROR) {
                     app.returnState();
+                } else if (app.state === constants.STATE_SUPPORT) {
+                    app.returnState();
                 } else if (app.state === constants.STATE_EXIT) {
                     var type = app.$exitDialog.find('.selected').data('type');
                     if (type === constants.BUTTON_TYPE_EXIT) {
@@ -910,6 +922,9 @@ app.init = function() {
                 break;
             case keys.KEY_4:
             case keys.KEY_BLUE:
+                if (app.state == constants.STATE_BROWSE) {
+                    app.showSupportInfo();
+                }
                 break;
             case keys.KEY_STOP:
                 if (app.state == constants.STATE_WATCH_CONTROLS) {
@@ -978,6 +993,15 @@ app.init = function() {
         }
         app.$items.mCustomScrollbar('update');
     });
+};
+app.showSupportInfo = function() {
+    if (app.state !== constants.STATE_EXIT) {
+        $('#support-dialog').show();
+        app.setState(constants.STATE_SUPPORT, function() {
+            $('#support-dialog').hide();
+        });
+        app.$buttonCloseSupport.addClass('selected');
+    }
 };
 app.timeoutAutoHideControls = null;
 app.showControls = function() {
@@ -1295,23 +1319,29 @@ app.playVideo = function(id) {
         }).fail(app.loadingStreamErrorHandler);
     }).fail(app.loadingStreamErrorHandler);
 };
-app.play = function(url) {
+app.play = function(url, saveState) {
     if (window.webapis) {
+        function playerIsActive() {
+            return app.state === constants.STATE_WATCH || 
+                app.state === constants.STATE_WATCH_CONTROLS ||
+                app.state === constants.STATE_SELECT_QUALITY;
+        }
+        var state = webapis.avplay.getState();
         webapis.avplay.stop();
         webapis.avplay.open(url);
         webapis.avplay.setListener({
             onbufferingstart: function() {
-                if (app.state === constants.STATE_WATCH || app.state === constants.STATE_WATCH_CONTROLS) {
+                if (playerIsActive()) {
                     app.showLoading(messages.BUFFERING + ' 0%');
                 }
             },
             onbufferingprogress: function(percent) {
-                if (app.state === constants.STATE_WATCH || app.state === constants.STATE_WATCH_CONTROLS) {
+                if (playerIsActive()) {
                     app.showLoading(messages.BUFFERING + ' ' + percent + '%');
                 }
             },
             onbufferingcomplete: function() {
-                if (app.state === constants.STATE_WATCH || app.state === constants.STATE_WATCH_CONTROLS) {
+                if (playerIsActive()) {
                     app.$loading.hide();
                 }
             },
@@ -1356,7 +1386,11 @@ app.play = function(url) {
         });
         webapis.avplay.setDisplayRect(0, 0, $(window).width(), $(window).height());
         webapis.avplay.prepare();
-        webapis.avplay.play();
+        if (saveState && state === 'PAUSED') {
+            webapis.avplay.pause();
+        } else {
+            webapis.avplay.play();
+        }
     }
 };
 app.stopLoading = function() {
@@ -1557,7 +1591,7 @@ app.getVideos = function(limit, offset, callback) {
                 $newCell.data('channel-id', vod.channel._id);
                 $newCell.data('channel-name', vod.channel.display_name);
                 $newCell.data('viewers', vod.views);
-                $newCell.data('length', vod.length);
+                $newCell.data('length', vod.status == 'recording' ? 0 : vod.length);
                 $newCell.data('game', vod.game);
                 $newCell.data('status', vod.title);
                 $newCell.data('vod-id', vod._id.toString().replace(/[^0-9]/g, ''));
@@ -1716,7 +1750,7 @@ app.showStreamItem = function($element) {
     app.$selectBox.find('.stream-channel-name').html($element.data('channel-name'));
     var viewers = '<i class="fa fa-fw fa-eye"></i> ' + app.numberFormat($element.data('viewers'));
     if ($element.data('length') !== undefined) {
-        viewers += '<br><i class="fa fa-fw fa-clock-o"></i> ' + app.timeFormat($element.data('length'));
+        viewers += '<br><i class="fa fa-fw fa-clock-o"></i> ' + ($element.data('length') > 0 ? app.timeFormat($element.data('length')) : '?');
     }
     app.$selectBox.find('.stream-viewers').html(viewers);
     app.$selectBox.find('.game-name').html($element.data('game') || '&nbsp;');
@@ -2152,7 +2186,7 @@ app.selectQuality = function($selectedItem) {
     $selectedItem.addClass('active');
     $('#stream-quality').text($selectedItem.data('quality'));
     var currentTime = webapis.avplay.getCurrentTime();
-    app.play(url);
+    app.play(url, true);
     if (currentTime) {
         webapis.avplay.seekTo(currentTime);
     }
@@ -2267,28 +2301,26 @@ if (window.tizen) {
     tizen.tvinputdevice.registerKey("ColorF3Blue");
 }
 
-$(function() {
-    setTimeout(function() {
-        if (window.webapis) {
-            webapis.network.addNetworkStateChangeListener(function (value) {
-                if (value === webapis.network.NetworkState.GATEWAY_DISCONNECTED) {
-                    if (app.state === constants.STATE_SELECT_QUALITY) {
-                        app.returnState();
-                    }
-                    if (app.state === constants.STATE_WATCH_CONTROLS) {
-                        app.returnState();
-                    }
-                    if (app.state === constants.STATE_WATCH) {
-                        app.returnState();
-                        app.showError(messages.ERROR_NETWORK_DISCONNECTED);
-                    }
-                    $('#logo').attr('src', 'images/TwitchAppDisconnected.png');
-                } else if (value === webapis.network.NetworkState.GATEWAY_CONNECTED){
-                    $('#logo').attr('src', 'images/TwitchApp.png');
+setTimeout(function() {
+    if (window.webapis && webapis.network) {
+        webapis.network.addNetworkStateChangeListener(function (value) {
+            if (value === webapis.network.NetworkState.GATEWAY_DISCONNECTED) {
+                if (app.state === constants.STATE_SELECT_QUALITY) {
+                    app.returnState();
                 }
-            });
-        } 
-    }, 2000);
-});
+                if (app.state === constants.STATE_WATCH_CONTROLS) {
+                    app.returnState();
+                }
+                if (app.state === constants.STATE_WATCH) {
+                    app.returnState();
+                    app.showError(messages.ERROR_NETWORK_DISCONNECTED);
+                }
+                $('#logo').attr('src', 'images/TwitchAppDisconnected.png');
+            } else if (value === webapis.network.NetworkState.GATEWAY_CONNECTED){
+                $('#logo').attr('src', 'images/TwitchApp.png');
+            }
+        });
+    } 
+}, 2000);
 
 window.onload = app.init;

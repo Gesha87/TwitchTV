@@ -12,6 +12,7 @@ var constants = {
     STATE_SELECT_VIDEO_TYPE: 'select-video-type',
     STATE_SELECT_SORT: 'select-sort',
     STATE_ERROR: 'error',
+    STATE_SUPPORT: 'support',
     STATE_EXIT: 'exit',
     
     PAGE_LIVE_CHANNELS: 'live-channels',

@@ -20,6 +20,7 @@ var messages = {
 	HINT_VIDEOS: 'Videos',
 	HINT_PRESETS: 'Presets',
 	HINT_SEARCH: 'Search',
+	HINT_SUPPORT: 'Support',
 	
 	GAME_SELECT: 'Select game',
 	GAME_SEARCH: 'Search',
@@ -62,6 +63,8 @@ var messages = {
     BUTTON_CANCEL: 'Cancel',
 
     CONFIRM_EXIT: 'Do you really want to exit?',
+    
+    SUPPORT_TEXT: 'Send your comments and suggestions to e-mail<br><b>tizenapps@mail.ru</b>',
 
     EMPTY_RESULTS: 'Nothing found',
     
