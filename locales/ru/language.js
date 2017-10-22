@@ -7,6 +7,8 @@ var messages = {
 	FILTER_STREAM_CHANNELS: 'Каналы',
 	FILTER_STREAM_LANGUAGES: 'Языки',
 	FILTER_STREAM_TYPE: 'Тип',
+	FILTER_VIDEO_CHANNEL: 'Канал',
+	FILTER_VIDEO_CHANNEL_NOTICE: 'При выборе канала фильтры "Игра" и "Период" будут недоступны',
 	FILTER_VIDEO_GAME: 'Игра',
 	FILTER_VIDEO_PERIOD: 'Период',
 	FILTER_VIDEO_LANGUAGES: 'Языки',
@@ -29,6 +31,11 @@ var messages = {
     CHANNELS_SEARCH: 'Поиск',
     CHANNELS_CLEAR: 'Очистить все',
     CHANNELS_TYPE_TO_SEARCH: 'Для поиска каналов начните печатать',
+    
+    CHANNEL_SELECT: 'Выберите канал',
+    CHANNEL_SEARCH: 'Поиск',
+    CHANNEL_CLEAR: 'Очистить',
+    CHANNEL_TYPE_TO_SEARCH: 'Для поиска канала начните печатать',
     
     LANGUAGE_SELECT: 'Выберите языки',
     LANGUAGE_CLEAR: 'Очистить все',
@@ -53,6 +60,10 @@ var messages = {
     SORT_TIME: 'Последние',
     SORT_VIEWS: 'Популярные (по умолчанию)',
     
+    CHANNEL_SORT_SELECT: 'Выберите порядок видеоматериалов',
+    CHANNEL_SORT_TIME: 'Последние (по умолчанию)',
+    CHANNEL_SORT_VIEWS: 'Популярные',
+    
     QUALITY_SELECT: 'Выберите качество',
     
     LOADING: 'Загрузка...',
@@ -74,9 +85,3 @@ var messages = {
     ERROR_QUALITY_LIST_IS_EMPTY: 'Не удалось получить список воспроизведения',
     ERROR_NETWORK_DISCONNECTED: 'Сеть отключена',
 };
-
-
-
-
-
-

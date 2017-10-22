@@ -1,45 +1,52 @@
 var language = 'en';
 var messages = {
-	PAGE_LIVE_CHANNELS: 'Live channels',
-	PAGE_VIDEOS: 'Videos',
+    PAGE_LIVE_CHANNELS: 'Live channels',
+    PAGE_VIDEOS: 'Videos',
 
-	FILTER_STREAM_GAME: 'Game',
-	FILTER_STREAM_CHANNELS: 'Channels',
-	FILTER_STREAM_LANGUAGES: 'Languages',
-	FILTER_STREAM_TYPE: 'Type',
-	FILTER_VIDEO_GAME: 'Game',
-	FILTER_VIDEO_PERIOD: 'Period',
-	FILTER_VIDEO_LANGUAGES: 'Languages',
-	FILTER_VIDEO_TYPE: 'Types',
-	FILTER_VIDEO_SORT: 'Order',
-	FILTER_PRESETS: 'Presets',
+    FILTER_STREAM_GAME: 'Game',
+    FILTER_STREAM_CHANNELS: 'Channels',
+    FILTER_STREAM_LANGUAGES: 'Languages',
+    FILTER_STREAM_TYPE: 'Type',
+    FILTER_VIDEO_CHANNEL: 'Channel',
+    FILTER_VIDEO_CHANNEL_NOTICE: 'If you select a channel, filters "Game" and "Period" will not be available',
+    FILTER_VIDEO_GAME: 'Game',
+    FILTER_VIDEO_PERIOD: 'Period',
+    FILTER_VIDEO_LANGUAGES: 'Languages',
+    FILTER_VIDEO_TYPE: 'Types',
+    FILTER_VIDEO_SORT: 'Order',
+    FILTER_PRESETS: 'Presets',
     FILTER_SEARCH: 'Search',
-	
-	HINT_REFRESH: 'Refresh',
-	HINT_LIVE_CHANNELS: 'Live',
-	HINT_VIDEOS: 'Videos',
-	HINT_PRESETS: 'Presets',
-	HINT_SEARCH: 'Search',
-	HINT_SUPPORT: 'Support',
-	
-	GAME_SELECT: 'Select game',
-	GAME_SEARCH: 'Search',
-	
-	CHANNELS_SELECT: 'Select channels (max. 50)',
-	CHANNELS_SEARCH: 'Search',
-	CHANNELS_CLEAR: 'Clear all',
-	CHANNELS_TYPE_TO_SEARCH: 'Start typing to search channels',
-	
-	LANGUAGE_SELECT: 'Select languages',
-	LANGUAGE_CLEAR: 'Clear all',
-	
-	STREAM_TYPE_SELECT: 'Select type of stream',
-	STREAM_TYPE_LIVE: 'Live (default)',
-	STREAM_TYPE_PLAYLIST: 'Playlist',
-	STREAM_TYPE_ALL: 'All',
-	
-	VIDEO_TYPE_SELECT: 'Select types of videos',
-	VIDEO_TYPE_CLEAR: 'Clear all',
+    
+    HINT_REFRESH: 'Refresh',
+    HINT_LIVE_CHANNELS: 'Live',
+    HINT_VIDEOS: 'Videos',
+    HINT_PRESETS: 'Presets',
+    HINT_SEARCH: 'Search',
+    HINT_SUPPORT: 'Support',
+    
+    GAME_SELECT: 'Select game',
+    GAME_SEARCH: 'Search',
+    
+    CHANNELS_SELECT: 'Select channels (max. 50)',
+    CHANNELS_SEARCH: 'Search',
+    CHANNELS_CLEAR: 'Clear all',
+    CHANNELS_TYPE_TO_SEARCH: 'Start typing to search channels',
+    
+    CHANNEL_SELECT: 'Select channel',
+    CHANNEL_SEARCH: 'Search',
+    CHANNEL_CLEAR: 'Clear',
+    CHANNEL_TYPE_TO_SEARCH: 'Start typing to search channel',
+    
+    LANGUAGE_SELECT: 'Select languages',
+    LANGUAGE_CLEAR: 'Clear all',
+    
+    STREAM_TYPE_SELECT: 'Select type of stream',
+    STREAM_TYPE_LIVE: 'Live (default)',
+    STREAM_TYPE_PLAYLIST: 'Playlist',
+    STREAM_TYPE_ALL: 'All',
+    
+    VIDEO_TYPE_SELECT: 'Select types of videos',
+    VIDEO_TYPE_CLEAR: 'Clear all',
     VIDEO_TYPE_ARCHIVE: 'Past broadcasts',
     VIDEO_TYPE_HIGHLIGHT: 'Highlights',
     VIDEO_TYPE_UPLOAD: 'Uploads',
@@ -53,9 +60,13 @@ var messages = {
     SORT_TIME: 'Recent',
     SORT_VIEWS: 'Popular (default)',
     
+    CHANNEL_SORT_SELECT: 'Select order of videos',
+    CHANNEL_SORT_TIME: 'Recent (default)',
+    CHANNEL_SORT_VIEWS: 'Popular',
+    
     QUALITY_SELECT: 'Select quality',
-	
-	LOADING: 'Loading...',
+    
+    LOADING: 'Loading...',
     BUFFERING: 'Buffering...',
     
     BUTTON_CLOSE: 'Close',
@@ -74,9 +85,3 @@ var messages = {
     ERROR_QUALITY_LIST_IS_EMPTY: 'Quality list is empty',
     ERROR_NETWORK_DISCONNECTED: 'Network is disconnected',
 };
-
-
-
-
-
-

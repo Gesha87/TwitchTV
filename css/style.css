@@ -34,6 +34,10 @@ body.init {
 	color: #fc3636;
 }
 
+.success {
+    color: #14b866;
+}
+
 .clear {
 	clear: both;
 }
@@ -181,15 +185,15 @@ img.loaded {
 	padding: 1.0vh;
 	line-height: 1.3;
 }
-.cell.selected .stream-channel-name {
-	display: none;
-}
+.cell.selected .stream-channel-name,
+.cell.selected .stream-info,
 .cell.selected .game-name {
 	display: none;
 }
+
 .select-box .stream-channel-name {
 	color: #ffffff;
-	max-width: 28vh;
+	max-width: 27vh;
 }
 
 .stream-info {
@@ -222,6 +226,9 @@ img.loaded {
 
 .channel-status {
 	font-size: 2.6vh;
+}
+.cell .channel-status {
+	color: #bbb8c0;
 }
 
 .ellipsed {
@@ -286,6 +293,10 @@ img.loaded {
 	color: #ffffff;
 	box-shadow: #6441a4 0 0 0 2px inset;
 }
+.unused {
+    color: rgba(255, 255, 255, 0.15);
+    box-shadow: rgba(255, 255, 255, 0.15) 0 0 0 2px inset;
+}
 
 .filter-divider {
     display: inline-block;
@@ -317,6 +328,14 @@ img.loaded {
 	margin-bottom: 0.4vh;
 }
 
+.page-caption {
+    display: inline-block;
+    margin-right: 2.0vh;
+    position: relative;
+    padding: 1.3vh 0 1.2vh;
+    color: #9993a5;
+}
+
 .page {
 	display: inline-block;
     margin-right: 2.0vh;
@@ -325,6 +344,7 @@ img.loaded {
 	box-shadow: #392e5c 0 0 0 2px inset;
 	/* background-color: #433f4a; */
 	color: #9993a5;
+	line-height: 2.8vh;
 }
 .page:last-child {
     margin-right: 0;
@@ -441,7 +461,8 @@ img.loaded {
     z-index: 500;
 }
 .select-language-wrapper, 
-.select-quality-wrapper {
+.select-quality-wrapper,
+.select-types-wrapper {
 	z-index: 1100;
 }
 

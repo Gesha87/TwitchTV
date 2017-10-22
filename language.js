@@ -7,6 +7,8 @@ var messages = {
 	FILTER_STREAM_CHANNELS: 'Channels',
 	FILTER_STREAM_LANGUAGES: 'Languages',
 	FILTER_STREAM_TYPE: 'Type',
+	FILTER_VIDEO_CHANNEL: 'Channel',
+	FILTER_VIDEO_CHANNEL_NOTICE: 'If you select a channel, filters "Game" and "Period" will not be available',
 	FILTER_VIDEO_GAME: 'Game',
 	FILTER_VIDEO_PERIOD: 'Period',
 	FILTER_VIDEO_LANGUAGES: 'Languages',
@@ -29,6 +31,11 @@ var messages = {
 	CHANNELS_SEARCH: 'Search',
 	CHANNELS_CLEAR: 'Clear all',
 	CHANNELS_TYPE_TO_SEARCH: 'Start typing to search channels',
+	
+	CHANNEL_SELECT: 'Select channel',
+    CHANNEL_SEARCH: 'Search',
+    CHANNEL_CLEAR: 'Clear',
+    CHANNEL_TYPE_TO_SEARCH: 'Start typing to search channel',
 	
 	LANGUAGE_SELECT: 'Select languages',
 	LANGUAGE_CLEAR: 'Clear all',
@@ -53,6 +60,10 @@ var messages = {
     SORT_TIME: 'Recent',
     SORT_VIEWS: 'Popular (default)',
     
+    CHANNEL_SORT_SELECT: 'Select order of videos',
+    CHANNEL_SORT_TIME: 'Recent (default)',
+    CHANNEL_SORT_VIEWS: 'Popular',
+    
     QUALITY_SELECT: 'Select quality',
 	
 	LOADING: 'Loading...',
@@ -74,9 +85,3 @@ var messages = {
     ERROR_QUALITY_LIST_IS_EMPTY: 'Quality list is empty',
     ERROR_NETWORK_DISCONNECTED: 'Network is disconnected',
 };
-
-
-
-
-
-

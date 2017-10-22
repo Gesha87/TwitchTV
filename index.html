@@ -37,21 +37,19 @@
 	                <div class="filter filter-game" id="stream-filter-game" data-type="game">
 	                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
 	                </div><div class="filter" id="stream-filter-channels" data-type="channels">
-	                    <i class="fa fa-user"></i> <span class="text">Каналы</span>
+	                    <i class="fa fa-users"></i> <span class="text">Каналы</span>
 	                </div><div class="filter filter-languages" id="stream-filter-languages" data-type="languages">
 	                    <i class="fa fa-globe"></i> <span class="text">Языки</span>
 	                </div><div class="filter" id="stream-filter-type" data-type="stream-type">
 	                    <i class="fa fa-play"></i> <span class="text">Тип</span>
-	                </div><!-- <div class="filter-divider">
-	                    <i class="fa fa-arrows-h"></i>
-	                </div><div class="filter" id="stream-filter-presets">
-	                    <i class="fa fa-filter"></i> <span class="text">Фильтры</span>
 	                </div><div class="filter" id="stream-filter-search">
 	                    <i class="fa fa-search"></i> <span class="text">Поиск</span>
-	                </div> -->
+	                </div>
 	            </div>
 	            <div id="video-filters" style="display:none;" class="filters">
-	                <div class="filter filter-game" id="video-filter-game" data-type="game">
+	                <div class="filter" id="video-filter-channel" data-type="channel">
+                        <i class="fa fa-user"></i> <span class="text">Канал</span>
+                    </div><div class="filter filter-game" id="video-filter-game" data-type="game">
 	                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
 	                </div><div class="filter" id="video-filter-period" data-type="period">
 	                    <i class="fa fa-calendar"></i> <span class="text">Период</span>
@@ -192,6 +190,23 @@
             </div>
         </div>
     </div>
+    <div id="select-channel" class="select-wrapper select-channels-wrapper">
+        <div class="caption">
+            <div class="text">Выбор канала</div>
+            <div id="channel-clear" class="selected-game" style="display: none;">
+                <span class="text">Очистить</span> <i class="fa fa-times"></i>
+            </div>
+        </div>
+        <div class="clear"><input class="search-input selected" id="channel-search-input" placeholder="Поиск канала"></div>
+        <div id="channel-items" class="items"></div>
+        <div id="select-video-channel-box" class="select-box channel-select-box">
+            <div class="channel-info">
+                <div class="channel-name"></div>
+                <div class="channel-followers channel-counter"></div>
+                <div class="channel-views channel-counter"></div>
+            </div>
+        </div>
+    </div>
 	<div id="select-language" class="select-wrapper select-language-wrapper text-center">
 		<div class="caption">
 			<div class="text">Выбор языка</div>
@@ -214,7 +229,7 @@
             </div>
         </div>
     </div>
-    <div id="select-video-type" class="select-wrapper text-center">
+    <div id="select-video-type" class="select-wrapper select-types-wrapper text-center">
         <div class="caption">
             <div class="text">Выбор типов</div>
         </div>
@@ -262,6 +277,20 @@
             </div>
             <div class="filter-list-item sort-time" id="sort-item-0-1" data-sort="time">
                 <div>Последние</div>
+            </div>
+        </div>
+    </div>
+    <div id="select-channel-sort" class="select-wrapper text-center">
+        <div class="caption">
+            <div class="text">Выбор порядка</div>
+        </div>
+        <div class="filter-list">
+			<div class="filter-list-item sort-time active selected"
+				id="channel-sort-item-0-0" data-sort="time">
+				<div>Последние (по умолчанию)</div>
+			</div>
+			<div class="filter-list-item sort-views" id="channel-sort-item-0-1" data-sort="views">
+                <div>Популярные</div>
             </div>
         </div>
     </div>

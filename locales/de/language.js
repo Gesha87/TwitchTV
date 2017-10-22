@@ -7,6 +7,8 @@ var messages = {
 	FILTER_STREAM_CHANNELS: 'Kanäle',
 	FILTER_STREAM_LANGUAGES: 'Sprachen',
 	FILTER_STREAM_TYPE: 'Typ',
+	FILTER_VIDEO_CHANNEL: 'Kanal',
+	FILTER_VIDEO_CHANNEL_NOTICE: 'Wenn Sie einen Kanal auswählen, sind die Filter "Spiel" und "Zeitspanne" nicht verfügbar',
 	FILTER_VIDEO_GAME: 'Spiel',
 	FILTER_VIDEO_PERIOD: 'Zeitspanne',
 	FILTER_VIDEO_LANGUAGES: 'Sprachen',
@@ -29,6 +31,11 @@ var messages = {
 	CHANNELS_SEARCH: 'Suche',
 	CHANNELS_CLEAR: 'Alles löschen',
 	CHANNELS_TYPE_TO_SEARCH: 'Anfangen zu tippen',
+	
+	CHANNEL_SELECT: 'Kanal auswählen',
+    CHANNEL_SEARCH: 'Suche',
+    CHANNEL_CLEAR: 'Löschen',
+    CHANNEL_TYPE_TO_SEARCH: 'Anfangen zu tippen',
 	
 	LANGUAGE_SELECT: 'Sprachen auswählen',
 	LANGUAGE_CLEAR: 'Alles löschen',
@@ -53,6 +60,10 @@ var messages = {
     SORT_TIME: 'Kürzlich',
     SORT_VIEWS: 'Beliebt (standard)',
     
+    CHANNEL_SORT_SELECT: 'Bestellung auswählen',
+    CHANNEL_SORT_TIME: 'Kürzlich (standard)',
+    CHANNEL_SORT_VIEWS: 'Beliebt',
+    
     QUALITY_SELECT: 'Qualität auswählen',
 	
 	LOADING: 'Laden...',
@@ -74,9 +85,3 @@ var messages = {
     ERROR_QUALITY_LIST_IS_EMPTY: 'Qualitätsliste ist leer',
     ERROR_NETWORK_DISCONNECTED: 'Netzwerk wird getrennt',
 };
-
-
-
-
-
-
