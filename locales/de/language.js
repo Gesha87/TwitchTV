@@ -2,6 +2,7 @@ var language = 'de';
 var messages = {
 	PAGE_LIVE_CHANNELS: 'Live-Kanäle',
 	PAGE_VIDEOS: 'Videos',
+	PAGE_SUBSCRIPTIONS: 'Folgst',
 
 	FILTER_STREAM_GAME: 'Spiel',
 	FILTER_STREAM_CHANNELS: 'Kanäle',
@@ -14,12 +15,14 @@ var messages = {
 	FILTER_VIDEO_LANGUAGES: 'Sprachen',
 	FILTER_VIDEO_TYPE: 'Typen',
 	FILTER_VIDEO_SORT: 'Bestellung',
+	FILTER_FOLLOWED_CHANNEL: 'Benutzer',
 	FILTER_PRESETS: 'Voreinstellungen',
     FILTER_SEARCH: 'Suche',
 	
 	HINT_REFRESH: 'Erfrischen',
 	HINT_LIVE_CHANNELS: 'Live',
 	HINT_VIDEOS: 'Videos',
+	HINT_SUBSCRIPTIONS: 'Folgst',
 	HINT_PRESETS: 'Voreinstellungen',
 	HINT_SEARCH: 'Suche',
 	HINT_SUPPORT: 'Unterstützung',
@@ -78,6 +81,7 @@ var messages = {
     SUPPORT_TEXT: 'Senden Sie Ihre bemerkungen und vorschläge per e-mail<br><b>tizenapps@mail.ru</b>',
 
     EMPTY_RESULTS: 'Nichts gefunden',
+    SELECT_CHANNEL: 'Wählen Sie den Benutzer aus, um die aktiven Kanäle anzuzeigen, denen er folgt',
     
     ERROR_LOADING_FAILED: 'Beim laden ist ein fehler aufgetreten.<br>Bitte versuchen Sie es später noch einmal',
     ERROR_STREAM_IS_OFFLINE: 'Stream ist offline',

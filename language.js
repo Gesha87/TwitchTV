@@ -2,6 +2,7 @@ var language = 'en';
 var messages = {
 	PAGE_LIVE_CHANNELS: 'Live channels',
 	PAGE_VIDEOS: 'Videos',
+	PAGE_SUBSCRIPTIONS: 'Followed',
 
 	FILTER_STREAM_GAME: 'Game',
 	FILTER_STREAM_CHANNELS: 'Channels',
@@ -14,12 +15,14 @@ var messages = {
 	FILTER_VIDEO_LANGUAGES: 'Languages',
 	FILTER_VIDEO_TYPE: 'Types',
 	FILTER_VIDEO_SORT: 'Order',
+	FILTER_FOLLOWED_CHANNEL: 'User',
 	FILTER_PRESETS: 'Presets',
     FILTER_SEARCH: 'Search',
 	
 	HINT_REFRESH: 'Refresh',
 	HINT_LIVE_CHANNELS: 'Live',
 	HINT_VIDEOS: 'Videos',
+	HINT_SUBSCRIPTIONS: 'Followed',
 	HINT_PRESETS: 'Presets',
 	HINT_SEARCH: 'Search',
 	HINT_SUPPORT: 'Support',
@@ -78,6 +81,7 @@ var messages = {
     SUPPORT_TEXT: 'Send your comments and suggestions to e-mail<br><b>tizenapps@mail.ru</b>',
 
     EMPTY_RESULTS: 'Nothing found',
+    SELECT_CHANNEL: 'Select user to view active channels that it follows',
     
     ERROR_LOADING_FAILED: 'An error occurred while loading.<br>Please, try again later',
     ERROR_STREAM_IS_OFFLINE: 'Stream is offline',

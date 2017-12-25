@@ -2,6 +2,7 @@ var language = 'ru';
 var messages = {
 	PAGE_LIVE_CHANNELS: 'Активные каналы',
 	PAGE_VIDEOS: 'Видеоматериалы',
+	PAGE_SUBSCRIPTIONS: 'Отслеживаемые',
 
 	FILTER_STREAM_GAME: 'Игра',
 	FILTER_STREAM_CHANNELS: 'Каналы',
@@ -14,12 +15,14 @@ var messages = {
 	FILTER_VIDEO_LANGUAGES: 'Языки',
 	FILTER_VIDEO_TYPE: 'Типы',
 	FILTER_VIDEO_SORT: 'Порядок',
+	FILTER_FOLLOWED_CHANNEL: 'Пользователь',
 	FILTER_PRESETS: 'Фильтры',
     FILTER_SEARCH: 'Поиск',
 	
 	HINT_REFRESH: 'Обновить',
 	HINT_LIVE_CHANNELS: 'Активные каналы',
 	HINT_VIDEOS: 'Видеоматериалы',
+	HINT_SUBSCRIPTIONS: 'Отслеживаемые',
 	HINT_PRESETS: 'Фильтры',
 	HINT_SEARCH: 'Поиск',
 	HINT_SUPPORT: 'Поддержка',
@@ -78,6 +81,7 @@ var messages = {
     SUPPORT_TEXT: 'Свои отзывы и предложения направляйте на электроннную почту<br><b>tizenapps@mail.ru</b>',
 
     EMPTY_RESULTS: 'Ничего не найдено',
+    SELECT_CHANNEL: 'Выберите пользователя, чтобы увидеть активные каналы, за которыми он следует',
     
     ERROR_LOADING_FAILED: 'Во время загрузки произошла ошибка.<br>Пожалуйста, попробуйте ещё раз позже',
     ERROR_STREAM_IS_OFFLINE: 'Канал находится не в сети',

@@ -503,10 +503,10 @@ img.loaded {
     position: absolute;
     top: 50vh;
     width: 100vw;
-    margin-top: -7.0vh;
+    margin-top: -11.0vh;
     text-align: center;
     background-color: #201c2b;
-    padding: 2vh 20vw;
+    padding: 4vh 20vw;
     overflow: hidden;
 }
 
