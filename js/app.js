@@ -289,7 +289,7 @@ app.translateLayout = function() {
     $('#video-filter-presets').find('.text').text(messages.FILTER_PRESETS);
     $('#video-filter-search').find('.text').text(messages.FILTER_SEARCH);
     // followed filters
-    $('#followed-filter-channel').find('.text').text(messages.FILTER_VIDEO_CHANNEL);
+    $('#followed-filter-channel').find('.text').text(messages.FILTER_FOLLOWED_CHANNEL);
     // hints
     $('#hint-live').find('.text').text(messages.HINT_LIVE_CHANNELS);
     $('#hint-videos').find('.text').text(messages.HINT_VIDEOS);
@@ -342,6 +342,12 @@ app.translateLayout = function() {
     app.$selectQuality.find('.caption > .text').text(messages.QUALITY_SELECT);
     // support
     $('#support-dialog-text').html(messages.SUPPORT_TEXT);
+    // chat
+    $('#chat-control-toggle').html(messages.CHAT_CONTROLL_TOGGLE);
+    $('#chat-control-close').html(messages.CHAT_CONTROLL_CLOSE);
+    $('#chat-control-mode').html(messages.CHAT_CONTROLL_MODE);
+    $('#chat-control-scroll').html(messages.CHAT_CONTROLL_SCROLL);
+    $('#chat-control-last').html(messages.CHAT_CONTROLL_LAST);
     // others
     $('#loading').find('.text').text(messages.LOADING);
     $('#confirm-exit').text(messages.CONFIRM_EXIT);
@@ -362,6 +368,10 @@ app.$buttonCloseError = null;
 app.$buttonCloseSupport = null;
 app.$exitDialog = null;
 app.$selectBox = null;
+app.$chat = null;
+app.$chatLoading = null;
+app.$chatContent = null;
+app.$chatControlsBottom = null;
 app.$player = null;
 app.$playerTime = null;
 app.$items = null;
@@ -418,6 +428,10 @@ app.init = function() {
     app.$exitDialog = $('#exit-dialog');
     app.$loadingText = app.$loading.find('.text');
     app.$selectBox = $('#select-box');
+    app.$chat = $('#chat');
+    app.$chatContent = $('#chat-content');
+    app.$chatLoading = $('#chat-loading');
+    app.$chatControlsBottom = $('#chat-controls-bottom');
     app.$player = $('#av-player');
     app.$playerTime = $('#player-time');
     app.$items = $('#items');
@@ -667,7 +681,9 @@ app.init = function() {
                         app.navigateVideosChannelItems(keys.KEY_UP, function() {
                             app.activateChannelSearchArea();
                         });
-                    } else if (app.activeArea == constants.AREA_CHANNELS_SEARCH && app.filters.videosChannel) {
+                    } else if (app.activeArea == constants.AREA_CHANNELS_SEARCH && 
+                            ((app.filters.videosChannel && app.state === constants.STATE_SELECT_CHANNEL) || 
+                             (app.filters.followedChannel && app.state === constants.STATE_SELECT_FOLLOWED_CHANNEL))) {
                         app.$channelSearchInput.blur();
                         app.activateChannelClearArea();
                     }
@@ -690,6 +706,13 @@ app.init = function() {
                         app.activatePlayerControlsArea(false);
                     }
                     app.autoHideControls();
+                } else if (app.state === constants.STATE_WATCH && app.chatIsActive) {
+                    var oldScrollTop = app.$chat.get(0).scrollTop;
+                    if (oldScrollTop > 0) {
+                        app.$chat.get(0).scrollTop -= app.chatScrollStep;
+                        app.chatAutoScroll = false;
+                        app.$chatControlsBottom.show();
+                    }
                 }
                 break;
             case keys.KEY_RIGHT:
@@ -808,19 +831,28 @@ app.init = function() {
                 } else if (app.state === constants.STATE_SELECT_QUALITY) {
                     app.navigateQualityItems(keys.KEY_DOWN);
                 } else if (app.state === constants.STATE_WATCH) {
-                    $('#player-controls').show();
-                    $('#player-info').show();
-                    if (app.$playerProgress.hasClass('hidden')) {
-                        app.activatePlayerControlsArea(true);
+                    if (app.chatIsActive) {
+                        var oldScrollTop = app.$chat.get(0).scrollTop; 
+                        app.$chat.get(0).scrollTop += app.chatScrollStep;
+                        if (app.$chat.get(0).scrollTop > 0 && app.$chat.get(0).scrollTop == oldScrollTop) {
+                            app.chatAutoScroll = true;
+                            app.$chatControlsBottom.hide();
+                        }
                     } else {
-                        app.activatePlayerProgressArea();
+                        $('#player-controls').show();
+                        $('#player-info').show();
+                        if (app.$playerProgress.hasClass('hidden')) {
+                            app.activatePlayerControlsArea(true);
+                        } else {
+                            app.activatePlayerProgressArea();
+                        }
+                        app.setState(constants.STATE_WATCH_CONTROLS, function() {
+                            $('#player-controls').hide();
+                            $('#player-info').hide();
+                            app.$playerProgressSlider.popover('hide');
+                        });
+                        app.autoHideControls();
                     }
-                    app.setState(constants.STATE_WATCH_CONTROLS, function() {
-                        $('#player-controls').hide();
-                        $('#player-info').hide();
-                        app.$playerProgressSlider.popover('hide');
-                    });
-                    app.autoHideControls();
                 } else if (app.state === constants.STATE_WATCH_CONTROLS) {
                     if (app.activeArea == constants.AREA_PLAYER_CONTROLS && !app.$playerProgress.hasClass('hidden')) {
                         app.activatePlayerProgressArea();
@@ -833,13 +865,14 @@ app.init = function() {
                     if (app.activeArea == constants.AREA_RESULTS) {
                         var $selectedItem = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
                         if ($selectedItem.length > 0) {
-                            if (app.page == constants.PAGE_LIVE_CHANNELS) {
+                            if (app.page == constants.PAGE_LIVE_CHANNELS ||
+                                    app.page == constants.PAGE_FOLLOWED) {
                             	if ($selectedItem.data('channel-logo')) {
                             		$('#player-stream-logo').attr('src', $selectedItem.data('channel-logo')).show();
                             	} else {
                             		$('#player-stream-logo').hide();
                             	}
-                            	chat.open($selectedItem.data('channel'));
+                            	app.chatRoom = $selectedItem.data('channel');
                                 $('#player-stream-name').text($selectedItem.data('channel-name'));
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
@@ -880,6 +913,7 @@ app.init = function() {
                                     	$('#player-stream-logo').attr('src', response.logo).show();
                                     }
                                 });
+                            	app.chatRoom = null;
                             	$('#player-stream-name').text($selectedItem.data('channel-name'));
                                 $('#player-stream-status').text($selectedItem.data('status'));
                                 $('#player-stream-game').text($selectedItem.data('game'));
@@ -1089,24 +1123,35 @@ app.init = function() {
             case keys.KEY_RED:
                 if (app.state == constants.STATE_BROWSE) {
                     app.selectActiveChannelsPage();
+                } else if (app.state == constants.STATE_WATCH) {
+                    app.toggleChat();
                 }
                 break;
             case keys.KEY_2:
             case keys.KEY_GREEN:
                 if (app.state == constants.STATE_BROWSE) {
                     app.selectVideosPage();
+                } else if (app.state == constants.STATE_WATCH && app.chatIsActive) {
+                    app.closeChat();
+                    app.updateDisplayRect();
                 }
                 break;
             case keys.KEY_3:
             case keys.KEY_YELLOW:
                 if (app.state == constants.STATE_BROWSE) {
                     app.selectSubscriptionsPage();
+                } else if (app.state == constants.STATE_WATCH && app.chatIsActive) {
+                    app.toggleChatMode();
                 }
                 break;
             case keys.KEY_4:
             case keys.KEY_BLUE:
                 if (app.state == constants.STATE_BROWSE) {
                     app.showSupportInfo();
+                } else if (app.state == constants.STATE_WATCH && app.chatIsActive) {
+                    app.chatAutoScroll = true;
+                    app.$chatControlsBottom.hide();
+                    app.$chat.scrollTo(app.$chatContent.find('div:last'));
                 }
                 break;
             case keys.KEY_STOP:
@@ -1180,6 +1225,67 @@ app.init = function() {
         }
         app.$items.mCustomScrollbar('update');
     });
+    /*chat.open('disguisedtoasths');
+    app.chatRoom = 'disguisedtoasths';
+    app.state = constants.STATE_WATCH;
+    app.chatIsActive = true;*/
+};
+app.chatIsActive = false;
+app.chatRoom = null;
+app.updateDisplayRect = function() {
+    if (window.webapis) {
+        if (app.chatIsActive && app.chatMode == 1) {
+            var width = Math.ceil($(window).width() - 0.44 * $(window).height());
+            var height = Math.ceil($(window).height() * width / $(window).width());
+            webapis.avplay.setDisplayRect(0, Math.ceil(($(window).height() - height) / 2), width, height);
+        } else {
+            webapis.avplay.setDisplayRect(0, 0, $(window).width(), $(window).height());
+        }
+    }
+};
+app.toggleChat = function() {
+    if (app.chatIsActive) {
+        app.hideChat();
+    } else {
+        app.showChat();
+    }
+    app.updateDisplayRect();
+};
+app.hideChat = function() {
+    app.chatIsActive = false;
+    app.$chat.hide();
+};
+app.chatAutoScroll = true;
+app.chatScrollStep = 10;
+app.showChat = function() {
+    app.chatIsActive = true;
+    app.$chat.show();
+    if (app.chatAutoScroll) {
+        app.$chat.scrollTo(app.$chatContent.find('div:last'));
+    }
+    if (!chat.ws && app.chatRoom) {
+        app.$chatLoading.show();
+        app.$chatContent.hide();
+        chat.open(app.chatRoom);
+        app.chatAutoScroll = true;
+        app.$chatControlsBottom.hide();
+    }
+};
+app.closeChat = function() {
+    app.hideChat();
+    chat.close();
+    app.$chatLoading.hide();
+    app.$chatContent.empty().show();
+};
+app.chatMode = localStorage.chatMode || 1;
+app.toggleChatMode = function() {
+    if (app.chatMode == 1) {
+        app.chatMode = 2;
+    } else {
+        app.chatMode = 1;
+    }
+    localStorage.chatMode = app.chatMode;
+    app.updateDisplayRect();
 };
 app.showSupportInfo = function() {
     if (app.state !== constants.STATE_EXIT) {
@@ -1526,29 +1632,29 @@ app.playVideo = function(id) {
         }).fail(app.loadingStreamErrorHandler);
     }).fail(app.loadingStreamErrorHandler);
 };
+app.playerIsActive = function() {
+    return app.state === constants.STATE_WATCH || 
+        app.state === constants.STATE_WATCH_CONTROLS ||
+        app.state === constants.STATE_SELECT_QUALITY;
+};
 app.play = function(url, saveState) {
     if (window.webapis) {
-        function playerIsActive() {
-            return app.state === constants.STATE_WATCH || 
-                app.state === constants.STATE_WATCH_CONTROLS ||
-                app.state === constants.STATE_SELECT_QUALITY;
-        }
         var state = webapis.avplay.getState();
         webapis.avplay.stop();
         webapis.avplay.open(url);
         webapis.avplay.setListener({
             onbufferingstart: function() {
-                if (playerIsActive()) {
+                if (app.playerIsActive()) {
                     app.showLoading(messages.BUFFERING + ' 0%');
                 }
             },
             onbufferingprogress: function(percent) {
-                if (playerIsActive()) {
+                if (app.playerIsActive()) {
                     app.showLoading(messages.BUFFERING + ' ' + percent + '%');
                 }
             },
             onbufferingcomplete: function() {
-                if (playerIsActive()) {
+                if (app.playerIsActive()) {
                     app.$loading.hide();
                 }
             },
@@ -1591,7 +1697,7 @@ app.play = function(url, saveState) {
                 }
             }
         });
-        webapis.avplay.setDisplayRect(0, 0, $(window).width(), $(window).height());
+        app.updateDisplayRect();
         webapis.avplay.prepare();
         if (saveState && state === 'PAUSED') {
             webapis.avplay.pause();
@@ -1616,6 +1722,7 @@ app.stop = function() {
     if (window.webapis) {
         webapis.avplay.stop();
     }
+    app.closeChat();
     app.returnState();
 };
 app.showLoading = function(text) {
@@ -2064,8 +2171,9 @@ app.fillChannelContainer = function(channels) {
 app.showStreamItem = function($element) {
     var channelName = $element.data('channel-name');
     if ($element.data('created') !== undefined) {
-        var date = new Date($element.data('created'));
-        channelName += '<br><small><small><small><i class="fa fa-calendar"></i> ' + date.toLocaleString() + '</small></small></small>';
+        var date = new moment($element.data('created'));
+        
+        channelName += '<br><small><small><small><i class="fa fa-calendar"></i> ' + date.format() + '</small></small></small>';
     }
     app.$selectBox.find('.stream-channel-name').html(channelName);
     var viewers = '<i class="fa fa-fw fa-eye"></i> ' + app.numberFormat($element.data('viewers'));
@@ -2735,15 +2843,53 @@ chat = {
         chat.close();
         chat.ws = new WebSocket('wss://irc-ws.chat.twitch.tv');
         chat.ws.onopen = function() {
+            app.$chatContent.empty().show();
+            app.$chatLoading.hide();
             chat.ws.send('CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership');
-            chat.ws.send('NICK justinfan' + Math.round(Math.random() * 1000000));
+            chat.ws.send('NICK justinfan' + Math.floor((Math.random() * 80000) + 1000));
             chat.ws.send('JOIN #' + channel);
         };
         chat.ws.onmessage = function(event) {
             console.log(event.data);
-            if (event.data.lastIndexOf('PING', 0) === 0) {
+            if (/:tmi.twitch.tv 001 justinfan\d+ :Welcome, GLHF!/.test(event.data)) {
+                app.$chatContent.append($('<div/>').html(messages.CHAT_GREETING));
+            } else if (event.data.lastIndexOf('PING', 0) === 0) {
                 chat.ws.send('PONG :tmi.twitch.tv');
-                console.log('PONG sent\r\n');
+            } else {
+                var reg = /^@badges=([^;]*);color=([^;]*);display-name=([^;]*);emotes=([^;]*);id=([^;]*);mod=([^;]*);room-id=([^;]*);subscriber=([^;]*);tmi-sent-ts=([^;]*);turbo=([^;]*);user-id=([^;]*);user-type=([^ ]*) :([^\!]*)!([^@]*)@([^\.]*).tmi.twitch.tv PRIVMSG #([^ ]*) :(.*)/;
+                var result;
+                if (result = reg.exec(event.data)) {
+                    var message = result[17];
+                    var color = result[2] || '#000000';
+                    var name = result[3] || result[13];
+                    if (message.indexOf('\u0001ACTION') === 0) {
+                        message = message.replace(/^\u0001ACTION /, '').replace(/\u0001$/, '');
+                    } else if (message.indexOf(' \x01ACTION') === 0) {
+                        message = message.replace(/^ \x01ACTION /, '').replace(/\x01$/, '');
+                    }
+                    if (result[4]) {
+                        var emoticons = result[4].split('/');
+                        for (var i = 0; i < emoticons.length; i++) {
+                            var parts = emoticons[i].split(':');
+                            var id = parts[0];
+                            var replaces = parts[1].split(',');
+                            for (var j = 0; j < replaces.length; j++) {
+                                var parts = replaces[j].split('-');
+                                if (parts.length == 2) {
+                                    
+                                }
+                            }
+                        }
+                    }
+                    if (app.$chatContent.get(0).children.length > 240) {
+                        app.$chatContent.children('div:first').remove();
+                    }
+                    var $newMessage = $('<div/>').html('<b style="color: ' + color + ';">' + name + '</b>: ' + message);
+                    app.$chatContent.append($newMessage);
+                    if (app.chatAutoScroll && app.chatIsActive) {
+                        app.$chat.scrollTo($newMessage);
+                    }
+                }
             }
         };
         chat.ws.onerror = function(error) {
@@ -2761,6 +2907,7 @@ chat = {
     close: function() {
         if (chat.ws) {
             chat.ws.close();
+            chat.ws = null;
         }
     }
 };

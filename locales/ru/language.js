@@ -75,10 +75,18 @@ var messages = {
     BUTTON_CLOSE: 'Закрыть',
     BUTTON_EXIT: 'Выход',
     BUTTON_CANCEL: 'Отмена',
+    
+    CHAT_CONTROLL_TOGGLE: 'Показать/скрыть чат',
+    CHAT_CONTROLL_CLOSE: 'Закрыть чат',
+    CHAT_CONTROLL_MODE: 'Изменить режим',
+    CHAT_CONTROLL_SCROLL: 'Прокрутка',
+    CHAT_CONTROLL_LAST: 'Последние сообщения',
 
     CONFIRM_EXIT: 'Вы действительно хотите выйти?',
     
     SUPPORT_TEXT: 'Свои отзывы и предложения направляйте на электроннную почту<br><b>tizenapps@mail.ru</b>',
+    
+    CHAT_GREETING: 'Добро пожаловать в чат!',
 
     EMPTY_RESULTS: 'Ничего не найдено',
     SELECT_CHANNEL: 'Выберите пользователя, чтобы увидеть активные каналы, за которыми он следует',

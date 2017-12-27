@@ -589,6 +589,52 @@ img.loaded {
 	z-index: 10;
 }
 
+.player .chat {
+	display: none;
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 44vh;
+	height: 100vh;
+	background-color: #efeef1;
+	overflow-x: hidden;
+	overflow-y: auto;
+	color: #19171c;
+	padding: 8.0vh 1.0vh 0;
+	font-size: 1.4vh;
+}
+
+.player .chat-controls {
+	width: 44vh;
+	background-color: #efeef1;
+	position: fixed;
+	top: 0;
+	right: 0;
+	padding: 0.6vh 1.0vh;
+	border-bottom: 0.2vh solid rgb(218, 216, 222);
+}
+.player .chat-controls-bottom {
+	display: none;
+	color: #ffffff;
+	text-align: center;
+    width: 44vh;
+    background-color: rgba(100, 65, 164, 0.7);
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 0.6vh 1.0vh;
+}
+
+.player .chat-loading {
+    text-align: center;
+    margin-top: 1vh;
+    display: none;
+}
+
+.player .chat-content {
+    font-size: 1.4vh;
+}
+
 .player object {
     width: 100vw;
     height: 100vh;
@@ -734,6 +780,12 @@ img.loaded {
 	animation: bouncedelay 1.4s infinite ease-in-out;
 	-webkit-animation-fill-mode: both;
 	animation-fill-mode: both;
+}
+
+.chat-loading .spinner-three-bounce > div {
+    width: 1.8vh;
+    height: 1.8vh;
+    background-color: #6441a4;
 }
 
 .spinner-three-bounce .bounce1 {

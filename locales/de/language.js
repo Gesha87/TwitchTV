@@ -75,10 +75,18 @@ var messages = {
     BUTTON_CLOSE: 'Schließen',
     BUTTON_EXIT: 'Ausfahrt',
     BUTTON_CANCEL: 'Stornieren',
+    
+    CHAT_CONTROLL_TOGGLE: 'Chat ein-/ausblenden',
+    CHAT_CONTROLL_CLOSE: 'Chat schließen',
+    CHAT_CONTROLL_MODE: 'Wechselmodus',
+    CHAT_CONTROLL_SCROLL: 'Scrollen',
+    CHAT_CONTROLL_LAST: 'Letzte Nachrichten',
 
     CONFIRM_EXIT: 'Willst du wirklich ausfahrt?',
     
     SUPPORT_TEXT: 'Senden Sie Ihre bemerkungen und vorschläge per e-mail<br><b>tizenapps@mail.ru</b>',
+    
+    CHAT_GREETING: 'Willkommen im Chat!',
 
     EMPTY_RESULTS: 'Nichts gefunden',
     SELECT_CHANNEL: 'Wählen Sie den Benutzer aus, um die aktiven Kanäle anzuzeigen, denen er folgt',

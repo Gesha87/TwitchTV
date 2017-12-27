@@ -75,10 +75,18 @@ var messages = {
     BUTTON_CLOSE: 'Close',
     BUTTON_EXIT: 'Exit',
     BUTTON_CANCEL: 'Cancel',
+    
+    CHAT_CONTROLL_TOGGLE: 'Show/hide chat',
+    CHAT_CONTROLL_CLOSE: 'Close chat',
+    CHAT_CONTROLL_MODE: 'Switch mode',
+    CHAT_CONTROLL_SCROLL: 'Scroll',
+    CHAT_CONTROLL_LAST: 'Last messages',
 
     CONFIRM_EXIT: 'Do you really want to exit?',
     
     SUPPORT_TEXT: 'Send your comments and suggestions to e-mail<br><b>tizenapps@mail.ru</b>',
+    
+    CHAT_GREETING: 'Welcome to the chat room!',
 
     EMPTY_RESULTS: 'Nothing found',
     SELECT_CHANNEL: 'Select user to view active channels that it follows',
