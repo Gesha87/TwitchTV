@@ -1,5 +1,4 @@
 ﻿var app = {}
-app.clientId = 'q5ix3v5d0ot12koqr7paerntdo5gz9';
 app.page = constants.PAGE_LIVE_CHANNELS;
 app.returnStack = [];
 app.state = constants.STATE_BROWSE;
@@ -1230,8 +1229,11 @@ app.init = function() {
         }
         app.$items.mCustomScrollbar('update');
     });
-    /*chat.open('a1taoda');
-    app.chatRoom = 'a1taoda';
+    /*app.isVideo = true;
+    comments.videoId = '213245808';
+    comments.open(0);
+    //chat.open('a1taoda');
+    //app.chatRoom = 'a1taoda';
     app.state = constants.STATE_WATCH;
     app.chatIsActive = true;*/
 };
@@ -1268,17 +1270,28 @@ app.showChat = function() {
     if (app.chatAutoScroll) {
         app.$chat.scrollTo(app.$chatContent.find('div:last'));
     }
-    if (!chat.ws && app.chatRoom) {
+    if (!app.isVideo && !chat.ws && app.chatRoom) {
         app.$chatLoading.show();
         app.$chatContent.hide();
         chat.open(app.chatRoom);
         app.chatAutoScroll = true;
         app.$chatControlsBottom.hide();
     }
+    if (app.isVideo && !comments.active && comments.videoId) {
+        app.initComments();
+    }
+};
+app.initComments = function() {
+    app.$chatLoading.show();
+    app.$chatContent.hide();
+    comments.open(webapis.avplay.getCurrentTime() / 1000);
+    app.chatAutoScroll = true;
+    app.$chatControlsBottom.hide();
 };
 app.closeChat = function() {
     app.hideChat();
     chat.close();
+    comments.close();
     app.$chatLoading.hide();
     app.$chatContent.empty().show();
 };
@@ -1362,18 +1375,27 @@ app.controlBackward = function() {
 	if (window.webapis) {
 		webapis.avplay.jumpBackward(30000);
 		app.updateProgressPosition();
+		if (comments.active) {
+		    app.initComments();
+		}
     }
 };
 app.controlForward = function() {
 	if (window.webapis) {
 		webapis.avplay.jumpForward(30000);
 		app.updateProgressPosition();
+		if (comments.active) {
+            app.initComments();
+        }
     }
 };
 app.controlSeek = function(seconds) {
     if (window.webapis) {
         webapis.avplay.seekTo(seconds * 1000);
         app.updateProgressPosition();
+        if (comments.active) {
+            app.initComments();
+        }
     }
 };
 app.controlOptions = function() {
@@ -1599,6 +1621,7 @@ app.initQualities = function() {
         app.showLoadingError(messages.ERROR_QUALITY_LIST_IS_EMPTY);
     }
 };
+app.isVideo = false;
 app.playStream = function(channelName) {
 	app.setState(constants.STATE_LOADING, app.stopLoading);
     app.$player.show();
@@ -1617,6 +1640,8 @@ app.playStream = function(channelName) {
                     app.loadingStream = null;
                 }).done(function(data) {
                     app.isPaused = false;
+                    app.isVideo = false;
+                    comments.videoId = null;
                 	app.setState(constants.STATE_WATCH, app.stop);
                     app.$loading.hide();
                     app.qualityList = m3u8.getStreamList(data);
@@ -1641,6 +1666,8 @@ app.playVideo = function(id) {
             app.loadingStream = null;
         }).done(function(data) {
             app.isPaused = false;
+            app.isVideo = true;
+            comments.videoId = id;
         	app.setState(constants.STATE_WATCH, app.stop);
             app.$loading.hide();
             app.qualityList = m3u8.getStreamList(data);
@@ -1686,6 +1713,9 @@ app.play = function(url, saveState) {
             oncurrentplaytime: function(currentTime) {
                 if (currentTime > 0) {
                     app.updateProgressPosition(currentTime);
+                    if (app.isVideo && comments.active) {
+                        comments.show(currentTime / 1000);
+                    }
                 }
             },
             onevent: function(eventType, eventData) {},
@@ -2351,7 +2381,7 @@ app.updateProgressSelectPosition = function() {
     app.$playerProgressSlider.popover('show');
 };
 app.updateProgressPosition = function(currentTime) {
-    currentTime = currentTime | webapis.avplay.getCurrentTime();
+    currentTime = currentTime || webapis.avplay.getCurrentTime();
     currentTime = currentTime / 1000;
     app.$playerTime.text(app.timeFormat(currentTime));
     var length = app.$playerProgress.data('length');
@@ -2874,6 +2904,16 @@ app.restoreFilters = function() {
         app.filters = JSON.parse(localStorage['filters']);
     }
 };
+app.chatAppend = function(color, name, message) {
+    if (app.$chatContent.get(0).children.length > 240) {
+        app.$chatContent.children('div:first').remove();
+    }
+    var $newMessage = $('<div/>').html('<b style="color: ' + color + ';">' + name + '</b>: ' + message);
+    app.$chatContent.append($newMessage);
+    if (app.chatAutoScroll && app.chatIsActive) {
+        app.$chat.scrollTo($newMessage);
+    }
+};
 
 chat = {
     ws: null,
@@ -2935,14 +2975,7 @@ chat = {
                         }
                         message = newMessage;
                     }
-                    if (app.$chatContent.get(0).children.length > 240) {
-                        app.$chatContent.children('div:first').remove();
-                    }
-                    var $newMessage = $('<div/>').html('<b style="color: ' + color + ';">' + name + '</b>: ' + message);
-                    app.$chatContent.append($newMessage);
-                    if (app.chatAutoScroll && app.chatIsActive) {
-                        app.$chat.scrollTo($newMessage);
-                    }
+                    app.chatAppend(color, name, message);
                 }
             }
         };
@@ -2962,6 +2995,96 @@ chat = {
         if (chat.ws) {
             chat.ws.close();
             chat.ws = null;
+        }
+    }
+};
+
+comments = {
+    active: false,
+    videoId: null,
+    xhrLoading: null,
+    messages: [],
+    nextMessage: null,
+    nextPage: null,
+    open: function(offset) {
+        comments.close();
+        comments.active = true;
+        offset = offset || 0;
+        console.log(comments.videoId);
+        if (comments.videoId) {
+            comments.xhrLoading = $.get('https://api.twitch.tv/v5/videos/' + comments.videoId + '/comments?client_id=q5ix3v5d0ot12koqr7paerntdo5gz9&content_offset_seconds=' + offset, function(data) {
+                app.$chatContent.empty().show();
+                app.$chatLoading.hide();
+                if (data.comments) {
+                    comments.messages = [];
+                    for (var i = data.comments.length - 1; i >= 0; i--) {
+                        var comment = data.comments[i];
+                        comments.messages.push({
+                            offset: comment.content_offset_seconds,
+                            user: comment.commenter.display_name || comment.commenter.name,
+                            color: comment.message.user_color || '#000000',
+                            fragments: comment.message.fragments
+                        });
+                    }
+                }
+                comments.nextPage = data._next || null;
+            }, 'json').always(function() {
+                comments.xhrLoading = null;                
+            });
+        }
+    },
+    show: function(offset) {
+        if (comments.videoId) {
+            var comment = comments.nextMessage || comments.messages.pop();
+            while (comment && comment.offset < offset) {
+                 var message = ''; //app.timeFormat(comment.offset) + ' - '
+                 for (var i = 0; i < comment.fragments.length; i++) {
+                     var fragment = comment.fragments[i];
+                     if (fragment.emoticon) {
+                         message += '<img src="http://static-cdn.jtvnw.net/emoticons/v1/' + fragment.emoticon.emoticon_id + '/' + ($(window).height() > 1100 ? '2.0' : '1.0') + '" class="chat-emote">';
+                     } else {
+                         message += fragment.text;
+                     }
+                 }
+                 app.chatAppend(comment.color, comment.user, message);
+                 comment = comments.messages.pop();
+            }
+            comments.nextMessage = comment;
+            if (comments.messages.length < 20 && comments.nextPage && !comments.xhrLoading) {
+                comments.xhrLoading = $.get('https://api.twitch.tv/v5/videos/' + comments.videoId + '/comments?client_id=q5ix3v5d0ot12koqr7paerntdo5gz9&cursor=' + comments.nextPage, function(data) {
+                    if (data.comments) {
+                        var messages = [];
+                        for (var i = data.comments.length - 1; i >= 0; i--) {
+                            var comment = data.comments[i];
+                            messages.push({
+                                offset: comment.content_offset_seconds,
+                                user: comment.commenter.display_name || comment.commenter.name,
+                                color: comment.message.user_color || '#000000',
+                                fragments: comment.message.fragments
+                            });
+                        }
+                        for (var i = 0; i < comments.messages.length; i++) {
+                            messages.push(comments.messages[i]);
+                        }
+                        comments.messages = messages;
+                    }
+                    comments.nextPage = data._next || null;
+                }, 'json').always(function() {
+                    comments.xhrLoading = null;                
+                });
+            }
+        }
+    },
+    close: function() {
+        if (comments.active) {
+            comments.active = false;
+            comments.messages = [];
+            comments.nextMessage = null;
+            comments.nextPage = null;
+            if (comments.xhrLoading) {
+                comments.xhrLoading.abort();
+                comments.xhrLoading = null;
+            }
         }
     }
 };
