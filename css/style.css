@@ -604,15 +604,25 @@ img.loaded {
 	font-size: 1.4vh;
 }
 
+.chat-emote {
+	max-height: 2em;
+	margin: 0 0 -0.5em;
+}
+
 .player .chat-controls {
 	width: 44vh;
 	background-color: #efeef1;
 	position: fixed;
 	top: 0;
 	right: 0;
-	padding: 0.6vh 1.0vh;
-	border-bottom: 0.2vh solid rgb(218, 216, 222);
+	padding: 0.6vh 1.0vh 0;
 }
+
+.player .chat-controls .line {
+	margin: 0.6vh -1.0vh 0;
+	background-color: #b9b3c5;
+}
+
 .player .chat-controls-bottom {
 	display: none;
 	color: #ffffff;
@@ -751,6 +761,7 @@ img.loaded {
 	display: inline-block;
 	padding: 1vh;
 	color: #bbb8c0;
+	margin: 0 0.5vh;
 }
 .player-control.selected {
 	color: #ffffff;
@@ -768,6 +779,7 @@ img.loaded {
 	right: 0;
 	white-space: nowrap;
 	margin-right: 4vh;
+	display: inline-block;
 }
 
 .spinner-three-bounce > div {

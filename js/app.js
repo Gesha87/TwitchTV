@@ -1,4 +1,5 @@
 ﻿var app = {}
+app.clientId = 'q5ix3v5d0ot12koqr7paerntdo5gz9';
 app.page = constants.PAGE_LIVE_CHANNELS;
 app.returnStack = [];
 app.state = constants.STATE_BROWSE;
@@ -80,7 +81,7 @@ app.areas[constants.AREA_CHANNEL_SORT] = {
     y: 0
 };
 app.areas[constants.AREA_PLAYER_CONTROLS] = {
-    columns: 4,
+    columns: 5,
     rows: 1,
     x: 1,
     y: 0
@@ -475,7 +476,7 @@ app.init = function() {
     app.$videoFilterChannel = $('#video-filter-channel');
     app.$followedFilterChannel = $('#followed-filter-channel');
     app.$playerProgressSlider.popover({placement: 'top', content: app.timeFormat(0)});
-    app.$videoFilterChannel.popover({placement: 'bottom', content: messages.FILTER_VIDEO_CHANNEL_NOTICE});
+    //app.$videoFilterChannel.popover({placement: 'bottom', content: messages.FILTER_VIDEO_CHANNEL_NOTICE});
     app.restoreFilters();
     app.translateLayout();
     app.initGameFiler();
@@ -1085,6 +1086,10 @@ app.init = function() {
                                 case 'options':
                                     app.controlOptions();
                                     break;
+                                case 'chat':
+                                    app.returnState();
+                                    app.toggleChat();
+                                    break;
                             }
                         }
                     } else if (app.activeArea == constants.AREA_PLAYER_PROGRESS) {
@@ -1225,8 +1230,8 @@ app.init = function() {
         }
         app.$items.mCustomScrollbar('update');
     });
-    /*chat.open('disguisedtoasths');
-    app.chatRoom = 'disguisedtoasths';
+    /*chat.open('a1taoda');
+    app.chatRoom = 'a1taoda';
     app.state = constants.STATE_WATCH;
     app.chatIsActive = true;*/
 };
@@ -1321,49 +1326,54 @@ app.autoHideControls = function() {
         }
     }, 5000);
 };
+app.isPaused = false;
 app.controlPlayPause = function() {
     if (window.webapis) {
-        var state = webapis.avplay.getState();
-        if (state === 'PLAYING') {
-            app.$controlPlayPause.find('i').removeClass('fa-pause').addClass('fa-play');
+        if (!app.isPaused) {
             webapis.avplay.pause();
+            app.$controlPlayPause.find('i').removeClass('fa-pause').addClass('fa-play');
+            app.isPaused = true;
         } else {
-            app.$controlPlayPause.find('i').removeClass('fa-play').addClass('fa-pause');
             webapis.avplay.play();
+            app.$controlPlayPause.find('i').removeClass('fa-play').addClass('fa-pause');
+            app.isPaused = false;
         }
     }
 };
 app.controlPlay = function() {
     if (window.webapis) {
-        var state = webapis.avplay.getState();
-        if (state !== 'PLAYING') {
-            app.$controlPlayPause.find('i').removeClass('fa-play').addClass('fa-pause');
+        if (app.isPaused) {
             webapis.avplay.play();
+            app.$controlPlayPause.find('i').removeClass('fa-play').addClass('fa-pause');
+            app.isPaused = false;
         }
     }
 };
 app.controlPause = function() {
     if (window.webapis) {
-        var state = webapis.avplay.getState();
-        if (state === 'PLAYING') {
-            app.$controlPlayPause.find('i').removeClass('fa-pause').addClass('fa-play');
+        if (!app.isPaused) {
             webapis.avplay.pause();
+            app.$controlPlayPause.find('i').removeClass('fa-pause').addClass('fa-play');
+            app.isPaused = true;
         }
     }
 };
 app.controlBackward = function() {
 	if (window.webapis) {
 		webapis.avplay.jumpBackward(30000);
+		app.updateProgressPosition();
     }
 };
 app.controlForward = function() {
 	if (window.webapis) {
 		webapis.avplay.jumpForward(30000);
+		app.updateProgressPosition();
     }
 };
 app.controlSeek = function(seconds) {
     if (window.webapis) {
         webapis.avplay.seekTo(seconds * 1000);
+        app.updateProgressPosition();
     }
 };
 app.controlOptions = function() {
@@ -1606,6 +1616,7 @@ app.playStream = function(channelName) {
                 app.loadingStream = $.get('http://usher.twitch.tv/api/channel/hls/' + channelName + '.m3u8?player_backend=html5&type=any&sig=' + data.sig + '&token=' + escape(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
                     app.loadingStream = null;
                 }).done(function(data) {
+                    app.isPaused = false;
                 	app.setState(constants.STATE_WATCH, app.stop);
                     app.$loading.hide();
                     app.qualityList = m3u8.getStreamList(data);
@@ -1618,6 +1629,10 @@ app.playStream = function(channelName) {
 app.playVideo = function(id) {
     app.setState(constants.STATE_LOADING, app.stopLoading);
     app.$player.show();
+    app.$playerTime.text(app.timeFormat(0));
+    app.$playerProgress.data('current', 0);
+    app.$playerProgressBar.css('width', '0%');
+    $('#stream-quality').text('');
     app.showLoading(messages.LOADING);
     app.loadingStream = $.get('https://api.twitch.tv/api/vods/' + id + '/access_token', 'json').always(function() {
         app.loadingStream = null;
@@ -1625,6 +1640,7 @@ app.playVideo = function(id) {
         app.loadingStream = $.get('http://usher.ttvnw.net/vod/' + id + '.m3u8?player_backend=html5&nauthsig=' + data.sig + '&nauth=' + encodeURIComponent(data.token) + '&allow_source=true&allow_spectre=true&p=' + Math.round(Math.random() * 1e7)).always(function() {
             app.loadingStream = null;
         }).done(function(data) {
+            app.isPaused = false;
         	app.setState(constants.STATE_WATCH, app.stop);
             app.$loading.hide();
             app.qualityList = m3u8.getStreamList(data);
@@ -1656,16 +1672,21 @@ app.play = function(url, saveState) {
             onbufferingcomplete: function() {
                 if (app.playerIsActive()) {
                     app.$loading.hide();
+                    if (app.isPaused) {
+                        try {
+                            webapis.avplay.pause();
+                        } catch (e) {}
+                    } else {
+                        try {
+                            webapis.avplay.play();
+                        } catch (e) {}
+                    }
                 }
             },
             oncurrentplaytime: function(currentTime) {
-                currentTime = currentTime / 1000;
-                app.$playerTime.text(app.timeFormat(currentTime));
-                var length = app.$playerProgress.data('length');
-                app.$playerProgress.data('current', currentTime);
-                var percent = length > 0 ? currentTime * 100 / length : 100;
-                percent = Math.min(percent, 100);
-                app.$playerProgressBar.css('width', percent + '%');
+                if (currentTime > 0) {
+                    app.updateProgressPosition(currentTime);
+                }
             },
             onevent: function(eventType, eventData) {},
             onerror: function(errorType) {
@@ -1686,6 +1707,8 @@ app.play = function(url, saveState) {
             },
             onstreamcompleted: function() {
                 webapis.avplay.stop();
+                app.isPaused = false;
+                app.closeChat();
                 if (app.state === constants.STATE_SELECT_QUALITY) {
                     app.returnState();
                 }
@@ -1699,10 +1722,11 @@ app.play = function(url, saveState) {
         });
         app.updateDisplayRect();
         webapis.avplay.prepare();
-        if (saveState && state === 'PAUSED') {
-            webapis.avplay.pause();
-        } else {
-            webapis.avplay.play();
+        if (!saveState || !app.isPaused) {
+            try {
+                webapis.avplay.play();
+                app.$controlPlayPause.find('i').removeClass('fa-play').addClass('fa-pause');
+            } catch (e) {}
         }
     }
 };
@@ -1722,6 +1746,7 @@ app.stop = function() {
     if (window.webapis) {
         webapis.avplay.stop();
     }
+    app.isPaused = false;
     app.closeChat();
     app.returnState();
 };
@@ -2100,6 +2125,10 @@ app.getChannelSearch = function(query, callback) {
         }
     });
 };
+app.getComments = function(id, offset) {
+    offset = offset || 0;
+    var url = 'https://api.twitch.tv/v5/videos/' + id + '/comments?content_offset_seconds=' + offset;
+};
 app.fillChannelsContainer = function(channels) {
     var i, x, y, game, $newCell, $newColumn;
     var countRows = app.areas[constants.AREA_CHANNELS_RESULTS].rows;
@@ -2171,9 +2200,8 @@ app.fillChannelContainer = function(channels) {
 app.showStreamItem = function($element) {
     var channelName = $element.data('channel-name');
     if ($element.data('created') !== undefined) {
-        var date = new moment($element.data('created'));
-        
-        channelName += '<br><small><small><small><i class="fa fa-calendar"></i> ' + date.format() + '</small></small></small>';
+        var date = new moment($element.data('created')).locale(navigator.language);
+        channelName += '<br><small><small><small><i class="fa fa-calendar"></i> ' + date.format('L, LTS') + '</small></small></small>';
     }
     app.$selectBox.find('.stream-channel-name').html(channelName);
     var viewers = '<i class="fa fa-fw fa-eye"></i> ' + app.numberFormat($element.data('viewers'));
@@ -2292,7 +2320,7 @@ app.selectPage = function(page) {
 app.activatePagesArea = function() {
     app.activeArea = constants.AREA_PAGES;
     app.showCurrentPage();
-    app.$videoFilterChannel.popover('hide');
+    //app.$videoFilterChannel.popover('hide');
 };
 app.activatePlayerControlsArea = function(reset) {
     app.activeArea = constants.AREA_PLAYER_CONTROLS;
@@ -2321,6 +2349,16 @@ app.updateProgressSelectPosition = function() {
     var popover = app.$playerProgressSlider.data('bs.popover');
     popover.options.content = app.timeFormat(select);
     app.$playerProgressSlider.popover('show');
+};
+app.updateProgressPosition = function(currentTime) {
+    currentTime = currentTime | webapis.avplay.getCurrentTime();
+    currentTime = currentTime / 1000;
+    app.$playerTime.text(app.timeFormat(currentTime));
+    var length = app.$playerProgress.data('length');
+    app.$playerProgress.data('current', currentTime);
+    var percent = length > 0 ? currentTime * 100 / length : 100;
+    percent = Math.min(percent, 100);
+    app.$playerProgressBar.css('width', percent + '%');
 };
 app.showPage = function($page, select) {
     app.$pages.find('.active').removeClass('active');
@@ -2369,11 +2407,11 @@ app.showCurrentFilter = function(direction) {
         return app.showCurrentFilter(direction);
     }
     elem.classList.add('selected');
-    if (elem.id == 'video-filter-channel' && !localStorage['hideVideoChannelPopover']) {
+    /*if (elem.id == 'video-filter-channel' && !localStorage['hideVideoChannelPopover']) {
         app.$videoFilterChannel.popover('show');
     } else {
         app.$videoFilterChannel.popover('hide');
-    }
+    }*/
 };
 app.loadingGames = null;
 app.searchGameTimeout = null;
@@ -2442,7 +2480,7 @@ app.selectCurrentFilter = function() {
             app.$channelsItems.mCustomScrollbar('update');
             break;
         case 'channel':
-            app.$videoFilterChannel.popover('hide');
+            //app.$videoFilterChannel.popover('hide');
             localStorage['hideVideoChannelPopover'] = 1;
             app.$selectChannel.show();
             app.setState(constants.STATE_SELECT_CHANNEL, function() {
@@ -2763,7 +2801,7 @@ app.activateItemsArea = function() {
     app.clearSelection(app.$main);
     var $activeCell = $('#item-' + app.areas[constants.AREA_RESULTS].x + '-' + app.areas[constants.AREA_RESULTS].y);
     app.showStreamItem($activeCell);
-    app.$videoFilterChannel.popover('hide');
+    //app.$videoFilterChannel.popover('hide');
 };
 app.activateGameItemsArea = function() {
     app.activeArea = constants.AREA_GAME_RESULTS;
@@ -2850,7 +2888,7 @@ chat = {
             chat.ws.send('JOIN #' + channel);
         };
         chat.ws.onmessage = function(event) {
-            console.log(event.data);
+            //console.log(event.data);
             if (/:tmi.twitch.tv 001 justinfan\d+ :Welcome, GLHF!/.test(event.data)) {
                 app.$chatContent.append($('<div/>').html(messages.CHAT_GREETING));
             } else if (event.data.lastIndexOf('PING', 0) === 0) {
@@ -2861,7 +2899,7 @@ chat = {
                 if (result = reg.exec(event.data)) {
                     var message = result[17];
                     var color = result[2] || '#000000';
-                    var name = result[3] || result[13];
+                    var name = result[3].replace('\\:', ';').replace('\\s', ' ').replace('\\\\', '\\') || result[13];
                     if (message.indexOf('\u0001ACTION') === 0) {
                         message = message.replace(/^\u0001ACTION /, '').replace(/\u0001$/, '');
                     } else if (message.indexOf(' \x01ACTION') === 0) {
@@ -2869,6 +2907,7 @@ chat = {
                     }
                     if (result[4]) {
                         var emoticons = result[4].split('/');
+                        var emotes = {};
                         for (var i = 0; i < emoticons.length; i++) {
                             var parts = emoticons[i].split(':');
                             var id = parts[0];
@@ -2876,10 +2915,25 @@ chat = {
                             for (var j = 0; j < replaces.length; j++) {
                                 var parts = replaces[j].split('-');
                                 if (parts.length == 2) {
-                                    
+                                    var min = parseInt(parts[0]),
+                                        max = parseInt(parts[1]),
+                                        version = $(window).height() > 1100 ? '2.0' : '1.0';
+                                    emotes[min] = '<img src="http://static-cdn.jtvnw.net/emoticons/v1/' + id + '/' + version + '" class="chat-emote">';
+                                    for (var k = min + 1; k <= max; k++) {
+                                        emotes[k] = '';
+                                    }
                                 }
                             }
                         }
+                        var newMessage = '';
+                        for (var i = 0; i < message.length; i++) {
+                            if (emotes[i] === undefined) {
+                                newMessage += message[i];
+                            } else {
+                                newMessage += emotes[i];
+                            }
+                        }
+                        message = newMessage;
                     }
                     if (app.$chatContent.get(0).children.length > 240) {
                         app.$chatContent.children('div:first').remove();

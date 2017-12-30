@@ -38,11 +38,11 @@
                     </div>
 	            </div>
 	            <div id="stream-filters" class="filters">
-	                <div class="filter" id="stream-filter-channels" data-type="channels">
+	                <div class="filter filter-game" id="stream-filter-game" data-type="game">
+                        <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
+                    </div><div class="filter" id="stream-filter-channels" data-type="channels">
                         <i class="fa fa-users"></i> <span class="text">Каналы</span>
-                    </div><div class="filter filter-game" id="stream-filter-game" data-type="game">
-	                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
-	                </div><div class="filter filter-languages" id="stream-filter-languages" data-type="languages">
+                    </div><div class="filter filter-languages" id="stream-filter-languages" data-type="languages">
 	                    <i class="fa fa-globe"></i> <span class="text">Языки</span>
 	                </div><div class="filter" id="stream-filter-type" data-type="stream-type">
 	                    <i class="fa fa-play"></i> <span class="text">Тип</span>
@@ -55,11 +55,11 @@
                         <i class="fa fa-user"></i> <span class="text">Канал</span>
                     </div><div class="filter filter-game" id="video-filter-game" data-type="game">
 	                    <i class="fa fa-gamepad"></i> <span class="text">Игра</span>
-	                </div><div class="filter filter-languages" id="video-filter-languages" data-type="languages">
+	                </div><div class="filter" id="video-filter-period" data-type="period">
+                        <i class="fa fa-calendar"></i> <span class="text">Период</span>
+                    </div><div class="filter filter-languages" id="video-filter-languages" data-type="languages">
                         <i class="fa fa-globe"></i> <span class="text">Языки</span>
-                    </div><div class="filter" id="video-filter-period" data-type="period">
-	                    <i class="fa fa-calendar"></i> <span class="text">Период</span>
-	                </div><div class="filter" id="video-filter-type" data-type="video-type">
+                    </div><div class="filter" id="video-filter-type" data-type="video-type">
 	                    <i class="fa fa-backward"></i> <span class="text">Тип</span>
 	                </div><div class="filter" id="video-filter-sort" data-type="sort">
 	                    <i class="fa fa-sort"></i> <span class="text">Сортировка</span>
@@ -131,6 +131,7 @@
                 <span class="badge badge-B">B</span> <b><span id="chat-control-close">Закрыть чат</span></b><br>
                 <span class="badge badge-C">C</span> <b><span id="chat-control-mode">Изменить режим</span></b>&nbsp;&nbsp;&nbsp;
                 <span class="badge"><i class="fa fa-caret-up"></i></span> <span class="badge"><i class="fa fa-caret-down"></i></span> <b><span id="chat-control-scroll">Прокрутка</span></b>
+                <hr class="line">
             </div>
             <div id="chat-loading" class="chat-loading">
                 <div class="spinner-three-bounce">
@@ -166,15 +167,16 @@
 	            </div> -->
 	            <div class="player-control" data-type="backward" id="control-item-0-0">
 	               <i class="fa fa-fw fa-backward"></i>
-	            </div>
-	            <div class="player-control selected" data-type="play-pause" id="control-item-1-0">
+	            </div><div class="player-control selected" data-type="play-pause" id="control-item-1-0">
 	               <i class="fa fa-fw fa-pause"></i>
-	            </div>
-	            <div class="player-control" data-type="forward" id="control-item-2-0">
+	            </div><div class="player-control" data-type="forward" id="control-item-2-0">
 	               <i class="fa fa-fw fa-forward"></i>
-	            </div>
-	            <div class="player-control player-control-options" data-type="options" id="control-item-3-0">
-	               <span id="stream-quality" class="player-stream-quality"></span> <i class="fa fa-gear"></i>
+	            </div><div class="player-control-options">
+	               <div class="player-control" data-type="options" id="control-item-3-0">
+	                   <span id="stream-quality" class="player-stream-quality"></span> <i class="fa fa-gear"></i>
+	                </div><div class="player-control" data-type="chat" id="control-item-4-0">
+                       <i class="fa fa-comment"></i>
+                    </div>
 	            </div>
 	            <div id="player-progress" class="player-progress selected">
 	               <div class="progress">
