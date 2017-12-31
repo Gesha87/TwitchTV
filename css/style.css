@@ -1,7 +1,21 @@
 @font-face {
     font-family: OpenSans;
-    src: url(../fonts/OpenSansEmoji.ttf);
+    src: url('../fonts/OpenSansEmoji.ttf') format('truetype');
 }
+
+@font-face {
+    font-family: HelveticaNeueCyr;
+    src: url('../fonts/HelveticaNeueCyr-Medium.ttf') format('truetype');
+    /* font-weight: 500; */
+    font-style: normal;
+}
+
+/*@font-face {
+    font-family: HelveticaNeueCyr;
+    src: url('../fonts/HelveticaNeueCyr-Heavy.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}*/
 
 * {
 	box-sizing: border-box;
@@ -601,7 +615,8 @@ img.loaded {
 	overflow-y: auto;
 	color: #19171c;
 	padding: 8.0vh 1.0vh 0;
-	font-size: 1.4vh;
+	font-size: 1.6vh;
+	font-family: HelveticaNeueCyr, Arial, sans-serif;
 }
 
 .chat-emote {
@@ -616,6 +631,10 @@ img.loaded {
 	top: 0;
 	right: 0;
 	padding: 0.6vh 1.0vh 0;
+}
+
+.player .chat-content {
+	overflow-x: hidden;
 }
 
 .player .chat-controls .line {
@@ -639,10 +658,6 @@ img.loaded {
     text-align: center;
     margin-top: 1vh;
     display: none;
-}
-
-.player .chat-content {
-    font-size: 1.4vh;
 }
 
 .player object {

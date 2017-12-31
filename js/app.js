@@ -1223,7 +1223,8 @@ app.init = function() {
         } else if (app.state === constants.STATE_SELECT_CHANNELS) {
             app.$selectChannels.css('z-index', 500);
             app.$channelsItems.mCustomScrollbar('update');
-        } else if (app.state === constants.STATE_SELECT_CHANNEL) {
+        } else if (app.state === constants.STATE_SELECT_CHANNEL ||
+                   app.state === constants.STATE_SELECT_FOLLOWED_CHANNEL) {
             app.$selectChannel.css('z-index', 500);
             app.$channelItems.mCustomScrollbar('update');
         }
@@ -2919,7 +2920,7 @@ chat = {
     ws: null,
     open: function(channel) {
         chat.close();
-        chat.ws = new WebSocket('wss://irc-ws.chat.twitch.tv');
+        chat.ws = new WebSocket('ws://irc-ws.chat.twitch.tv');
         chat.ws.onopen = function() {
             app.$chatContent.empty().show();
             app.$chatLoading.hide();
@@ -2980,15 +2981,15 @@ chat = {
             }
         };
         chat.ws.onerror = function(error) {
-            console.log(error.message);
+            //console.log(error.message);
         };
         chat.ws.onclose = function(event) {
-            if (event.wasClean) {
+            /*if (event.wasClean) {
                 console.log('Соединение закрыто чисто');
             } else {
                 console.log('Обрыв соединения');
             }
-            console.log('Код: ' + event.code + ' причина: ' + event.reason);
+            console.log('Код: ' + event.code + ' причина: ' + event.reason);*/
         };
     },
     close: function() {
@@ -3010,7 +3011,6 @@ comments = {
         comments.close();
         comments.active = true;
         offset = offset || 0;
-        console.log(comments.videoId);
         if (comments.videoId) {
             comments.xhrLoading = $.get('https://api.twitch.tv/v5/videos/' + comments.videoId + '/comments?client_id=q5ix3v5d0ot12koqr7paerntdo5gz9&content_offset_seconds=' + offset, function(data) {
                 app.$chatContent.empty().show();
