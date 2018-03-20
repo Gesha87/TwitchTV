@@ -80,6 +80,7 @@ var messages = {
     CHAT_CONTROLL_CLOSE: 'Chat schließen',
     CHAT_CONTROLL_MODE: 'Wechselmodus',
     CHAT_CONTROLL_SCROLL: 'Scrollen',
+    CHAT_CONTROLL_FONT: 'Schriftgröße',
     CHAT_CONTROLL_LAST: 'Letzte Nachrichten',
 
     CONFIRM_EXIT: 'Willst du wirklich ausfahrt?',

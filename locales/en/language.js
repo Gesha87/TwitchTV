@@ -80,6 +80,7 @@ var messages = {
     CHAT_CONTROLL_CLOSE: 'Close chat',
     CHAT_CONTROLL_MODE: 'Switch mode',
     CHAT_CONTROLL_SCROLL: 'Scroll',
+    CHAT_CONTROLL_FONT: 'Font size',
     CHAT_CONTROLL_LAST: 'Last messages',
 
     CONFIRM_EXIT: 'Do you really want to exit?',

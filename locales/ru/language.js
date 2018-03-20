@@ -80,6 +80,7 @@ var messages = {
     CHAT_CONTROLL_CLOSE: 'Закрыть чат',
     CHAT_CONTROLL_MODE: 'Изменить режим',
     CHAT_CONTROLL_SCROLL: 'Прокрутка',
+    CHAT_CONTROLL_FONT: 'Шрифт',
     CHAT_CONTROLL_LAST: 'Последние сообщения',
 
     CONFIRM_EXIT: 'Вы действительно хотите выйти?',

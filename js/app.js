@@ -347,6 +347,7 @@ app.translateLayout = function() {
     $('#chat-control-close').html(messages.CHAT_CONTROLL_CLOSE);
     $('#chat-control-mode').html(messages.CHAT_CONTROLL_MODE);
     $('#chat-control-scroll').html(messages.CHAT_CONTROLL_SCROLL);
+    $('#chat-control-font').html(messages.CHAT_CONTROLL_FONT);
     $('#chat-control-last').html(messages.CHAT_CONTROLL_LAST);
     // others
     $('#loading').find('.text').text(messages.LOADING);
@@ -1123,7 +1124,7 @@ app.init = function() {
                     app.$channelsSearchInput.blur();
                 }
                 break;
-            case keys.KEY_1:
+            //case keys.KEY_1:
             case keys.KEY_RED:
                 if (app.state == constants.STATE_BROWSE) {
                     app.selectActiveChannelsPage();
@@ -1131,7 +1132,7 @@ app.init = function() {
                     app.toggleChat();
                 }
                 break;
-            case keys.KEY_2:
+            //case keys.KEY_2:
             case keys.KEY_GREEN:
                 if (app.state == constants.STATE_BROWSE) {
                     app.selectVideosPage();
@@ -1140,7 +1141,7 @@ app.init = function() {
                     app.updateDisplayRect();
                 }
                 break;
-            case keys.KEY_3:
+            //case keys.KEY_3:
             case keys.KEY_YELLOW:
                 if (app.state == constants.STATE_BROWSE) {
                     app.selectSubscriptionsPage();
@@ -1148,7 +1149,7 @@ app.init = function() {
                     app.toggleChatMode();
                 }
                 break;
-            case keys.KEY_4:
+            //case keys.KEY_4:
             case keys.KEY_BLUE:
                 if (app.state == constants.STATE_BROWSE) {
                     app.showSupportInfo();
@@ -1203,6 +1204,18 @@ app.init = function() {
                     app.returnState();
                 }
                 break;
+            //case keys.KEY_1:
+            case keys.KEY_CHANNELUP:
+                if (app.state == constants.STATE_WATCH && app.chatIsActive) {
+                    app.increaseChatFontSize();
+                }
+                break;
+            //case keys.KEY_2:
+            case keys.KEY_CHANNELDOWN:
+                if (app.state == constants.STATE_WATCH && app.chatIsActive) {
+                    app.decreaseChatFontSize();
+                }
+                break;
             default:
                 //console.log("Key code : " + e.keyCode);
                 break;
@@ -1230,9 +1243,10 @@ app.init = function() {
         }
         app.$items.mCustomScrollbar('update');
     });
+    app.updateChatFontSize();
     /*app.isVideo = true;
     comments.videoId = '213245808';
-    comments.open(0);
+    comments.open(2400);
     //chat.open('a1taoda');
     //app.chatRoom = 'a1taoda';
     app.state = constants.STATE_WATCH;
@@ -1250,6 +1264,11 @@ app.updateDisplayRect = function() {
             webapis.avplay.setDisplayRect(0, 0, $(window).width(), $(window).height());
         }
     }
+    if (app.chatMode == 3) {
+        app.$chat.addClass('transparent');
+    } else {
+        app.$chat.removeClass('transparent');
+    }
 };
 app.toggleChat = function() {
     if (app.chatIsActive) {
@@ -1264,7 +1283,7 @@ app.hideChat = function() {
     app.$chat.hide();
 };
 app.chatAutoScroll = true;
-app.chatScrollStep = 10;
+app.chatScrollStep = 15;
 app.showChat = function() {
     app.chatIsActive = true;
     app.$chat.show();
@@ -1300,11 +1319,39 @@ app.chatMode = localStorage.chatMode || 1;
 app.toggleChatMode = function() {
     if (app.chatMode == 1) {
         app.chatMode = 2;
+    } else if (app.chatMode == 2) {
+        app.chatMode = 3;
     } else {
         app.chatMode = 1;
     }
     localStorage.chatMode = app.chatMode;
     app.updateDisplayRect();
+};
+app.chatFontSize = localStorage.chatFontSize || 1;
+app.increaseChatFontSize = function() {
+    if (app.chatFontSize < 3) {
+        app.chatFontSize++;
+        localStorage.chatFontSize = app.chatFontSize;
+        app.updateChatFontSize();
+    }
+};
+app.decreaseChatFontSize = function() {
+    if (app.chatFontSize > 1) {
+        app.chatFontSize--;
+        localStorage.chatFontSize = app.chatFontSize;
+        app.updateChatFontSize();
+    }
+};
+app.updateChatFontSize = function() {
+    if (app.chatFontSize == 1) {
+        app.$chat.removeClass('big').removeClass('big2').removeClass('big3');
+    } else if(app.chatFontSize == 2) {
+        app.$chat.addClass('big').removeClass('big2').removeClass('big3');
+    } else if(app.chatFontSize == 3) {
+        app.$chat.removeClass('big').addClass('big2').removeClass('big3');
+    } else if(app.chatFontSize == 4) {
+        app.$chat.removeClass('big').removeClass('big2').addClass('big3');
+    }
 };
 app.showSupportInfo = function() {
     if (app.state !== constants.STATE_EXIT) {
@@ -1814,9 +1861,9 @@ app.loadMore = function() {
                 app.loadingMoreResults = null;
             });
         } else if (app.page === constants.PAGE_FOLLOWED) {
-            app.loadingMoreResults = app.getFollowed(66, app.areas[constants.AREA_RESULTS].count, function() {
+            app.loadingMoreResults = app.getFollowed(99, app.areas[constants.AREA_RESULTS].count, function() {
                 app.loadingMoreResults = null;
-            });
+            }, 'loadingMoreResults');
         }
     }
 }
@@ -1848,9 +1895,9 @@ app.refresh = function(force) {
                 app.refreshing = null;
             });
         } else if (app.page == constants.PAGE_FOLLOWED) {
-            app.refreshing = app.getFollowed(33, 0, function() {
+            app.refreshing = app.getFollowed(99, 0, function() {
                 app.refreshing = null;
-            });
+            }, 'refreshing');
         }
     }
 };
@@ -1926,33 +1973,34 @@ app.getLiveChannels = function(limit, offset, callback, filters) {
         }
     });
 };
-app.getFollowed = function(limit, offset, callback) {
-    if (app.filters.followedChannel) {
-        var url = 'https://api.twitch.tv/kraken/users/' + app.filters.followedChannel.id + '/follows/channels?limit=100';
-        return $.ajax($.extend({}, app.twitchApiOptions, {
-            url: url
-        })).done(function(response) {
-            //console.log(response);
-            if (response.follows.length > 0) {
-                var channels = [];
-                for (i = 0; i < response.follows.length; i++) {
-                    var user = response.follows[i];
-                    channels.push(user.channel._id);
-                }
-                app.getLiveChannels(limit, offset, callback, {channel: channels.join(',')});
-            } else if (offset == 0) {
-                app.$itemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
-                app.$loading.hide();
-                if (typeof callback == 'function') {
-                    callback();
-                }
+app.followedChannels = [];
+app.getFollowedChannels = function(limit, offset, limit2, offset2, callback, variable) {
+    var url = 'https://api.twitch.tv/kraken/users/' + app.filters.followedChannel.id + '/follows/channels?limit=' + limit + '&offset=' + offset;
+    return $.ajax($.extend({}, app.twitchApiOptions, {
+        url: url
+    })).done(function(response) {
+        if (response.follows.length > 0) {
+            for (i = 0; i < response.follows.length; i++) {
+                var user = response.follows[i];
+                app.followedChannels.push(user.channel._id);
             }
-        }).fail(app.loadingErrorHandler).fail(function() {
+            if (response._total > app.followedChannels.length) {
+                app[variable] = app.getFollowedChannels(limit, offset + limit, limit2, offset2, callback, variable);
+                return;
+            }
+        } else if (offset == 0) {
+            app.$itemsContainer.append($('<div class="column text"/>').text(messages.EMPTY_RESULTS));
             app.$loading.hide();
-            if (typeof callback == 'function') {
-                callback();
-            }
-        });
+            app[variable] = null;
+            return;
+        }
+        app[variable] = app.getLiveChannels(limit2, offset2, callback, {channel: app.followedChannels.join(',')});
+    }).fail(app.loadingErrorHandler);
+};
+app.getFollowed = function(limit, offset, callback, variable) {
+    if (app.filters.followedChannel) {
+        app.followedChannels = [];
+        return app.getFollowedChannels(100, 0, limit, offset, callback, variable);
     } else {
         app.$itemsContainer.append($('<div class="column text"/>').text(messages.SELECT_CHANNEL));
         app.$loading.hide();
@@ -2181,7 +2229,7 @@ app.fillChannelsContainer = function(channels) {
             <img src="' + src + '" onload="img.imageLoaded(this)" ' + onError + '">\
             <div class="checkbox"><i class="fa ' + checkboxClass + '"></i></div>\
             <div class="channel-info">\
-                <div class="channel-name">' + channel.display_name + '</div>\
+                <div class="channel-name ellipsed">' + channel.display_name + '</div>\
                 <div class="channel-counter"><i class="fa fa-fw fa-user"></i> ' + app.numberFormat(channel.followers) + '</div>\
                 <div class="channel-counter"><i class="fa fa-fw fa-eye"></i> ' + app.numberFormat(channel.views) + '</div>\
             </div>\
@@ -2213,7 +2261,7 @@ app.fillChannelContainer = function(channels) {
             <i class="fa fa-fw fa-twitch"></i>\
             <img src="' + src + '" onload="img.imageLoaded(this)" ' + onError + '">\
             <div class="channel-info">\
-                <div class="channel-name">' + channel.display_name + '</div>\
+                <div class="channel-name ellipsed">' + channel.display_name + '</div>\
                 <div class="channel-counter"><i class="fa fa-fw fa-user"></i> ' + app.numberFormat(channel.followers) + '</div>\
                 <div class="channel-counter"><i class="fa fa-fw fa-eye"></i> ' + app.numberFormat(channel.views) + '</div>\
             </div>\
@@ -2299,7 +2347,7 @@ app.showItem = function($element, $items, $itemsContainer, $selectBox) {
         $selectBox.height($element.height());
         var newOffset = $element.offset();
         newOffset.left -= left + scrollLeft;
-        newOffset.top = Math.round(newOffset.top);
+        //newOffset.top = Math.floor(newOffset.top);
         $selectBox.offset(newOffset);
     }
     app.autoHideScrollbar($items);
@@ -2909,7 +2957,7 @@ app.chatAppend = function(color, name, message) {
     if (app.$chatContent.get(0).children.length > 240) {
         app.$chatContent.children('div:first').remove();
     }
-    var $newMessage = $('<div/>').html('<b style="color: ' + color + ';">' + name + '</b>: ' + message);
+    var $newMessage = $('<div class="chat-message"/>').html('<b style="color: ' + color + ';">' + name + '</b>: ' + message);
     app.$chatContent.append($newMessage);
     if (app.chatAutoScroll && app.chatIsActive) {
         app.$chat.scrollTo($newMessage);
@@ -3111,6 +3159,8 @@ if (window.tizen) {
     tizen.tvinputdevice.registerKey("ColorF1Green");
     tizen.tvinputdevice.registerKey("ColorF2Yellow");
     tizen.tvinputdevice.registerKey("ColorF3Blue");
+    tizen.tvinputdevice.registerKey("ChannelUp");
+    tizen.tvinputdevice.registerKey("ChannelDown");
 }
 
 setTimeout(function() {
