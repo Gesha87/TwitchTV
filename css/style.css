@@ -99,6 +99,8 @@ body.init {
 .channel-cell {
 	background-color: #201c2b;
 	box-shadow: #392e5c 0 1px 0px 0px inset;
+	/* height: 15.73vh; */
+	/* width: 45.73vh; */
 }
 .channel-cell:first-child {
     box-shadow: inherit;
@@ -115,24 +117,23 @@ body.init {
 }
 
 .channel-cell img {
-	float: left;
     height: 15.73vh;
     width: 15.73vh;
 }
 
 .channel-info {
-	float: left;
+	position: absolute;
+	left: 15.73vh;
+	top: 0;
 	line-height: 1.3;
 	padding: 1vh 0;
-	width: 30vh;
-}
-.channel-select-box .channel-info {
-	margin-left: 15.73vh;
+	/* width: 45.73vh; */
 }
 
 .channel-name {
 	padding: 0 1vh;
     color: #bbb8c0;
+    max-width: 30vh;
 }
 .active.channel-cell .channel-name {
     color: #6441a4;
@@ -631,7 +632,7 @@ img.loaded {
 	margin-bottom: 0.7em;
 }
 .chat-message:last-child {
-    margin-bottom: 2.8em;
+    margin-bottom: 2.4em;
 }
 
 .chat-emote {

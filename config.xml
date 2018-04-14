@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="https://github.com/Gesha87/TwitchTV" version="1.1.0" viewmodes="maximized">
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="https://github.com/Gesha87/TwitchTV" version="1.1.1" viewmodes="maximized">
     <access origin="*" subdomains="true"></access>
-    <tizen:application id="9m7wyPjHXD.TwitchTV" package="9m7wyPjHXD" required_version="2.3"/>
+    <tizen:application id="8m7wyPjHXD.TwitchTV" package="8m7wyPjHXD" required_version="2.3"/>
     <author href="https://my.mail.ru/mail/tizenapps/" email="tizenapps@mail.ru">Andrey Kulik</author>
     <content src="index.html"/>
     <description>Application for Twitch - social video platform and community for gamers.</description>

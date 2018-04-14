@@ -90,6 +90,7 @@ var messages = {
     CHAT_GREETING: 'Welcome to the chat room!',
 
     EMPTY_RESULTS: 'Nothing found',
+    RELOAD_RESULTS: 'Press Enter button to reload page',
     SELECT_CHANNEL: 'Select user to view active channels that it follows',
     
     ERROR_LOADING_FAILED: 'An error occurred while loading.<br>Please, try again later',

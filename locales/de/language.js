@@ -90,6 +90,7 @@ var messages = {
     CHAT_GREETING: 'Willkommen im Chat!',
 
     EMPTY_RESULTS: 'Nichts gefunden',
+    RELOAD_RESULTS: 'Drücken Sie die Eingabetaste, um die Seite neu zu laden',
     SELECT_CHANNEL: 'Wählen Sie den Benutzer aus, um die aktiven Kanäle anzuzeigen, denen er folgt',
     
     ERROR_LOADING_FAILED: 'Beim laden ist ein fehler aufgetreten.<br>Bitte versuchen Sie es später noch einmal',

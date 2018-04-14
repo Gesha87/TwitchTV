@@ -503,6 +503,10 @@ app.init = function() {
     app.$itemsContainer = app.$items.find('.mCSB_container');
     var lastGameQuery = '';
     app.$gameSearchInput.on('keyup', function(e) {
+        if (e.keyCode == keys.KEY_RETURN) {
+            app.$gameSearchInput.blur();
+            return;
+        }
         var query = $.trim(app.$gameSearchInput.val());
         if (query == lastGameQuery) return;
         lastGameQuery = query;
@@ -529,6 +533,10 @@ app.init = function() {
     });
     var lastChannelsQuery = '';
     app.$channelsSearchInput.on('keyup', function(e) {
+        if (e.keyCode == keys.KEY_RETURN) {
+            app.$channelsSearchInput.blur();
+            return;
+        }
         var query = $.trim(app.$channelsSearchInput.val());
         if (query == lastChannelsQuery) return;
         lastChannelsQuery = query;
@@ -555,6 +563,10 @@ app.init = function() {
     });
     var lastChannelQuery = '';
     app.$channelSearchInput.on('keyup', function(e) {
+        if (e.keyCode == keys.KEY_RETURN) {
+            app.$channelSearchInput.blur();
+            return;
+        }
         var query = $.trim(app.$channelSearchInput.val());
         if (query == lastChannelQuery) return;
         lastChannelQuery = query;
@@ -1966,7 +1978,11 @@ app.getLiveChannels = function(limit, offset, callback, filters) {
         app.$items.mCustomScrollbar('update');
         app.autoHideScrollbar(app.$items);
         app.hasMoreResults = response.streams.length > 0;
-    }).fail(app.loadingErrorHandler).always(function() {
+    }).fail(app.loadingErrorHandler).fail(function() {
+        if (offset == 0) {
+            app.$itemsContainer.append($('<div class="column text"/>').text(messages.RELOAD_RESULTS));
+        }
+    }).always(function() {
         app.$loading.hide();
         if (typeof callback == 'function') {
             callback();
@@ -1995,7 +2011,11 @@ app.getFollowedChannels = function(limit, offset, limit2, offset2, callback, var
             return;
         }
         app[variable] = app.getLiveChannels(limit2, offset2, callback, {channel: app.followedChannels.join(',')});
-    }).fail(app.loadingErrorHandler);
+    }).fail(app.loadingErrorHandler).fail(function() {
+        if (offset == 0) {
+            app.$itemsContainer.append($('<div class="column text"/>').text(messages.RELOAD_RESULTS));
+        }
+    });
 };
 app.getFollowed = function(limit, offset, callback, variable) {
     if (app.filters.followedChannel) {
@@ -2082,7 +2102,11 @@ app.getVideos = function(limit, offset, callback) {
         app.$items.mCustomScrollbar('update');
         app.autoHideScrollbar(app.$items);
         app.hasMoreResults = response[name].length > 0;
-    }).fail(app.loadingErrorHandler).always(function() {
+    }).fail(app.loadingErrorHandler).fail(function() {
+        if (offset == 0) {
+            app.$itemsContainer.append($('<div class="column text"/>').text(messages.RELOAD_RESULTS));
+        }
+    }).always(function() {
         app.$loading.hide();
         if (typeof callback == 'function') {
             callback();
@@ -2226,7 +2250,7 @@ app.fillChannelsContainer = function(channels) {
         var divClass = checked ? 'active' : '';
         $newCell = $('<div class="cell channel-cell ' + divClass + '" id="channel-item-' + x + '-' + y + '">\
             <i class="fa fa-fw fa-twitch"></i>\
-            <img src="' + src + '" onload="img.imageLoaded(this)" ' + onError + '">\
+            <img src="' + src + '" onload="img.imageLoaded(this)" ' + onError + '"><img src="images/TwitchApp.png" style="width: 30vh;">\
             <div class="checkbox"><i class="fa ' + checkboxClass + '"></i></div>\
             <div class="channel-info">\
                 <div class="channel-name ellipsed">' + channel.display_name + '</div>\
@@ -2259,7 +2283,7 @@ app.fillChannelContainer = function(channels) {
         var onError = channel.logo ? 'onerror="img.imageFailed(this)' : '';
         $newCell = $('<div class="cell channel-cell" id="videos-channel-item-' + x + '-' + y + '">\
             <i class="fa fa-fw fa-twitch"></i>\
-            <img src="' + src + '" onload="img.imageLoaded(this)" ' + onError + '">\
+            <img src="' + src + '" onload="img.imageLoaded(this)" ' + onError + '"><img src="images/TwitchApp.png" style="width: 30vh;">\
             <div class="channel-info">\
                 <div class="channel-name ellipsed">' + channel.display_name + '</div>\
                 <div class="channel-counter"><i class="fa fa-fw fa-user"></i> ' + app.numberFormat(channel.followers) + '</div>\
@@ -2979,7 +3003,7 @@ chat = {
         chat.ws.onmessage = function(event) {
             //console.log(event.data);
             if (/:tmi.twitch.tv 001 justinfan\d+ :Welcome, GLHF!/.test(event.data)) {
-                app.$chatContent.append($('<div/>').html(messages.CHAT_GREETING));
+                app.$chatContent.append($('<div class="chat-message"/>').html(messages.CHAT_GREETING));
             } else if (event.data.lastIndexOf('PING', 0) === 0) {
                 chat.ws.send('PONG :tmi.twitch.tv');
             } else {
