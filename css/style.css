@@ -54,6 +54,7 @@ body.init {
 }
 .column.text {
 	line-height: 1.2;
+	padding-bottom: 1vh;
 }
 
 .column:first-child {

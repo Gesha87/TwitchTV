@@ -3007,19 +3007,27 @@ chat = {
             } else if (event.data.lastIndexOf('PING', 0) === 0) {
                 chat.ws.send('PONG :tmi.twitch.tv');
             } else {
-                var reg = /^@badges=([^;]*);color=([^;]*);display-name=([^;]*);emotes=([^;]*);id=([^;]*);mod=([^;]*);room-id=([^;]*);subscriber=([^;]*);tmi-sent-ts=([^;]*);turbo=([^;]*);user-id=([^;]*);user-type=([^ ]*) :([^\!]*)!([^@]*)@([^\.]*).tmi.twitch.tv PRIVMSG #([^ ]*) :(.*)/;
+                var reg = /^@(.+) :([^\!]*)!([^@]*)@([^\.]*).tmi.twitch.tv PRIVMSG #([^ ]*) :(.*)/;
                 var result;
                 if (result = reg.exec(event.data)) {
-                    var message = result[17];
-                    var color = result[2] || '#000000';
-                    var name = result[3].replace('\\:', ';').replace('\\s', ' ').replace('\\\\', '\\') || result[13];
+                    var message = result[6];
+                    var options = {};
+                    var optionStrings = result[1].split(';');
+                    for (var i = 0; i < optionStrings.length; i++) {
+                        var pairs = optionStrings[i].split('=');
+                        if (pairs.length == 2) {
+                            options[pairs[0]] = pairs[1];
+                        }
+                    }
+                    var color = options.color || '#000000';
+                    var name = (options['display-name'] || '').replace('\\:', ';').replace('\\s', ' ').replace('\\\\', '\\') || result[2];
                     if (message.indexOf('\u0001ACTION') === 0) {
                         message = message.replace(/^\u0001ACTION /, '').replace(/\u0001$/, '');
                     } else if (message.indexOf(' \x01ACTION') === 0) {
                         message = message.replace(/^ \x01ACTION /, '').replace(/\x01$/, '');
                     }
-                    if (result[4]) {
-                        var emoticons = result[4].split('/');
+                    if (options.emotes) {
+                        var emoticons = options.emotes.split('/');
                         var emotes = {};
                         for (var i = 0; i < emoticons.length; i++) {
                             var parts = emoticons[i].split(':');
